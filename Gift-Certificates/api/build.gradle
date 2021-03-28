@@ -1,0 +1,9 @@
+plugins {
+    id 'application'
+}
+
+mainClassName = "com.epam.esm.Controller"
+
+dependencies {
+    compile project(':core')
+}

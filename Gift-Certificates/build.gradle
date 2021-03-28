@@ -1,0 +1,22 @@
+subprojects {
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+
+    ext.versions = [
+            springframework: "5.3.5",
+    ]
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.0'
+        testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+        implementation "org.springframework:spring-jdbc:${versions.springframework}"
+        implementation "org.springframework:spring-context:${versions.springframework}"
+        implementation "org.springframework:spring-core:${versions.springframework}"
+    }
+}
