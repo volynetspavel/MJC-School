@@ -1,12 +1,5 @@
 package com.epam.esm.config;
 
-import com.epam.esm.dao.AbstractDao;
-import com.epam.esm.dao.CertificateDao;
-import com.epam.esm.dao.TagDao;
-import com.epam.esm.dao.db.CertificateDaoImpl;
-import com.epam.esm.dao.db.TagDaoImpl;
-import com.epam.esm.model.Certificate;
-import com.epam.esm.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,15 +33,5 @@ public class DBConfig {
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
-    }
-
-    @Bean
-    public AbstractDao<Tag> getTagDao(JdbcTemplate jdbcTemplate){
-        return new TagDaoImpl(jdbcTemplate);
-    }
-
-    @Bean
-    public AbstractDao<Certificate> getCertificateDao(JdbcTemplate jdbcTemplate){
-        return new CertificateDaoImpl(jdbcTemplate);
     }
 }
