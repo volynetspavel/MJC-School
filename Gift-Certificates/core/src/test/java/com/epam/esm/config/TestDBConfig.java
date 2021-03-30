@@ -12,6 +12,7 @@ import com.epam.esm.service.impl.CertificateServiceImpl;
 import com.epam.esm.service.impl.TagServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -22,6 +23,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource("classpath:test_database.properties")
+@ComponentScan("com.epam.esm")
 public class TestDBConfig {
     @Autowired
     private Environment env;
@@ -42,23 +44,4 @@ public class TestDBConfig {
         return new JdbcTemplate(dataSource);
     }
 
-    @Bean
-    public AbstractDao<Tag> getTagDao(JdbcTemplate jdbcTemplate) {
-        return new TagDaoImpl(jdbcTemplate);
-    }
-
-    @Bean
-    public TagService getTagService(TagDaoImpl tagDao) {
-        return new TagServiceImpl(tagDao);
-    }
-
-    @Bean
-    public AbstractDao<Certificate> getCertificateDao(JdbcTemplate jdbcTemplate) {
-        return new CertificateDaoImpl(jdbcTemplate);
-    }
-
-    @Bean
-    public CertificateService getCertificateService(CertificateDao certificateDao){
-        return new CertificateServiceImpl(certificateDao);
-    }
 }
