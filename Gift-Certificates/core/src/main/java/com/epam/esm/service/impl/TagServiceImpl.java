@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.AbstractDao;
+import com.epam.esm.dao.TagDao;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,13 @@ import java.util.List;
  */
 @Service
 public class TagServiceImpl extends TagService {
-    private AbstractDao<Tag> abstractDao;
+    private TagDao abstractDao;
+
+    public TagServiceImpl(){
+    }
 
     @Autowired
-    public TagServiceImpl(AbstractDao<Tag> abstractDao){
+    public TagServiceImpl(TagDao abstractDao){
         this.abstractDao = abstractDao;
     }
 
@@ -28,6 +32,11 @@ public class TagServiceImpl extends TagService {
     @Override
     public void delete(String name) {
         abstractDao.delete(name);
+    }
+
+    @Override
+    public void delete(int id) {
+        abstractDao.delete(id);
     }
 
     @Override
@@ -43,5 +52,10 @@ public class TagServiceImpl extends TagService {
     @Override
     public Tag findById(int id) {
         return abstractDao.findById(id);
+    }
+
+    @Override
+    public Tag findByName(String name) {
+        return abstractDao.findByName(name);
     }
 }
