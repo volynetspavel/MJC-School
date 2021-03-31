@@ -39,7 +39,7 @@ public class TagDaoImpl extends TagDao {
 
     @Override
     public void delete(String name) {
-        jdbcTemplate.update(SQL_DELETE_TAG_BY_NAME, name);
+        delete(findByName(name).getId());
     }
 
     @Override
@@ -49,8 +49,8 @@ public class TagDaoImpl extends TagDao {
     }
 
     @Override
-    public void update(Tag entity) {
-        jdbcTemplate.update(SQL_UPDATE_TAG_NAME, entity.getName(), entity.getId());
+    public void update(Tag newTag) {
+        jdbcTemplate.update(SQL_UPDATE_TAG_NAME, newTag.getName(), newTag.getId());
     }
 
     @Override
