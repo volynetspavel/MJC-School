@@ -4,6 +4,7 @@ subprojects {
 
     ext.versions = [
             springframework: "5.3.5",
+            jackson        : "2.12.1"
     ]
 
     repositories {
@@ -18,5 +19,23 @@ subprojects {
         implementation "org.springframework:spring-jdbc:${versions.springframework}"
         implementation "org.springframework:spring-context:${versions.springframework}"
         implementation "org.springframework:spring-core:${versions.springframework}"
+        implementation "org.springframework:spring-web:${versions.springframework}"
+        implementation "org.springframework:spring-webmvc:${versions.springframework}"
+        testCompile "org.springframework:spring-test:${versions.springframework}"
+
+        //for getters, setters, hashcode and equals in beans
+        compileOnly 'org.projectlombok:lombok:1.18.16'
+        annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+        testCompileOnly 'org.projectlombok:lombok:1.18.16'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+        implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${versions.jackson}"
+        implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${versions.jackson}"
+
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }

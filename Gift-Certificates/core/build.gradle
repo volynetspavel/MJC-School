@@ -1,3 +1,9 @@
+plugins {
+    id 'java'
+}
+
+group 'com.epam.esm'
+
 dependencies {
 
     // this is for mysql java connector
