@@ -1,6 +1,7 @@
 package com.epam.esm.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper=false)
 public class Tag extends AbstractEntity {
     private String name;
 }
