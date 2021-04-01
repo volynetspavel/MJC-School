@@ -23,6 +23,9 @@ subprojects {
         implementation "org.springframework:spring-webmvc:${versions.springframework}"
         testCompile "org.springframework:spring-test:${versions.springframework}"
 
+        //for data transfer object
+        implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.3.9'
+
         //for getters, setters, hashcode and equals in beans
         compileOnly 'org.projectlombok:lombok:1.18.16'
         annotationProcessor 'org.projectlombok:lombok:1.18.16'
