@@ -1,12 +1,16 @@
 package com.epam.esm.dao.db;
 
+import com.epam.esm.constant.CertificateTableColumn;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.model.Certificate;
-import com.epam.esm.exception.DaoException;
-import com.epam.esm.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,38 +21,53 @@ import java.util.List;
 @Repository
 public class CertificateDaoImpl extends CertificateDao {
     private static final String SQL_INSERT_CERITFICATE = "INSERT INTO gift_certificate " +
-            "(name, description, price, duration, create_date, last_update_time ) VALUES (?, ?, ?, ?, ?, ?);";
-    private static final String SQL_DELETE_CERITFICATE_BY_NAME = "DELETE FROM gift_certificate WHERE name = ?;";
-    private static final String SQL_UPDATE_CERITFICATE_NAME = "UPDATE gift_certificate " +
-            "SET name=?, description=?, price=?, duration=?, create_date=?, last_update_time=? WHERE id=?;";
+            "(name, description, price, duration, create_date, last_update_date ) " +
+            "VALUES (:name, :description, :price, :duration, :create_date, :last_update_date);";
+    private static final String SQL_DELETE_CERITFICATE_BY_ID = "DELETE FROM gift_certificate WHERE id = ?;";
+    private static final String SQL_UPDATE_CERITFICATE = "UPDATE gift_certificate SET " +
+            "name=COALESCE(?,name), " +
+            "description=COALESCE(?,description), " +
+            "price=COALESCE(?,price), " +
+            "duration =COALESCE(?,duration), " +
+            "last_update_date=COALESCE(?,last_update_date) WHERE id=?;";
     private static final String SQL_FIND_ALL_CERITFICATES = "SELECT * FROM gift_certificate";
     private static final String SQL_FIND_CERITFICATE_BY_ID = "SELECT * FROM gift_certificate WHERE id = ?;";
+    private static final String SQL_FIND_CERTIFICATE_BY_NAME = "SELECT * FROM gift_certificate WHERE name = ?;";
+
+    private static final String SQL_INSERT_CERTIFICATE_ID_AND_TAG_ID = "INSERT INTO gift_certificate_has_tag " +
+            "(gift_certificate_id, tag_id) VALUES(?,?);";
+    private static final String SQL_DELETE_CERTIFICATE_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG =
+            "DELETE FROM gift_certificate_has_tag WHERE gift_certificate_id = ?;";
+    private static final String SQL_FIND_ALL_CERITFICATES_BY_TAG_ID =
+            "SELECT name, description, price, duration, create_date, last_update_date " +
+                    "FROM gift_certificate " +
+                    "JOIN gift_certificate_has_tag " +
+                    "ON gift_certificate.id = gift_certificate_has_tag.gift_certificate_id " +
+                    "WHERE gift_certificate_has_tag.tag_id = ?;";
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
-    public CertificateDaoImpl(JdbcTemplate jdbcTemplate1) {
+    public CertificateDaoImpl(JdbcTemplate jdbcTemplate1,
+                              NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate1;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
-    public void insert(Certificate entity) {
-        jdbcTemplate.update(SQL_INSERT_CERITFICATE,
-                entity.getName(), entity.getDescription(), entity.getPrice(),
-                entity.getDuration(), entity.getCreateTime(), entity.getLastUpdateTime());
-    }
+    public int insert(Certificate certificate) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue(CertificateTableColumn.NAME, certificate.getName())
+                .addValue(CertificateTableColumn.DESCRIPTION, certificate.getDescription())
+                .addValue(CertificateTableColumn.PRICE, certificate.getPrice())
+                .addValue(CertificateTableColumn.DURATION, certificate.getDuration())
+                .addValue(CertificateTableColumn.CREATE_DATE, certificate.getCreateDate())
+                .addValue(CertificateTableColumn.LAST_UPDATE_DATE, certificate.getLastUpdateDate());
 
-    @Override
-    public void delete(String id) {
-        jdbcTemplate.update(SQL_DELETE_CERITFICATE_BY_NAME, id);
-    }
-
-    @Override
-    public void update(Certificate entity) {
-        jdbcTemplate.update(SQL_UPDATE_CERITFICATE_NAME,
-                entity.getName(), entity.getDescription(), entity.getPrice(),
-                entity.getDuration(), entity.getCreateTime(), entity.getLastUpdateTime(),
-                entity.getId());
+        namedParameterJdbcTemplate.update(SQL_INSERT_CERITFICATE, parameterSource, keyHolder);
+        return keyHolder.getKey().intValue();
     }
 
     @Override
@@ -57,8 +76,37 @@ public class CertificateDaoImpl extends CertificateDao {
     }
 
     @Override
+    public List<Certificate> findAllByTagId(int id) {
+        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_TAG_ID, new BeanPropertyRowMapper<>(Certificate.class), id);
+    }
+
+    @Override
     public Certificate findById(int id) {
         return jdbcTemplate.query(SQL_FIND_CERITFICATE_BY_ID, new BeanPropertyRowMapper<>(Certificate.class), id)
                 .stream().findAny().orElse(null);
+    }
+
+    @Override
+    public Certificate findByName(String name) {
+        return jdbcTemplate.query(SQL_FIND_CERTIFICATE_BY_NAME, new BeanPropertyRowMapper<>(Certificate.class), name)
+                .stream().findAny().orElse(null);
+    }
+
+    @Override
+    public void delete(int id) {
+        jdbcTemplate.update(SQL_DELETE_CERTIFICATE_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG, id);
+        jdbcTemplate.update(SQL_DELETE_CERITFICATE_BY_ID, id);
+    }
+
+    @Override
+    public void update(Certificate certificate) {
+        jdbcTemplate.update(SQL_UPDATE_CERITFICATE,
+                certificate.getName(), certificate.getDescription(), certificate.getPrice(),
+                certificate.getDuration(), certificate.getLastUpdateDate(), certificate.getId());
+    }
+
+    @Override
+    public void insertLinkBetweenCertificateAndTag(int idNewCertificate, int idTag) {
+        jdbcTemplate.update(SQL_INSERT_CERTIFICATE_ID_AND_TAG_ID, idNewCertificate, idTag);
     }
 }

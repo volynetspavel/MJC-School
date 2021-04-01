@@ -33,13 +33,9 @@ public class TagDaoImpl extends TagDao {
     }
 
     @Override
-    public void insert(Tag entity) {
+    public int insert(Tag entity) {
         jdbcTemplate.update(SQL_INSERT_TAG, entity.getName());
-    }
-
-    @Override
-    public void delete(String name) {
-        delete(findByName(name).getId());
+        return findByName(entity.getName()).getId();
     }
 
     @Override

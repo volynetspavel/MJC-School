@@ -7,7 +7,5 @@ import com.epam.esm.model.Tag;
  */
 public abstract class TagDao extends AbstractDao<Tag>{
 
-    public abstract void delete(int id);
-
     public abstract Tag findByName(String name);
 }
