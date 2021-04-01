@@ -1,14 +1,17 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class is an implementation of TagService.
@@ -16,21 +19,24 @@ import java.util.List;
 @Service
 public class TagServiceImpl extends TagService {
     private TagDao tagDao;
+    private TagMapper tagMapper;
 
     public TagServiceImpl() {
     }
 
     @Autowired
-    public TagServiceImpl(TagDao tagDao) {
+    public TagServiceImpl(TagDao tagDao, TagMapper tagMapper) {
         this.tagDao = tagDao;
+        this.tagMapper = tagMapper;
     }
 
     @Override
-    public void insert(Tag tag) throws ResourceAlreadyExistException {
-        if (tagDao.findByName(tag.getName()) != null) {
+    public void insert(TagDto tagDto) throws ResourceAlreadyExistException {
+        if (tagDao.findByName(tagDto.getName()) != null) {
             throw new ResourceAlreadyExistException("Requested resource (name = "
-                    + tag.getName() + ") has already existed.");
+                    + tagDto.getName() + ") has already existed.");
         }
+        Tag tag = tagMapper.toEntity(tagDto);
         tagDao.insert(tag);
     }
 
@@ -53,9 +59,9 @@ public class TagServiceImpl extends TagService {
     }
 
     @Override
-    public void update(Tag newTag) throws ResourceNotFoundException, ResourceAlreadyExistException {
-        int id = newTag.getId();
-        String name = newTag.getName();
+    public void update(TagDto newTagDto) throws ResourceNotFoundException, ResourceAlreadyExistException {
+        int id = newTagDto.getId();
+        String name = newTagDto.getName();
 
         Tag oldTag = tagDao.findById(id);
         Tag tagWithSameName = tagDao.findByName(name);
@@ -67,33 +73,39 @@ public class TagServiceImpl extends TagService {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + tagWithSameName.getName() + ") has already existed.");
         }
+
+        Tag newTag = tagMapper.toEntity(newTagDto);
         tagDao.update(newTag);
     }
 
     @Override
-    public List<Tag> findAll() throws ResourceNotFoundException {
+    public List<TagDto> findAll() throws ResourceNotFoundException {
         List<Tag> tags = tagDao.findAll();
         if (tags == null || tags.isEmpty()) {
             throw new ResourceNotFoundException("Requested resource not found");
         }
-        return tags;
+        return tags.stream()
+                .map(tag -> tagMapper.toDto(tag))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Tag findById(int id) throws ResourceNotFoundException {
+    public TagDto findById(int id) throws ResourceNotFoundException {
         Tag tag = tagDao.findById(id);
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
-        return tag;
+        TagDto tagDto = tagMapper.toDto(tag);
+        return tagDto;
     }
 
     @Override
-    public Tag findByName(String name) throws ResourceNotFoundException {
+    public TagDto findByName(String name) throws ResourceNotFoundException {
         Tag tag = tagDao.findByName(name);
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (name = " + name + ")");
         }
-        return tag;
+        TagDto tagDto = tagMapper.toDto(tag);
+        return tagDto;
     }
 }
