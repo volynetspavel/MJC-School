@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CertificateServiceImpl extends CertificateService {
+    private static final String SORT_ORDER_DESC = "desc";
+
     private CertificateDao certificateDao;
     private TagDao tagDao;
     private CertificateMapper certificateMapper;
@@ -78,23 +81,69 @@ public class CertificateServiceImpl extends CertificateService {
     @Override
     public List<CertificateDto> findAll() throws ResourceNotFoundException {
         List<Certificate> certificates = certificateDao.findAll();
-        if (certificates == null || certificates.isEmpty()) {
-            throw new ResourceNotFoundException("Requested resource not found");
-        }
-        return certificates.stream()
-                .map(certificate -> certificateMapper.toDto(certificate))
-                .collect(Collectors.toList());
+        checkOnEmptyOrNull(certificates);
+
+        return fromEntitytoDtoAndAddListTags(certificates);
     }
 
     @Override
     public List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException {
         List<Certificate> certificates = certificateDao.findAllByTagId(id);
-        if (certificates == null || certificates.isEmpty()) {
-            throw new ResourceNotFoundException("Requested resource not found");
+        checkOnEmptyOrNull(certificates);
+
+        return fromEntitytoDtoAndAddListTags(certificates);
+    }
+
+    @Override
+    public List<CertificateDto> searchByPartOfName(String partOfName) throws ResourceNotFoundException {
+        List<Certificate> certificates = certificateDao.searchByPartOfName(partOfName);
+        checkOnEmptyOrNull(certificates);
+
+        return fromEntitytoDtoAndAddListTags(certificates);
+    }
+
+    @Override
+    public List<CertificateDto> searchByPartOfDescription(String partOfDescription)
+            throws ResourceNotFoundException {
+
+        List<Certificate> certificates = certificateDao.searchByPartOfDescription(partOfDescription);
+        checkOnEmptyOrNull(certificates);
+
+        return fromEntitytoDtoAndAddListTags(certificates);
+    }
+
+    @Override
+    public List<CertificateDto> findAllOrderByName(String order) throws ResourceNotFoundException {
+        List<CertificateDto> certificateDtos = findAll();
+        Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
+        return sortByComparatorAndOrder(certificateDtos, certificateDtoComparatorByName, order);
+    }
+
+    @Override
+    public List<CertificateDto> findAllOrderByDate(String order) throws ResourceNotFoundException {
+        List<CertificateDto> certificateDtos = findAll();
+        Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
+        return sortByComparatorAndOrder(certificateDtos, certificateDtoComparatorByDate, order);
+    }
+
+    @Override
+    public List<CertificateDto> findAllOrderByNameAndDate(String order) throws ResourceNotFoundException {
+        List<CertificateDto> certificateDtos = findAll();
+
+        Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
+        Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
+
+        if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
+            certificateDtos = certificateDtos.stream()
+                    .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate).reversed())
+                    .collect(Collectors.toList());
+        } else {
+            //sort order by default is asc
+            certificateDtos = certificateDtos.stream()
+                    .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate))
+                    .collect(Collectors.toList());
         }
-        return certificates.stream()
-                .map(certificate -> certificateMapper.toDto(certificate))
-                .collect(Collectors.toList());
+        return certificateDtos;
     }
 
     @Override
@@ -140,5 +189,34 @@ public class CertificateServiceImpl extends CertificateService {
             int idTag = tagDao.findByName(tag.getName()).getId();
             certificateDao.insertLinkBetweenCertificateAndTag(idNewCertificate, idTag);
         }
+    }
+
+    private void checkOnEmptyOrNull(List<Certificate> certificates) throws ResourceNotFoundException {
+        if (certificates == null || certificates.isEmpty()) {
+            throw new ResourceNotFoundException("Requested resource not found");
+        }
+    }
+
+    private List<CertificateDto> fromEntitytoDtoAndAddListTags(List<Certificate> certificates) {
+        return certificates.stream()
+                .map(certificate -> certificateMapper.toDto(certificate))
+                .peek(certificateDto -> certificateDto.setTags(tagDao.findTagsByCertificateId(certificateDto.getId())))
+                .collect(Collectors.toList());
+    }
+
+    private List<CertificateDto> sortByComparatorAndOrder(List<CertificateDto> certificateDtos,
+                                                          Comparator<CertificateDto> certificateDtoComparator,
+                                                          String order) {
+        if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
+            certificateDtos = certificateDtos.stream()
+                    .sorted(certificateDtoComparator.reversed())
+                    .collect(Collectors.toList());
+        } else {
+            //sort order by default is asc
+            certificateDtos = certificateDtos.stream()
+                    .sorted(certificateDtoComparator)
+                    .collect(Collectors.toList());
+        }
+        return certificateDtos;
     }
 }

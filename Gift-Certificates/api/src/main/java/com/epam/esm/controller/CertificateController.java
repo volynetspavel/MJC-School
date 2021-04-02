@@ -36,6 +36,27 @@ public class CertificateController {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/all-order-by-name/{order}")
+    public List<CertificateDto> findAllOrderByName(@PathVariable String order)
+            throws ResourceNotFoundException {
+        return certificateService.findAllOrderByName(order);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/all-order-by-date/{order}")
+    public List<CertificateDto> findAllOrderByDate(@PathVariable String order)
+            throws ResourceNotFoundException {
+        return certificateService.findAllOrderByDate(order);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/all-order-by-name-and-date/{order}")
+    public List<CertificateDto> findAllOrderByNameAndDate(@PathVariable String order)
+            throws ResourceNotFoundException {
+        return certificateService.findAllOrderByNameAndDate(order);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/all-by-tag/{id}")
     public List<CertificateDto> findAllByTagId(@PathVariable int id) throws ResourceNotFoundException {
         return certificateService.findAllByTagId(id);
@@ -60,4 +81,20 @@ public class CertificateController {
         certificateDto.setId(id);
         certificateService.update(certificateDto);
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search/name-{partOfName}")
+    public List<CertificateDto> searchByPartOfName(@PathVariable String partOfName)
+            throws ResourceNotFoundException {
+        return certificateService.searchByPartOfName(partOfName);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search/desc-{partOfDescription}")
+    public List<CertificateDto> searchByPartOfDescription(@PathVariable String partOfDescription)
+            throws ResourceNotFoundException {
+        return certificateService.searchByPartOfDescription(partOfDescription);
+    }
+
+
 }

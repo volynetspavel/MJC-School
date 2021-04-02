@@ -14,4 +14,8 @@ public abstract class CertificateDao extends AbstractDao<Certificate> {
     public abstract void insertLinkBetweenCertificateAndTag(int idNewCertificate, int idTag);
 
     public abstract List<Certificate> findAllByTagId(int id);
+
+    public abstract List<Certificate> searchByPartOfName(String partOfName);
+
+    public abstract List<Certificate> searchByPartOfDescription(String partOfDescription);
 }

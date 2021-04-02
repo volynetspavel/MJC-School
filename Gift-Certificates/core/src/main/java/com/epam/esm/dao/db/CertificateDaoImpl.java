@@ -39,7 +39,7 @@ public class CertificateDaoImpl extends CertificateDao {
     private static final String SQL_DELETE_CERTIFICATE_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG =
             "DELETE FROM gift_certificate_has_tag WHERE gift_certificate_id = ?;";
     private static final String SQL_FIND_ALL_CERITFICATES_BY_TAG_ID =
-            "SELECT name, description, price, duration, create_date, last_update_date " +
+            "SELECT id, name, description, price, duration, create_date, last_update_date " +
                     "FROM gift_certificate " +
                     "JOIN gift_certificate_has_tag " +
                     "ON gift_certificate.id = gift_certificate_has_tag.gift_certificate_id " +
@@ -72,12 +72,38 @@ public class CertificateDaoImpl extends CertificateDao {
 
     @Override
     public List<Certificate> findAll() {
-        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES, new BeanPropertyRowMapper<>(Certificate.class));
+        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES,
+                new BeanPropertyRowMapper<>(Certificate.class));
     }
 
     @Override
     public List<Certificate> findAllByTagId(int id) {
-        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_TAG_ID, new BeanPropertyRowMapper<>(Certificate.class), id);
+        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_TAG_ID,
+                new BeanPropertyRowMapper<>(Certificate.class), id);
+    }
+
+    @Override
+    public List<Certificate> searchByPartOfName(String partOfName) {
+        String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_NAME = buildSqlForSearchCertificateByPartOfName(partOfName);
+        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_PART_OF_NAME,
+                new BeanPropertyRowMapper<>(Certificate.class));
+    }
+
+    @Override
+    public List<Certificate> searchByPartOfDescription(String partOfDescription) {
+        String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION =
+                buildSqlForSearchCertificateByPartOfDescription(partOfDescription);
+        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION,
+                new BeanPropertyRowMapper<>(Certificate.class));
+    }
+
+    private String buildSqlForSearchCertificateByPartOfName(String partOfName) {
+        return "SELECT * FROM gift_certificate WHERE gift_certificate.name LIKE '%" + partOfName + "%';";
+    }
+
+    private String buildSqlForSearchCertificateByPartOfDescription(String partOfDescription) {
+        return "SELECT * FROM gift_certificate WHERE gift_certificate.description LIKE '%" +
+                partOfDescription + "%';";
     }
 
     @Override
