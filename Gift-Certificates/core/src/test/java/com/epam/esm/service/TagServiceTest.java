@@ -1,8 +1,10 @@
 package com.epam.esm.service;
 
 import com.epam.esm.config.TestDBConfig;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class for testing methods from service layer for tag entity.
+ * Class for testing methods from service layer for tag.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestDBConfig.class)
@@ -25,17 +27,21 @@ public class TagServiceTest {
     @Autowired
     private TagService tagService;
 
+    @Autowired
+    private TagMapper tagMapper;
+
+
     @DisplayName("Testing method findById() on positive result")
     @Test
     public void testFindByIdSuccess() throws ResourceNotFoundException {
-        int id = 1;
-        String name = "extreme";
+        int id = 2;
+        String name = "beauty";
 
         Tag actual = new Tag();
         actual.setId(id);
         actual.setName(name);
 
-        Tag expected = tagService.findById(id);
+        Tag expected = tagMapper.toEntity(tagService.findById(id));
         Assertions.assertEquals(actual, expected);
     }
 
@@ -77,7 +83,7 @@ public class TagServiceTest {
         String name = "travel";
         tag.setName(name);
 
-        tagService.insert(tag);
+        tagService.insert(tagMapper.toDto(tag));
         Assertions.assertEquals(name, tagService.findByName(name).getName());
     }
 
@@ -89,7 +95,7 @@ public class TagServiceTest {
         tag.setName(name);
 
         Assertions.assertThrows(ResourceAlreadyExistException.class, () -> {
-            tagService.insert(tag);
+            tagService.insert(tagMapper.toDto(tag));
         });
     }
 
@@ -99,10 +105,10 @@ public class TagServiceTest {
         String newName = "sport for kids";
 
         String updatedTagName = "travel";
-        Tag updatedTag = tagService.findByName(updatedTagName);
+        Tag updatedTag = tagMapper.toEntity(tagService.findByName(updatedTagName));
         updatedTag.setName(newName);
 
-        tagService.update(updatedTag);
+        tagService.update(tagMapper.toDto(updatedTag));
         Assertions.assertEquals(newName, tagService.findByName(newName).getName());
     }
 
@@ -117,7 +123,7 @@ public class TagServiceTest {
         updatedTag.setName(newName);
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            tagService.update(updatedTag);
+            tagService.update(tagMapper.toDto(updatedTag));
         });
     }
 
@@ -132,33 +138,33 @@ public class TagServiceTest {
         updatedTag.setName(newName);
 
         Assertions.assertThrows(ResourceAlreadyExistException.class, () -> {
-            tagService.update(updatedTag);
+            tagService.update(tagMapper.toDto(updatedTag));
         });
     }
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
     public void testFindAllSuccess() throws ResourceNotFoundException {
-        List<Tag> expectedTags = tagService.findAll();
+        List<TagDto> expectedTagDtos = tagService.findAll();
 
-        Tag tag1 = new Tag();
-        Tag tag2 = new Tag();
-        Tag tag3 = new Tag();
-        Tag tag4 = new Tag();
-        tag1.setName("extreme");
-        tag2.setName("beauty");
-        tag3.setName("rest");
-        tag4.setName("sport for kids");
+        TagDto tagDto1 = new TagDto();
+        TagDto tagDto2 = new TagDto();
+        TagDto tagDto3 = new TagDto();
+        TagDto tagDto4 = new TagDto();
+        tagDto1.setName("extreme");
+        tagDto2.setName("beauty");
+        tagDto3.setName("rest");
+        tagDto4.setName("sport for kids");
 
-        List<Tag> actualTags = new ArrayList<Tag>() {
+        List<TagDto> actualTagDtos = new ArrayList<TagDto>() {
             {
-//                add(tag1);
-                add(tag2);
-                add(tag3);
-                add(tag4);
+//                add(tagDto1);
+                add(tagDto2);
+                add(tagDto3);
+                add(tagDto4);
             }
         };
-        Assertions.assertEquals(actualTags, expectedTags);
+        Assertions.assertEquals(actualTagDtos, expectedTagDtos);
     }
 
     @DisplayName("Testing method findAll() on negative result")
