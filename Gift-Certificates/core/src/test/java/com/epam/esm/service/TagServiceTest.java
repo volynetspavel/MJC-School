@@ -22,7 +22,7 @@ import java.util.List;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestDBConfig.class)
-public class TagServiceTest {
+class TagServiceTest {
 
     @Autowired
     private TagService tagService;
@@ -33,13 +33,12 @@ public class TagServiceTest {
 
     @DisplayName("Testing method findById() on positive result")
     @Test
-    public void testFindByIdSuccess() throws ResourceNotFoundException {
+    void testFindByIdSuccess() throws ResourceNotFoundException {
         int id = 2;
         String name = "beauty";
 
-        Tag actual = new Tag();
+        Tag actual = createTag(name);
         actual.setId(id);
-        actual.setName(name);
 
         Tag expected = tagMapper.toEntity(tagService.findById(id));
         Assertions.assertEquals(actual, expected);
@@ -47,41 +46,37 @@ public class TagServiceTest {
 
     @DisplayName("Testing method findById() on exception")
     @Test
-    public void testFindByIdThrowsException() {
+    void testFindByIdThrowsException() {
         int id = 10;
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            tagService.findById(id);
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> tagService.findById(id));
     }
 
     @DisplayName("Testing method delete() by id of tag on positive result")
     @Test
-    public void testDeleteByIdSuccess() throws ResourceNotFoundException {
+    void testDeleteByIdSuccess() throws ResourceNotFoundException {
         int id = 2;
         tagService.delete(id);
 
         //after execute method delete, expected ResourceNotFoundException, because same tag hasn't already exist
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            tagService.findById(id);
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> tagService.findById(id));
     }
 
     @DisplayName("Testing method delete() by id of tag on negative result")
     @Test
-    public void testDeleteByIdThrowsException() {
+    void testDeleteByIdThrowsException() {
         int id = 1;
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            tagService.delete(id);
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> tagService.delete(id));
     }
 
     @DisplayName("Testing method insert() on positive result")
     @Test
-    public void testInsertSuccess() throws ResourceAlreadyExistException, ResourceNotFoundException {
-        Tag tag = new Tag();
+    void testInsertSuccess() throws ResourceAlreadyExistException, ResourceNotFoundException {
         String name = "travel";
-        tag.setName(name);
+        Tag tag = createTag(name);
 
         tagService.insert(tagMapper.toDto(tag));
         Assertions.assertEquals(name, tagService.findByName(name).getName());
@@ -89,19 +84,17 @@ public class TagServiceTest {
 
     @DisplayName("Testing method insert() on negative result")
     @Test
-    public void testInsertThrowsException() {
-        Tag tag = new Tag();
+    void testInsertThrowsException() {
         String name = "travel";
-        tag.setName(name);
+        Tag tag = createTag(name);
 
-        Assertions.assertThrows(ResourceAlreadyExistException.class, () -> {
-            tagService.insert(tagMapper.toDto(tag));
-        });
+        Assertions.assertThrows(ResourceAlreadyExistException.class,
+                () -> tagService.insert(tagMapper.toDto(tag)));
     }
 
     @DisplayName("Testing method update() on positive result")
     @Test
-    public void testUpdateSuccess() throws ResourceNotFoundException, ResourceAlreadyExistException {
+    void testUpdateSuccess() throws ResourceNotFoundException, ResourceAlreadyExistException {
         String newName = "sport for kids";
 
         String updatedTagName = "travel";
@@ -114,64 +107,66 @@ public class TagServiceTest {
 
     @DisplayName("Testing method update() on negative result with ResourceNotFoundException")
     @Test
-    public void testUpdateThrowsResourceNotFoundException() {
+    void testUpdateThrowsResourceNotFoundException() {
         int id = 20;
         String newName = "sport";
 
-        Tag updatedTag = new Tag();
+        Tag updatedTag = createTag(newName);
         updatedTag.setId(id);
-        updatedTag.setName(newName);
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            tagService.update(tagMapper.toDto(updatedTag));
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> tagService.update(tagMapper.toDto(updatedTag)));
     }
 
     @DisplayName("Testing method update() on negative result with ResourceAlreadyExistException")
     @Test
-    public void testUpdateThrowsResourceAlreadyExistException() {
+    void testUpdateThrowsResourceAlreadyExistException() {
         int id = 3;
         String newName = "rest";
 
-        Tag updatedTag = new Tag();
+        Tag updatedTag = createTag(newName);
         updatedTag.setId(id);
-        updatedTag.setName(newName);
 
-        Assertions.assertThrows(ResourceAlreadyExistException.class, () -> {
-            tagService.update(tagMapper.toDto(updatedTag));
-        });
+        Assertions.assertThrows(ResourceAlreadyExistException.class,
+                () -> tagService.update(tagMapper.toDto(updatedTag)));
     }
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
-    public void testFindAllSuccess() throws ResourceNotFoundException {
-        List<TagDto> expectedTagDtos = tagService.findAll();
+    void testFindAllSuccess() throws ResourceNotFoundException {
+        List expectedTags = tagService.findAll();
 
-        TagDto tagDto1 = new TagDto();
-        TagDto tagDto2 = new TagDto();
-        TagDto tagDto3 = new TagDto();
-        TagDto tagDto4 = new TagDto();
-        tagDto1.setName("extreme");
-        tagDto2.setName("beauty");
-        tagDto3.setName("rest");
-        tagDto4.setName("sport for kids");
+        String name1 = "extreme";
+        String name2 = "beauty";
+        String name3 = "rest";
+        String name4 = "sport";
 
-        List<TagDto> actualTagDtos = new ArrayList<TagDto>() {
+        TagDto tagDto1 = tagMapper.toDto(createTag(name1));
+        TagDto tagDto2 = tagMapper.toDto(createTag(name2));
+        TagDto tagDto3 = tagMapper.toDto(createTag(name3));
+        TagDto tagDto4 = tagMapper.toDto(createTag(name4));
+
+        List actualTags = new ArrayList<TagDto>() {
             {
-//                add(tagDto1);
+                add(tagDto1);
                 add(tagDto2);
                 add(tagDto3);
                 add(tagDto4);
             }
         };
-        Assertions.assertEquals(actualTagDtos, expectedTagDtos);
+        Assertions.assertEquals(actualTags, expectedTags);
     }
 
     @DisplayName("Testing method findAll() on negative result")
     @Test
-    public void testFindAllThrowsException() {
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            tagService.findAll();
-        });
+    void testFindAllThrowsException() {
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> tagService.findAll());
+    }
+
+    private Tag createTag(String name) {
+        Tag tag = new Tag();
+        tag.setName(name);
+        return tag;
     }
 }
