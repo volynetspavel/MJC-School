@@ -9,23 +9,23 @@ import java.util.List;
 /**
  * This class is a layer for interacting with CertificateDao.
  */
-public abstract class CertificateService implements AbstractService<CertificateDto>{
+public interface CertificateService extends AbstractService<CertificateDto> {
 
-    public abstract CertificateDto findByName(String name) throws ResourceNotFoundException;
+    CertificateDto findByName(String name) throws ResourceNotFoundException;
 
-    public abstract void checkAndCreateTags(List<Tag> tags);
+    void insertTags(List<Tag> tags);
 
-    public abstract void createLinkBetweenCertificateAndTag(int idNewCertificate, List<Tag> tags);
+    void createLinkBetweenCertificateAndTag(int idNewCertificate, List<Tag> tags);
 
-    public abstract List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException;
+    List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException;
 
-    public abstract List<CertificateDto> searchByPartOfName(String partOfName) throws ResourceNotFoundException;
+    List<CertificateDto> searchByPartOfName(String partOfName) throws ResourceNotFoundException;
 
-    public abstract List<CertificateDto> searchByPartOfDescription(String partOfDescription) throws ResourceNotFoundException;
+    List<CertificateDto> searchByPartOfDescription(String partOfDescription) throws ResourceNotFoundException;
 
-    public abstract List<CertificateDto> findAllOrderByName(String order) throws ResourceNotFoundException;
+    List<CertificateDto> findAllOrderByName(String order) throws ResourceNotFoundException;
 
-    public abstract List<CertificateDto> findAllOrderByNameAndDate(String order) throws ResourceNotFoundException;
+    List<CertificateDto> findAllOrderByNameAndDate(String order) throws ResourceNotFoundException;
 
-    public abstract List<CertificateDto> findAllOrderByDate(String order) throws ResourceNotFoundException;
+    List<CertificateDto> findAllOrderByDate(String order) throws ResourceNotFoundException;
 }

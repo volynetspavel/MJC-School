@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * This class is an implementation of TagService.
  */
 @Service
-public class TagServiceImpl extends TagService {
+public class TagServiceImpl implements TagService {
     private TagDao tagDao;
     private TagMapper tagMapper;
 

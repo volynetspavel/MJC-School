@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * This class is an implementation of CertificateService.
  */
 @Service
-public class CertificateServiceImpl extends CertificateService {
+public class CertificateServiceImpl implements CertificateService {
     private static final String SORT_ORDER_DESC = "desc";
 
     private CertificateDao certificateDao;
@@ -48,7 +48,7 @@ public class CertificateServiceImpl extends CertificateService {
         }
 
         List<Tag> tags = certificateDto.getTags();
-        checkAndCreateTags(tags);
+        insertTags(tags);
 
         Certificate certificate = certificateMapper.toEntity(certificateDto);
         certificate.setCreateDate(Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
@@ -73,7 +73,7 @@ public class CertificateServiceImpl extends CertificateService {
 
         List<Tag> tags = updatedCertificateDto.getTags();
         if (tags != null) {
-            checkAndCreateTags(tags);
+            insertTags(tags);
             createLinkBetweenCertificateAndTag(idUpdateCertificate, tags);
         }
     }
@@ -81,25 +81,25 @@ public class CertificateServiceImpl extends CertificateService {
     @Override
     public List<CertificateDto> findAll() throws ResourceNotFoundException {
         List<Certificate> certificates = certificateDao.findAll();
-        checkOnEmptyOrNull(certificates);
+        checkListOnEmptyOrNull(certificates);
 
-        return fromEntitytoDtoAndAddListTags(certificates);
+        return fromEntityToDtoAndAddListTags(certificates);
     }
 
     @Override
     public List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException {
         List<Certificate> certificates = certificateDao.findAllByTagId(id);
-        checkOnEmptyOrNull(certificates);
+        checkListOnEmptyOrNull(certificates);
 
-        return fromEntitytoDtoAndAddListTags(certificates);
+        return fromEntityToDtoAndAddListTags(certificates);
     }
 
     @Override
     public List<CertificateDto> searchByPartOfName(String partOfName) throws ResourceNotFoundException {
         List<Certificate> certificates = certificateDao.searchByPartOfName(partOfName);
-        checkOnEmptyOrNull(certificates);
+        checkListOnEmptyOrNull(certificates);
 
-        return fromEntitytoDtoAndAddListTags(certificates);
+        return fromEntityToDtoAndAddListTags(certificates);
     }
 
     @Override
@@ -107,43 +107,43 @@ public class CertificateServiceImpl extends CertificateService {
             throws ResourceNotFoundException {
 
         List<Certificate> certificates = certificateDao.searchByPartOfDescription(partOfDescription);
-        checkOnEmptyOrNull(certificates);
+        checkListOnEmptyOrNull(certificates);
 
-        return fromEntitytoDtoAndAddListTags(certificates);
+        return fromEntityToDtoAndAddListTags(certificates);
     }
 
     @Override
     public List<CertificateDto> findAllOrderByName(String order) throws ResourceNotFoundException {
-        List<CertificateDto> certificateDtos = findAll();
+        List<CertificateDto> certificateList = findAll();
         Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
-        return sortByComparatorAndOrder(certificateDtos, certificateDtoComparatorByName, order);
+        return sortByComparatorAndOrder(certificateList, certificateDtoComparatorByName, order);
     }
 
     @Override
     public List<CertificateDto> findAllOrderByDate(String order) throws ResourceNotFoundException {
-        List<CertificateDto> certificateDtos = findAll();
+        List<CertificateDto> certificateList = findAll();
         Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
-        return sortByComparatorAndOrder(certificateDtos, certificateDtoComparatorByDate, order);
+        return sortByComparatorAndOrder(certificateList, certificateDtoComparatorByDate, order);
     }
 
     @Override
     public List<CertificateDto> findAllOrderByNameAndDate(String order) throws ResourceNotFoundException {
-        List<CertificateDto> certificateDtos = findAll();
+        List<CertificateDto> certificateList = findAll();
 
         Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
         Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
 
         if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
-            certificateDtos = certificateDtos.stream()
+            certificateList = certificateList.stream()
                     .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate).reversed())
                     .collect(Collectors.toList());
         } else {
             //sort order by default is asc
-            certificateDtos = certificateDtos.stream()
+            certificateList = certificateList.stream()
                     .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate))
                     .collect(Collectors.toList());
         }
-        return certificateDtos;
+        return certificateList;
     }
 
     @Override
@@ -164,7 +164,6 @@ public class CertificateServiceImpl extends CertificateService {
         certificateDao.delete(id);
     }
 
-
     @Override
     public CertificateDto findByName(String name) throws ResourceNotFoundException {
         Certificate certificate = certificateDao.findByName(name);
@@ -175,7 +174,7 @@ public class CertificateServiceImpl extends CertificateService {
     }
 
     @Override
-    public void checkAndCreateTags(List<Tag> tags) {
+    public void insertTags(List<Tag> tags) {
         for (Tag tag : tags) {
             if (tagDao.findByName(tag.getName()) == null) {
                 tagDao.insert(tag);
@@ -191,32 +190,32 @@ public class CertificateServiceImpl extends CertificateService {
         }
     }
 
-    private void checkOnEmptyOrNull(List<Certificate> certificates) throws ResourceNotFoundException {
+    private void checkListOnEmptyOrNull(List<Certificate> certificates) throws ResourceNotFoundException {
         if (certificates == null || certificates.isEmpty()) {
             throw new ResourceNotFoundException("Requested resource not found");
         }
     }
 
-    private List<CertificateDto> fromEntitytoDtoAndAddListTags(List<Certificate> certificates) {
+    private List<CertificateDto> fromEntityToDtoAndAddListTags(List<Certificate> certificates) {
         return certificates.stream()
                 .map(certificate -> certificateMapper.toDto(certificate))
                 .peek(certificateDto -> certificateDto.setTags(tagDao.findTagsByCertificateId(certificateDto.getId())))
                 .collect(Collectors.toList());
     }
 
-    private List<CertificateDto> sortByComparatorAndOrder(List<CertificateDto> certificateDtos,
+    private List<CertificateDto> sortByComparatorAndOrder(List<CertificateDto> certificateList,
                                                           Comparator<CertificateDto> certificateDtoComparator,
                                                           String order) {
         if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
-            certificateDtos = certificateDtos.stream()
+            certificateList = certificateList.stream()
                     .sorted(certificateDtoComparator.reversed())
                     .collect(Collectors.toList());
         } else {
-            //sort order by default is asc
-            certificateDtos = certificateDtos.stream()
+            //sort order by default is ASC
+            certificateList = certificateList.stream()
                     .sorted(certificateDtoComparator)
                     .collect(Collectors.toList());
         }
-        return certificateDtos;
+        return certificateList;
     }
 }
