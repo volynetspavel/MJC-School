@@ -44,6 +44,12 @@ public class CertificateDaoImpl extends CertificateDao {
                     "JOIN gift_certificate_has_tag " +
                     "ON gift_certificate.id = gift_certificate_has_tag.gift_certificate_id " +
                     "WHERE gift_certificate_has_tag.tag_id = ?;";
+    private static final String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_NAME =
+            "SELECT * FROM gift_certificate WHERE gift_certificate.name LIKE ? ;";
+    private static final String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION =
+            "SELECT * FROM gift_certificate WHERE gift_certificate.description LIKE ? ;";
+
+
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -84,27 +90,18 @@ public class CertificateDaoImpl extends CertificateDao {
 
     @Override
     public List<Certificate> searchByPartOfName(String partOfName) {
-        String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_NAME = buildSqlForSearchCertificateByPartOfName(partOfName);
+        String partOfNameWithSpecialSymbols = "%" + partOfName + "%";
         return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_PART_OF_NAME,
-                new BeanPropertyRowMapper<>(Certificate.class));
+                new BeanPropertyRowMapper<>(Certificate.class), partOfNameWithSpecialSymbols);
     }
 
     @Override
     public List<Certificate> searchByPartOfDescription(String partOfDescription) {
-        String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION =
-                buildSqlForSearchCertificateByPartOfDescription(partOfDescription);
+        String partOfDescriptionWithSpecialSymbols = "%" + partOfDescription + "%";
         return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION,
-                new BeanPropertyRowMapper<>(Certificate.class));
+                new BeanPropertyRowMapper<>(Certificate.class), partOfDescriptionWithSpecialSymbols);
     }
 
-    private String buildSqlForSearchCertificateByPartOfName(String partOfName) {
-        return "SELECT * FROM gift_certificate WHERE gift_certificate.name LIKE '%" + partOfName + "%';";
-    }
-
-    private String buildSqlForSearchCertificateByPartOfDescription(String partOfDescription) {
-        return "SELECT * FROM gift_certificate WHERE gift_certificate.description LIKE '%" +
-                partOfDescription + "%';";
-    }
 
     @Override
     public Certificate findById(int id) {
