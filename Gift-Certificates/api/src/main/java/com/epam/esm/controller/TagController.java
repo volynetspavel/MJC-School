@@ -14,7 +14,7 @@ import java.util.List;
  * Class is used to send requests from the client to the service layer for tag entity.
  */
 @RestController
-@RequestMapping("/tag")
+@RequestMapping("/tags")
 public class TagController {
     private TagService tagService;
 
@@ -24,31 +24,31 @@ public class TagController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping
+    @PostMapping("/add")
     public void insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException {
         tagService.insert(tag);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/all")
+    @GetMapping
     public List<TagDto> findAll() throws ResourceNotFoundException {
         return tagService.findAll();
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/{id}")
-    public TagDto findById(@PathVariable int id) throws ResourceNotFoundException {
+    @GetMapping("/find/{id}")
+    public TagDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
         return tagService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/remove/{id}")
     public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
         tagService.delete(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/{id}")
+    @PutMapping("/edit/{id}")
     public void update(@PathVariable("id") int id, @RequestBody TagDto tag)
             throws ResourceNotFoundException, ResourceAlreadyExistException {
         tag.setId(id);
