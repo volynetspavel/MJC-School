@@ -1,13 +1,16 @@
 package com.epam.esm.exception.model;
 
-public class Error {
+/**
+ * Class used for print any errors or exceptions on backend side.
+ */
+public class ExceptionMessage {
     private int code;
     private String message;
 
-    public Error() {
+    public ExceptionMessage() {
     }
 
-    public Error(int code, String message) {
+    public ExceptionMessage(int code, String message) {
         this.code = code;
         this.message = message;
     }
