@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * This class is a layer for interacting with CertificateDao.
  */
-public interface CertificateService extends AbstractService<CertificateDto> {
+public interface CertificateService extends Service<CertificateDto> {
 
     CertificateDto findByName(String name) throws ResourceNotFoundException;
 

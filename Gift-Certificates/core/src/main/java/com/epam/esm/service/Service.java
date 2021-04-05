@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Basic interface for service layer. Defines general methods for all services.
  */
-public interface AbstractService<T extends AbstractDto> {
+public interface Service<T extends AbstractDto> {
     void insert(T entityDto) throws ResourceAlreadyExistException;
 
     void delete(int id) throws ResourceNotFoundException;

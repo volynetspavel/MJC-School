@@ -6,7 +6,7 @@ import com.epam.esm.exception.ResourceNotFoundException;
 /**
  * This class is a layer for interacting with TagDao.
  */
-public interface TagService extends AbstractService<TagDto> {
+public interface TagService extends Service<TagDto> {
 
     void delete(String name) throws ResourceNotFoundException;
 
