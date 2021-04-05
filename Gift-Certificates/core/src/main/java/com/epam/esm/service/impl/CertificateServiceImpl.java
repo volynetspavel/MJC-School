@@ -46,7 +46,7 @@ public class CertificateServiceImpl implements CertificateService {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + certificateDto.getName() + ") has already existed.");
         }
-
+        
         List<Tag> tags = certificateDto.getTags();
         insertTags(tags);
 

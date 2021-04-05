@@ -55,9 +55,9 @@ public class CertificateDaoImpl extends CertificateDao {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
-    public CertificateDaoImpl(JdbcTemplate jdbcTemplate1,
+    public CertificateDaoImpl(JdbcTemplate jdbcTemplate,
                               NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate1;
+        this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
