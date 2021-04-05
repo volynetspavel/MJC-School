@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -134,7 +134,7 @@ class TagServiceTest {
     @DisplayName("Testing method findAll() on positive result")
     @Test
     void testFindAllSuccess() throws ResourceNotFoundException {
-        List expectedTags = tagService.findAll();
+        List<TagDto> expectedTags = tagService.findAll();
 
         String name1 = "extreme";
         String name2 = "beauty";
@@ -146,14 +146,7 @@ class TagServiceTest {
         TagDto tagDto3 = tagMapper.toDto(createTag(name3));
         TagDto tagDto4 = tagMapper.toDto(createTag(name4));
 
-        List actualTags = new ArrayList<TagDto>() {
-            {
-                add(tagDto1);
-                add(tagDto2);
-                add(tagDto3);
-                add(tagDto4);
-            }
-        };
+        List<TagDto> actualTags = Arrays.asList(tagDto1, tagDto2, tagDto3, tagDto4);
         Assertions.assertEquals(actualTags, expectedTags);
     }
 

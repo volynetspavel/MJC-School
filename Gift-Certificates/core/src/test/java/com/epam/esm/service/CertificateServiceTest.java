@@ -16,7 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,6 +25,7 @@ import java.util.List;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestDBConfig.class)
 public class CertificateServiceTest {
+
     @Autowired
     private CertificateService certificateService;
 
@@ -54,9 +55,8 @@ public class CertificateServiceTest {
     @Test
     void testFindByIdThrowsException() {
         int id = 25;
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            certificateService.findById(id);
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> certificateService.findById(id));
     }
 
     @DisplayName("Testing method delete() by id of certificate on positive result")
@@ -65,9 +65,8 @@ public class CertificateServiceTest {
         int id = 2;
         certificateService.delete(id);
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            certificateService.findById(id);
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> certificateService.findById(id));
     }
 
     @DisplayName("Testing method delete() by id of certificate on negative result")
@@ -75,9 +74,8 @@ public class CertificateServiceTest {
     void testDeleteByIdThrowsException() {
         int id = 1;
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            certificateService.delete(id);
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> certificateService.delete(id));
     }
 
     @DisplayName("Testing method insert() on positive result")
@@ -88,7 +86,7 @@ public class CertificateServiceTest {
         BigDecimal price = new BigDecimal(350);
         Integer duration = 15;
 
-        //createdDaye and lastUpdateDate are set in services
+        //createdDate and lastUpdateDate are set in services
         Certificate certificate = createCertificate(name, description, price,
                 duration, null, null);
 
@@ -108,9 +106,8 @@ public class CertificateServiceTest {
         Certificate certificate = createCertificate(name, description, price,
                 duration, null, null);
 
-        Assertions.assertThrows(ResourceAlreadyExistException.class, () -> {
-            certificateService.insert(certificateMapper.toDto(certificate));
-        });
+        Assertions.assertThrows(ResourceAlreadyExistException.class,
+                () -> certificateService.insert(certificateMapper.toDto(certificate)));
     }
 
     @DisplayName("Testing method update() on positive result")
@@ -148,15 +145,14 @@ public class CertificateServiceTest {
                 newDuration, newCreateDate, newLastUpdateDate);
         updatedCertificate.setId(id);
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            certificateService.update(certificateMapper.toDto(updatedCertificate));
-        });
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> certificateService.update(certificateMapper.toDto(updatedCertificate)));
     }
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
     void testFindAllSuccess() throws ResourceNotFoundException {
-        List expectedCertificates = certificateService.findAll();
+        List<CertificateDto> expectedCertificates = certificateService.findAll();
 
         String name1 = "Off road jeep tour";
         String description1 = "We offer the active and courageous an extreme off-road trip.";
@@ -201,13 +197,7 @@ public class CertificateServiceTest {
                 description3, price3, duration3, createDate3, lastUpdateDate3));
         certificateDto3.setTags(List.of(new Tag[]{}));
 
-        List actualCertificates = new ArrayList<CertificateDto>() {
-            {
-                add(certificateDto1);
-                add(certificateDto2);
-                add(certificateDto3);
-            }
-        };
+        List<CertificateDto> actualCertificates = Arrays.asList(certificateDto1, certificateDto2, certificateDto3);
         Assertions.assertEquals(expectedCertificates, actualCertificates);
     }
 

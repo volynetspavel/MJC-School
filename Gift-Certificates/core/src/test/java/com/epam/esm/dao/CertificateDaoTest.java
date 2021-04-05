@@ -11,15 +11,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * Class for testing methods from service layer for certificate.
+ * Class for testing methods from dao layer for certificate.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestDBConfig.class)
 public class CertificateDaoTest {
+
     @Autowired
     private CertificateDao certificateDao;
 
@@ -95,7 +96,7 @@ public class CertificateDaoTest {
     @DisplayName("Testing method findAll() on positive result")
     @Test
     void testFindAllSuccess() {
-        List expectedCertificates = certificateDao.findAll();
+        List<Certificate> expectedCertificates = certificateDao.findAll();
 
         String name1 = "Off road jeep tour";
         String description1 = "We offer the active and courageous an extreme off-road trip.";
@@ -126,13 +127,8 @@ public class CertificateDaoTest {
         Certificate certificate3 = createCertificate(name3,
                 description3, price3, duration3, createDate3, lastUpdateDate3);
 
-        List actualCertificates = new ArrayList<Certificate>() {
-            {
-                add(certificate1);
-                add(certificate2);
-                add(certificate3);
-            }
-        };
+        List<Certificate> actualCertificates = Arrays.asList(certificate1, certificate2, certificate3);
+
         Assertions.assertEquals(expectedCertificates, actualCertificates);
     }
 

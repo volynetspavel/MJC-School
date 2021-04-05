@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -79,7 +79,7 @@ public class TagDaoTest {
     @DisplayName("Testing method findAll() on positive result")
     @Test
     void testFindAllSuccess() {
-        List expectedTags = tagDao.findAll();
+        List<Tag> expectedTags = tagDao.findAll();
 
         String name1 = "extreme";
         String name2 = "beauty";
@@ -91,14 +91,7 @@ public class TagDaoTest {
         Tag tag3 = createTag(name3);
         Tag tag4 = createTag(name4);
 
-        List actualTags = new ArrayList<Tag>() {
-            {
-                add(tag1);
-                add(tag2);
-                add(tag3);
-                add(tag4);
-            }
-        };
+        List<Tag> actualTags = Arrays.asList(tag1, tag2, tag3, tag4);
         Assertions.assertEquals(actualTags, expectedTags);
     }
 
