@@ -11,8 +11,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CertificateMapper extends AbstractMapper<Certificate, CertificateDto> {
+
     @Autowired
-    public CertificateMapper(){
+    public CertificateMapper() {
         super(Certificate.class, CertificateDto.class);
     }
 }
