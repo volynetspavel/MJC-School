@@ -1,0 +1,107 @@
+package com.epam.esm.controller;
+
+import com.epam.esm.dto.CertificateDto;
+import com.epam.esm.exception.ResourceAlreadyExistException;
+import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.service.CertificateService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+
+import java.util.List;
+
+/**
+ * Class is used to send requests from the client to the service layer for certificate entity.
+ */
+@RestController
+@RequestMapping("/certificates")
+public class CertificateController {
+
+    private CertificateService certificateService;
+
+    @Autowired
+    public CertificateController(CertificateService certificateService) {
+        this.certificateService = certificateService;
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/add")
+    public void insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
+        certificateService.insert(certificateDto);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping
+    public List<CertificateDto> findAll() throws ResourceNotFoundException {
+        return certificateService.findAll();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/name/{order}")
+    public List<CertificateDto> findAllOrderByName(@PathVariable("order") String order)
+            throws ResourceNotFoundException {
+        return certificateService.findAllOrderByName(order);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/date/{order}")
+    public List<CertificateDto> findAllOrderByDate(@PathVariable("order") String order)
+            throws ResourceNotFoundException {
+        return certificateService.findAllOrderByDate(order);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/namedate/{order}")
+    public List<CertificateDto> findAllOrderByNameAndDate(@PathVariable("order") String order)
+            throws ResourceNotFoundException {
+        return certificateService.findAllOrderByNameAndDate(order);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/tag/{id}")
+    public List<CertificateDto> findAllByTagId(@PathVariable("id") int id) throws ResourceNotFoundException {
+        return certificateService.findAllByTagId(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/find/{id}")
+    public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
+        return certificateService.findById(id);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/remove/{id}")
+    public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
+        certificateService.delete(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/edit/{id}")
+    public void update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
+            throws ResourceNotFoundException, ResourceAlreadyExistException {
+        certificateDto.setId(id);
+        certificateService.update(certificateDto);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search/name/{partOfName}")
+    public List<CertificateDto> searchByPartOfName(@PathVariable("partOfName") String partOfName)
+            throws ResourceNotFoundException {
+        return certificateService.searchByPartOfName(partOfName);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search/description/{partOfDescription}")
+    public List<CertificateDto> searchByPartOfDescription(@PathVariable("partOfDescription") String partOfDescription)
+            throws ResourceNotFoundException {
+        return certificateService.searchByPartOfDescription(partOfDescription);
+    }
+}
