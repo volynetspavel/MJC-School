@@ -11,8 +11,9 @@ import java.math.BigDecimal;
  */
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 public class Certificate extends AbstractEntity {
+
     private String name;
     private String description;
     private BigDecimal price;

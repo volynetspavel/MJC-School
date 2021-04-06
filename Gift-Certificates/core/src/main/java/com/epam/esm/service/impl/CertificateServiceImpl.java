@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class CertificateServiceImpl implements CertificateService {
+
     private static final String SORT_ORDER_DESC = "desc";
 
     private CertificateDao certificateDao;
@@ -46,7 +47,7 @@ public class CertificateServiceImpl implements CertificateService {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + certificateDto.getName() + ") has already existed.");
         }
-        
+
         List<Tag> tags = certificateDto.getTags();
         insertTags(tags);
 

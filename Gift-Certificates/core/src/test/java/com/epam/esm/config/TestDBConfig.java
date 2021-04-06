@@ -12,6 +12,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
+/**
+ * Defines the configuration for connecting to the test-database.
+ */
 @Configuration
 @PropertySource("classpath:test_database.properties")
 @ComponentScan("com.epam.esm")

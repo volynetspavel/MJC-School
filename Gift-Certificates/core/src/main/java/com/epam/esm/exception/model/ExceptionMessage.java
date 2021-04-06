@@ -4,6 +4,7 @@ package com.epam.esm.exception.model;
  * Class used for print any errors or exceptions on backend side.
  */
 public class ExceptionMessage {
+
     private int code;
     private String message;
 

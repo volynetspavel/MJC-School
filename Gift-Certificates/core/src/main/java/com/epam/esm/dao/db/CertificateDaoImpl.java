@@ -20,6 +20,7 @@ import java.util.List;
  */
 @Repository
 public class CertificateDaoImpl extends CertificateDao {
+
     private static final String SQL_INSERT_CERITFICATE = "INSERT INTO gift_certificate " +
             "(name, description, price, duration, create_date, last_update_date ) " +
             "VALUES (:name, :description, :price, :duration, :create_date, :last_update_date);";
@@ -48,7 +49,6 @@ public class CertificateDaoImpl extends CertificateDao {
             "SELECT * FROM gift_certificate WHERE gift_certificate.name LIKE ? ;";
     private static final String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION =
             "SELECT * FROM gift_certificate WHERE gift_certificate.description LIKE ? ;";
-
 
 
     private final JdbcTemplate jdbcTemplate;

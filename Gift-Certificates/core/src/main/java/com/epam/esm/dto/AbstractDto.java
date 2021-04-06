@@ -7,5 +7,6 @@ import lombok.Data;
  */
 @Data
 public class AbstractDto {
+
     private int id;
 }

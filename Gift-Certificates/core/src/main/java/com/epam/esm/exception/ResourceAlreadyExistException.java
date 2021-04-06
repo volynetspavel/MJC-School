@@ -7,6 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public class ResourceAlreadyExistException extends Exception {
+
     private final String code = "9901";
 
     public ResourceAlreadyExistException() {

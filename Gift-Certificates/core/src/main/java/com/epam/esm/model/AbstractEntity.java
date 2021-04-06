@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public abstract class AbstractEntity {
+
     private int id;
 }

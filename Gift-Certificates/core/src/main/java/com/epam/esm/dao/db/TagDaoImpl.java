@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Repository
 public class TagDaoImpl extends TagDao {
+
     private static final String SQL_INSERT_TAG = "INSERT INTO tag (name) VALUES (?);";
     private static final String SQL_DELETE_TAG_BY_NAME = "DELETE FROM tag WHERE name = ?;";
     private static final String SQL_DELETE_TAG_BY_ID = "DELETE FROM tag WHERE id = ?;";
@@ -70,8 +71,9 @@ public class TagDaoImpl extends TagDao {
         return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME, new BeanPropertyRowMapper<>(Tag.class), name)
                 .stream().findAny().orElse(null);
     }
+
     @Override
-    public List<Tag> findTagsByCertificateId(int idCertificate){
+    public List<Tag> findTagsByCertificateId(int idCertificate) {
         return jdbcTemplate.query(SQL_FIND_TAG_BY_CERTIFICATE_ID,
                 new BeanPropertyRowMapper<>(Tag.class), idCertificate);
     }

@@ -24,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/tags")
 public class TagController {
+
     private TagService tagService;
 
     @Autowired
@@ -31,7 +32,7 @@ public class TagController {
         this.tagService = tagService;
     }
 
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/add")
     public void insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException {
         tagService.insert(tag);

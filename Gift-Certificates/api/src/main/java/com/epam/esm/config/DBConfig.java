@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 @Configuration
 @PropertySource("classpath:database.properties")
 public class DBConfig {
+
     @Autowired
     private Environment env;
 

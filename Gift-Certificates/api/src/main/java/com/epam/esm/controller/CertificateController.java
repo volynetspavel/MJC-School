@@ -24,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/certificates")
 public class CertificateController {
+
     private CertificateService certificateService;
 
     @Autowired
@@ -31,7 +32,7 @@ public class CertificateController {
         this.certificateService = certificateService;
     }
 
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/add")
     public void insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
         certificateService.insert(certificateDto);

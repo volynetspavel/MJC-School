@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class CertificateDto extends AbstractDto {
+    
     private String name;
     private String description;
     private BigDecimal price;
