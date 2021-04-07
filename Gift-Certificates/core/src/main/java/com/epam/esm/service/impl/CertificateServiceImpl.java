@@ -42,7 +42,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public void insert(CertificateDto certificateDto) throws ResourceAlreadyExistException {
+    public CertificateDto insert(CertificateDto certificateDto) throws ResourceAlreadyExistException {
         if (certificateDao.findByName(certificateDto.getName()) != null) {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + certificateDto.getName() + ") has already existed.");
@@ -57,6 +57,10 @@ public class CertificateServiceImpl implements CertificateService {
 
         int idNewCertificate = certificateDao.insert(certificate);
         createLinkBetweenCertificateAndTag(idNewCertificate, tags);
+
+        CertificateDto newCertificateDto = certificateMapper.toDto(certificateDao.findById(idNewCertificate));
+        newCertificateDto.setTags(tags);
+        return newCertificateDto;
     }
 
     @Override

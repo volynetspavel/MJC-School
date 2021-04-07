@@ -32,13 +32,15 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void insert(TagDto tagDto) throws ResourceAlreadyExistException {
+    public TagDto insert(TagDto tagDto) throws ResourceAlreadyExistException {
         if (tagDao.findByName(tagDto.getName()) != null) {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + tagDto.getName() + ") has already existed.");
         }
         Tag tag = tagMapper.toEntity(tagDto);
-        tagDao.insert(tag);
+        int idNewTag = tagDao.insert(tag);
+
+        return tagMapper.toDto(tagDao.findById(idNewTag));
     }
 
     @Override
@@ -96,8 +98,7 @@ public class TagServiceImpl implements TagService {
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
-        TagDto tagDto = tagMapper.toDto(tag);
-        return tagDto;
+        return tagMapper.toDto(tag);
     }
 
     @Override
@@ -106,7 +107,6 @@ public class TagServiceImpl implements TagService {
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (name = " + name + ")");
         }
-        TagDto tagDto = tagMapper.toDto(tag);
-        return tagDto;
+        return tagMapper.toDto(tag);
     }
 }

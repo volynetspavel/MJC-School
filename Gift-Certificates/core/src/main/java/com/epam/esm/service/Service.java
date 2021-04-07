@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface Service<T extends AbstractDto> {
 
-    void insert(T entityDto) throws ResourceAlreadyExistException;
+    T insert(T entityDto) throws ResourceAlreadyExistException;
 
     void delete(int id) throws ResourceNotFoundException;
 
