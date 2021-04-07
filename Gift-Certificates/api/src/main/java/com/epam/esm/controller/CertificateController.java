@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -34,8 +35,8 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/add")
-    public void insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
-        certificateService.insert(certificateDto);
+    public CertificateDto insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
+        return certificateService.insert(certificateDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -45,22 +46,22 @@ public class CertificateController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/name/{order}")
-    public List<CertificateDto> findAllOrderByName(@PathVariable("order") String order)
+    @GetMapping("/name")
+    public List<CertificateDto> findAllOrderByName(@RequestParam("order") String order)
             throws ResourceNotFoundException {
         return certificateService.findAllOrderByName(order);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/date/{order}")
-    public List<CertificateDto> findAllOrderByDate(@PathVariable("order") String order)
+    @GetMapping("/date")
+    public List<CertificateDto> findAllOrderByDate(@RequestParam("order") String order)
             throws ResourceNotFoundException {
         return certificateService.findAllOrderByDate(order);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/namedate/{order}")
-    public List<CertificateDto> findAllOrderByNameAndDate(@PathVariable("order") String order)
+    @GetMapping("/name_date")
+    public List<CertificateDto> findAllOrderByNameAndDate(@RequestParam("order") String order)
             throws ResourceNotFoundException {
         return certificateService.findAllOrderByNameAndDate(order);
     }
@@ -92,15 +93,15 @@ public class CertificateController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/search/name/{partOfName}")
-    public List<CertificateDto> searchByPartOfName(@PathVariable("partOfName") String partOfName)
+    @GetMapping("/search/name")
+    public List<CertificateDto> searchByPartOfName(@RequestParam("part") String partOfName)
             throws ResourceNotFoundException {
         return certificateService.searchByPartOfName(partOfName);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/search/description/{partOfDescription}")
-    public List<CertificateDto> searchByPartOfDescription(@PathVariable("partOfDescription") String partOfDescription)
+    @GetMapping("/search/description")
+    public List<CertificateDto> searchByPartOfDescription(@RequestParam("part") String partOfDescription)
             throws ResourceNotFoundException {
         return certificateService.searchByPartOfDescription(partOfDescription);
     }

@@ -34,8 +34,8 @@ public class TagController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/add")
-    public void insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException {
-        tagService.insert(tag);
+    public TagDto insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException {
+        return tagService.insert(tag);
     }
 
     @ResponseStatus(HttpStatus.OK)
