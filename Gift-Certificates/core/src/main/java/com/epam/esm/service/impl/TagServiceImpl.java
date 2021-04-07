@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
@@ -62,7 +63,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void update(TagDto newTagDto) throws ResourceNotFoundException, ResourceAlreadyExistException {
+    public TagDto update(TagDto newTagDto) throws ResourceNotFoundException, ResourceAlreadyExistException {
         int id = newTagDto.getId();
         String name = newTagDto.getName();
 
@@ -79,6 +80,8 @@ public class TagServiceImpl implements TagService {
 
         Tag newTag = tagMapper.toEntity(newTagDto);
         tagDao.update(newTag);
+
+        return tagMapper.toDto(tagDao.findById(id));
     }
 
     @Override

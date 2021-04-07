@@ -64,7 +64,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public void update(CertificateDto updatedCertificateDto)
+    public CertificateDto update(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException {
 
         int idUpdateCertificate = updatedCertificateDto.getId();
@@ -81,6 +81,10 @@ public class CertificateServiceImpl implements CertificateService {
             insertTags(tags);
             createLinkBetweenCertificateAndTag(idUpdateCertificate, tags);
         }
+        CertificateDto certificateWithUpdatedFields = certificateMapper
+                .toDto(certificateDao.findById(idUpdateCertificate));
+        certificateWithUpdatedFields.setTags(tagDao.findTagsByCertificateId(idUpdateCertificate));
+        return certificateWithUpdatedFields;
     }
 
     @Override

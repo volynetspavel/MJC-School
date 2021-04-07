@@ -15,7 +15,7 @@ public interface Service<T extends AbstractDto> {
 
     void delete(int id) throws ResourceNotFoundException;
 
-    void update(T entityDto) throws ResourceNotFoundException, ResourceAlreadyExistException;
+    T update(T entityDto) throws ResourceNotFoundException, ResourceAlreadyExistException;
 
     List<T> findAll() throws ResourceNotFoundException;
 

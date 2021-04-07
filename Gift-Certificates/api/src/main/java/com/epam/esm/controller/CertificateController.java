@@ -86,10 +86,10 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/edit/{id}")
-    public void update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
+    public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ResourceAlreadyExistException {
         certificateDto.setId(id);
-        certificateService.update(certificateDto);
+        return certificateService.update(certificateDto);
     }
 
     @ResponseStatus(HttpStatus.OK)

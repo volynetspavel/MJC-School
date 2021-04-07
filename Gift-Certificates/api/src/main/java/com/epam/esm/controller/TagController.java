@@ -58,9 +58,10 @@ public class TagController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/edit/{id}")
-    public void update(@PathVariable("id") int id, @RequestBody TagDto tag)
+    public TagDto update(@PathVariable("id") int id, @RequestBody TagDto tag)
             throws ResourceNotFoundException, ResourceAlreadyExistException {
         tag.setId(id);
-        tagService.update(tag);
+        return tagService.update(tag);
+
     }
 }
