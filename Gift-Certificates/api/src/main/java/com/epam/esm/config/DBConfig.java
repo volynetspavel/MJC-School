@@ -3,6 +3,7 @@ package com.epam.esm.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,14 +16,27 @@ import javax.sql.DataSource;
  * Defines the configuration for connecting to the database.
  */
 @Configuration
-@PropertySource("classpath:database.properties")
+@PropertySource("classpath:application-${spring.profiles.active}.properties")
 public class DBConfig {
 
     @Autowired
     private Environment env;
 
     @Bean
+    @Profile("prod")
     public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+        dataSource.setDriverClassName(env.getProperty("db.driver"));
+        dataSource.setUrl(env.getProperty("db.url"));
+        dataSource.setUsername(env.getProperty("db.user"));
+        dataSource.setPassword(env.getProperty("db.password"));
+        return dataSource;
+    }
+
+    @Bean
+    @Profile("dev")
+    public DataSource devDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
         dataSource.setDriverClassName(env.getProperty("db.driver"));
@@ -38,7 +52,7 @@ public class DBConfig {
     }
 
     @Bean
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate() {
-        return new NamedParameterJdbcTemplate(dataSource());
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
     }
 }
