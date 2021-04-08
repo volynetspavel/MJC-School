@@ -25,8 +25,8 @@ public class TagDaoImpl extends TagDao {
     private static final String SQL_DELETE_TAG_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG =
             "DELETE FROM gift_certificate_has_tag WHERE tag_id = ?;";
     private static final String SQL_FIND_TAG_BY_CERTIFICATE_ID =
-            "SELECT id, name  FROM gift_certificate_db.tag " +
-                    "JOIN gift_certificate_db.gift_certificate_has_tag " +
+            "SELECT id, name  FROM tag " +
+                    "JOIN gift_certificate_has_tag " +
                     "ON tag.id = gift_certificate_has_tag.tag_id " +
                     "WHERE gift_certificate_has_tag.gift_certificate_id = ?;";
 
