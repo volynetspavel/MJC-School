@@ -33,7 +33,7 @@ public class TagController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/add")
+    @PostMapping
     public TagDto insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException {
         return tagService.insert(tag);
     }
@@ -45,23 +45,22 @@ public class TagController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/find/{id}")
+    @GetMapping("/{id}")
     public TagDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
         return tagService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/remove/{id}")
+    @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
         tagService.delete(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/edit/{id}")
+    @PutMapping("/{id}")
     public TagDto update(@PathVariable("id") int id, @RequestBody TagDto tag)
             throws ResourceNotFoundException, ResourceAlreadyExistException {
         tag.setId(id);
         return tagService.update(tag);
-
     }
 }

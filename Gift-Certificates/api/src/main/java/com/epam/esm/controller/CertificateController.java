@@ -34,15 +34,27 @@ public class CertificateController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/add")
+    @PostMapping
     public CertificateDto insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
         return certificateService.insert(certificateDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping
+    @GetMapping("/all")
     public List<CertificateDto> findAll() throws ResourceNotFoundException {
         return certificateService.findAll();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{id}")
+    public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
+        return certificateService.findById(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/tag/{id}")
+    public List<CertificateDto> findAllByTagId(@PathVariable("id") int id) throws ResourceNotFoundException {
+        return certificateService.findAllByTagId(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -67,29 +79,13 @@ public class CertificateController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/tag/{id}")
-    public List<CertificateDto> findAllByTagId(@PathVariable("id") int id) throws ResourceNotFoundException {
-        return certificateService.findAllByTagId(id);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/find/{id}")
-    public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
-        return certificateService.findById(id);
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/remove/{id}")
-    public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
-        certificateService.delete(id);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/edit/{id}")
-    public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
-            throws ResourceNotFoundException, ResourceAlreadyExistException {
-        certificateDto.setId(id);
-        return certificateService.update(certificateDto);
+    @GetMapping
+    public List<CertificateDto> findCertificatesByTagPartOfNamePartOfDescriptionAndOrderedByName(
+            @RequestParam("tag_id") int id,
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("order") String order) throws ResourceNotFoundException {
+        return certificateService.findByTagPartOfNamePartOfDescriptionAndOrderedByName(id, name, description, order);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -104,5 +100,19 @@ public class CertificateController {
     public List<CertificateDto> searchByPartOfDescription(@RequestParam("part") String partOfDescription)
             throws ResourceNotFoundException {
         return certificateService.searchByPartOfDescription(partOfDescription);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
+        certificateService.delete(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{id}")
+    public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
+            throws ResourceNotFoundException, ResourceAlreadyExistException {
+        certificateDto.setId(id);
+        return certificateService.update(certificateDto);
     }
 }
