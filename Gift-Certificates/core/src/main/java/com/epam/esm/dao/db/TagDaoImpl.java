@@ -16,7 +16,6 @@ import java.util.List;
 public class TagDaoImpl extends TagDao {
 
     private static final String SQL_INSERT_TAG = "INSERT INTO tag (name) VALUES (?);";
-    private static final String SQL_DELETE_TAG_BY_NAME = "DELETE FROM tag WHERE name = ?;";
     private static final String SQL_DELETE_TAG_BY_ID = "DELETE FROM tag WHERE id = ?;";
     private static final String SQL_UPDATE_TAG_NAME = "UPDATE tag SET name=? WHERE id=?;";
     private static final String SQL_FIND_ALL_TAGS = "SELECT * FROM tag";
