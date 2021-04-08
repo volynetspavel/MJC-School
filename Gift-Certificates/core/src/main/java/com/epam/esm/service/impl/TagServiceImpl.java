@@ -9,6 +9,7 @@ import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class TagServiceImpl implements TagService {
         this.tagMapper = tagMapper;
     }
 
+    @Transactional
     @Override
     public TagDto insert(TagDto tagDto) throws ResourceAlreadyExistException {
         if (tagDao.findByName(tagDto.getName()) != null) {
@@ -43,24 +45,18 @@ public class TagServiceImpl implements TagService {
         return tagMapper.toDto(tagDao.findById(idNewTag));
     }
 
-    @Override
-    public void delete(String name) throws ResourceNotFoundException {
-        Tag tag = tagDao.findByName(name);
-        if (tag == null) {
-            throw new ResourceNotFoundException("Requested resource not found (name = " + name + ")");
-        }
-        tagDao.delete(tag.getId());
-    }
-
+    @Transactional
     @Override
     public void delete(int id) throws ResourceNotFoundException {
         Tag tag = tagDao.findById(id);
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
+        tagDao.deleteTagByIdFromGiftCertificateHasTag(id);
         tagDao.delete(id);
     }
 
+    @Transactional
     @Override
     public TagDto update(TagDto newTagDto) throws ResourceNotFoundException, ResourceAlreadyExistException {
         int id = newTagDto.getId();

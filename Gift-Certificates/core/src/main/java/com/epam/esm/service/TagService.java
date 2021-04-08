@@ -8,7 +8,5 @@ import com.epam.esm.exception.ResourceNotFoundException;
  */
 public interface TagService extends Service<TagDto> {
 
-    void delete(String name) throws ResourceNotFoundException;
-
     TagDto findByName(String name) throws ResourceNotFoundException;
 }

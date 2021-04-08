@@ -45,8 +45,12 @@ public class TagDaoImpl extends TagDao {
 
     @Override
     public void delete(int id) {
-        jdbcTemplate.update(SQL_DELETE_TAG_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG, id);
         jdbcTemplate.update(SQL_DELETE_TAG_BY_ID, id);
+    }
+
+    @Override
+    public void deleteTagByIdFromGiftCertificateHasTag(int id) {
+        jdbcTemplate.update(SQL_DELETE_TAG_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG, id);
     }
 
     @Override

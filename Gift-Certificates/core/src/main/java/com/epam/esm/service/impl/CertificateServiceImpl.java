@@ -11,6 +11,7 @@ import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -41,6 +42,7 @@ public class CertificateServiceImpl implements CertificateService {
         this.certificateMapper = certificateMapper;
     }
 
+    @Transactional
     @Override
     public CertificateDto insert(CertificateDto certificateDto) throws ResourceAlreadyExistException {
         if (certificateDao.findByName(certificateDto.getName()) != null) {
@@ -63,6 +65,7 @@ public class CertificateServiceImpl implements CertificateService {
         return newCertificateDto;
     }
 
+    @Transactional
     @Override
     public CertificateDto update(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException {
@@ -181,6 +184,7 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificate);
     }
 
+    @Transactional
     @Override
     public void delete(int id) throws ResourceNotFoundException {
         Certificate certificate = certificateDao.findById(id);
@@ -199,6 +203,7 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificate);
     }
 
+    @Transactional
     @Override
     public void insertTags(List<Tag> tags) {
         for (Tag tag : tags) {
@@ -208,6 +213,7 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
+    @Transactional
     @Override
     public void createLinkBetweenCertificateAndTag(int idNewCertificate, List<Tag> tags) {
         for (Tag tag : tags) {
