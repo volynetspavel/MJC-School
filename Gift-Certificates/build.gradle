@@ -35,6 +35,8 @@ subprojects {
         implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${versions.jackson}"
         implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${versions.jackson}"
 
+        //for logs
+        implementation 'ch.qos.logback:logback-classic:1.1.3'
     }
 
     test {
