@@ -104,6 +104,23 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
+    public List<CertificateDto> findByTagPartOfNamePartOfDescriptionAndOrderedByName(
+            int id,
+            String name,
+            String description,
+            String order) throws ResourceNotFoundException {
+
+        List<Certificate> certificateList = certificateDao
+                .findByTagPartOfNamePartOfDescriptionAndOrdered(id, name, description);
+        checkListOnEmptyOrNull(certificateList);
+        List<CertificateDto> certificates = fromEntityToDtoAndAddListTags(certificateList);
+
+        Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
+
+        return sortByComparatorAndOrder(certificates, certificateDtoComparatorByName, order);
+    }
+
+    @Override
     public List<CertificateDto> searchByPartOfName(String partOfName) throws ResourceNotFoundException {
         List<Certificate> certificates = certificateDao.searchByPartOfName(partOfName);
         checkListOnEmptyOrNull(certificates);

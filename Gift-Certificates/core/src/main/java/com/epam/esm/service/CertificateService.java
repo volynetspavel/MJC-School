@@ -28,4 +28,9 @@ public interface CertificateService extends Service<CertificateDto> {
     List<CertificateDto> findAllOrderByNameAndDate(String order) throws ResourceNotFoundException;
 
     List<CertificateDto> findAllOrderByDate(String order) throws ResourceNotFoundException;
+
+    List<CertificateDto> findByTagPartOfNamePartOfDescriptionAndOrderedByName(int id,
+                                                                              String name,
+                                                                              String description,
+                                                                              String order) throws ResourceNotFoundException;
 }

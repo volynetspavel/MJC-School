@@ -49,6 +49,14 @@ public class CertificateDaoImpl extends CertificateDao {
             "SELECT * FROM gift_certificate WHERE gift_certificate.name LIKE ? ;";
     private static final String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION =
             "SELECT * FROM gift_certificate WHERE gift_certificate.description LIKE ? ;";
+    private static final String SQL_FIND_ALL_CERITFICATES_BY_TAG_ID_PART_OF_NAME_PART_OF_DESCRIPTION =
+            "SELECT id, name, description, price, duration, create_date, last_update_date " +
+                    "FROM gift_certificate " +
+                    "JOIN gift_certificate_has_tag " +
+                    "ON gift_certificate.id = gift_certificate_has_tag.gift_certificate_id " +
+                    "WHERE gift_certificate_has_tag.tag_id = ? " +
+                    "AND gift_certificate.name LIKE ? " +
+                    "AND gift_certificate.description LIKE ? ;";
 
 
     private final JdbcTemplate jdbcTemplate;
@@ -102,6 +110,18 @@ public class CertificateDaoImpl extends CertificateDao {
                 new BeanPropertyRowMapper<>(Certificate.class), partOfDescriptionWithSpecialSymbols);
     }
 
+    @Override
+    public List<Certificate> findByTagPartOfNamePartOfDescriptionAndOrdered(int id,
+                                                                            String name,
+                                                                            String description) {
+        String partOfNameWithSpecialSymbols = "%" + name + "%";
+        String partOfDescriptionWithSpecialSymbols = "%" + description + "%";
+        return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_TAG_ID_PART_OF_NAME_PART_OF_DESCRIPTION,
+                new BeanPropertyRowMapper<>(Certificate.class),
+                id,
+                partOfNameWithSpecialSymbols,
+                partOfDescriptionWithSpecialSymbols);
+    }
 
     @Override
     public Certificate findById(int id) {
