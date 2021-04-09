@@ -13,7 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -54,8 +55,8 @@ public class CertificateServiceImpl implements CertificateService {
         insertTags(tags);
 
         Certificate certificate = certificateMapper.toEntity(certificateDto);
-        certificate.setCreateDate(Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
-        certificate.setLastUpdateDate(Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
+        certificate.setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+        certificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
         int idNewCertificate = certificateDao.insert(certificate);
         createLinkBetweenCertificateAndTag(idNewCertificate, tags);
@@ -76,7 +77,7 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         Certificate updatedCertificate = certificateMapper.toEntity(updatedCertificateDto);
-        updatedCertificate.setLastUpdateDate(Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
+        updatedCertificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         certificateDao.update(updatedCertificate);
 
         List<Tag> tags = updatedCertificateDto.getTags();
