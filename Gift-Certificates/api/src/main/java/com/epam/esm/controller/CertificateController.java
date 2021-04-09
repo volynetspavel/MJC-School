@@ -23,7 +23,7 @@ import java.util.List;
  * Class is used to send requests from the client to the service layer for certificate entity.
  */
 @RestController
-@RequestMapping("/certificates")
+@RequestMapping("/certificate")
 public class CertificateController {
 
     private CertificateService certificateService;
@@ -37,12 +37,6 @@ public class CertificateController {
     @PostMapping
     public CertificateDto insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
         return certificateService.insert(certificateDto);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/all")
-    public List<CertificateDto> findAll() throws ResourceNotFoundException {
-        return certificateService.findAll();
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -81,11 +75,12 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<CertificateDto> findCertificatesByTagPartOfNamePartOfDescriptionAndOrderedByName(
-            @RequestParam("tag_id") int id,
-            @RequestParam("name") String name,
-            @RequestParam("description") String description,
-            @RequestParam("order") String order) throws ResourceNotFoundException {
-        return certificateService.findByTagPartOfNamePartOfDescriptionAndOrderedByName(id, name, description, order);
+            @RequestParam(value = "tag_name", required = false) String tagName,
+            @RequestParam(value = "part_name", required = false) String partOfCertificateName,
+            @RequestParam(value = "part_desc", required = false) String partOfCertificateDescription,
+            @RequestParam(value = "order", required = false) String order) throws ResourceNotFoundException {
+        return certificateService.findByTagPartOfNamePartOfDescriptionAndOrderedByName(tagName,
+                partOfCertificateName, partOfCertificateDescription, order);
     }
 
     @ResponseStatus(HttpStatus.OK)

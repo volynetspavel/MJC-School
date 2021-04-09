@@ -18,8 +18,4 @@ public abstract class CertificateDao extends AbstractDao<Certificate> {
     public abstract List<Certificate> searchByPartOfName(String partOfName);
 
     public abstract List<Certificate> searchByPartOfDescription(String partOfDescription);
-
-    public abstract List<Certificate> findByTagPartOfNamePartOfDescriptionAndOrdered(int id,
-                                                                                     String name,
-                                                                                     String description);
 }

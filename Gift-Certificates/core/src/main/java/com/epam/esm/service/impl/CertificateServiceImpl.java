@@ -109,19 +109,42 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     public List<CertificateDto> findByTagPartOfNamePartOfDescriptionAndOrderedByName(
-            int id,
-            String name,
-            String description,
+            String tagName,
+            String partOfCertificateName,
+            String partOfCertificateDescription,
             String order) throws ResourceNotFoundException {
 
-        List<Certificate> certificateList = certificateDao
-                .findByTagPartOfNamePartOfDescriptionAndOrdered(id, name, description);
+        List<Certificate> certificateList = certificateDao.findAll();
         checkListOnEmptyOrNull(certificateList);
-        List<CertificateDto> certificates = fromEntityToDtoAndAddListTags(certificateList);
 
         Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
 
-        return sortByComparatorAndOrder(certificates, certificateDtoComparatorByName, order);
+        List<CertificateDto> certificates = fromEntityToDtoAndAddListTags(certificateList);
+        if (tagName != null) {
+            certificates = certificates.stream()
+                    .filter(cert -> (cert.getTags().stream()
+                            .anyMatch(tag -> tag.getName().equals(tagName))))
+                    .collect(Collectors.toList());
+        }
+
+        if (partOfCertificateName != null) {
+            certificates = certificates.stream()
+                    .filter(certificate -> certificate.getName().toLowerCase()
+                            .contains(partOfCertificateName.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (partOfCertificateDescription != null) {
+            certificates = certificates.stream()
+                    .filter(certificate -> certificate.getDescription().toLowerCase()
+                            .contains(partOfCertificateDescription.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        return (tagName == null && partOfCertificateName == null
+                && partOfCertificateDescription == null && order == null)
+                ? fromEntityToDtoAndAddListTags(certificateList)
+                : sortByComparatorAndOrder(certificates, certificateDtoComparatorByName, order);
     }
 
     @Override
@@ -239,7 +262,7 @@ public class CertificateServiceImpl implements CertificateService {
     private List<CertificateDto> sortByComparatorAndOrder(List<CertificateDto> certificateList,
                                                           Comparator<CertificateDto> certificateDtoComparator,
                                                           String order) {
-        if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
+        if (order != null && order.equalsIgnoreCase(SORT_ORDER_DESC)) {
             certificateList = certificateList.stream()
                     .sorted(certificateDtoComparator.reversed())
                     .collect(Collectors.toList());
