@@ -12,4 +12,6 @@ public abstract class TagDao extends AbstractDao<Tag>{
     public abstract Tag findByName(String name);
 
     public abstract List<Tag> findTagsByCertificateId(int idCertificate);
+
+    public abstract void deleteTagByIdFromGiftCertificateHasTag(int id);
 }

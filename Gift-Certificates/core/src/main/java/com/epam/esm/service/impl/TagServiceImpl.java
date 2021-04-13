@@ -9,6 +9,7 @@ import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,36 +32,33 @@ public class TagServiceImpl implements TagService {
         this.tagMapper = tagMapper;
     }
 
+    @Transactional
     @Override
-    public void insert(TagDto tagDto) throws ResourceAlreadyExistException {
+    public TagDto insert(TagDto tagDto) throws ResourceAlreadyExistException {
         if (tagDao.findByName(tagDto.getName()) != null) {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + tagDto.getName() + ") has already existed.");
         }
         Tag tag = tagMapper.toEntity(tagDto);
-        tagDao.insert(tag);
+        int idNewTag = tagDao.insert(tag);
+
+        return tagMapper.toDto(tagDao.findById(idNewTag));
     }
 
-    @Override
-    public void delete(String name) throws ResourceNotFoundException {
-        Tag tag = tagDao.findByName(name);
-        if (tag == null) {
-            throw new ResourceNotFoundException("Requested resource not found (name = " + name + ")");
-        }
-        tagDao.delete(tag.getId());
-    }
-
+    @Transactional
     @Override
     public void delete(int id) throws ResourceNotFoundException {
         Tag tag = tagDao.findById(id);
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
+        tagDao.deleteTagByIdFromGiftCertificateHasTag(id);
         tagDao.delete(id);
     }
 
+    @Transactional
     @Override
-    public void update(TagDto newTagDto) throws ResourceNotFoundException, ResourceAlreadyExistException {
+    public TagDto update(TagDto newTagDto) throws ResourceNotFoundException, ResourceAlreadyExistException {
         int id = newTagDto.getId();
         String name = newTagDto.getName();
 
@@ -77,6 +75,8 @@ public class TagServiceImpl implements TagService {
 
         Tag newTag = tagMapper.toEntity(newTagDto);
         tagDao.update(newTag);
+
+        return tagMapper.toDto(tagDao.findById(id));
     }
 
     @Override
@@ -96,8 +96,7 @@ public class TagServiceImpl implements TagService {
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
-        TagDto tagDto = tagMapper.toDto(tag);
-        return tagDto;
+        return tagMapper.toDto(tag);
     }
 
     @Override
@@ -106,7 +105,6 @@ public class TagServiceImpl implements TagService {
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (name = " + name + ")");
         }
-        TagDto tagDto = tagMapper.toDto(tag);
-        return tagDto;
+        return tagMapper.toDto(tag);
     }
 }

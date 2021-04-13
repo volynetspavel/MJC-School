@@ -4,6 +4,9 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 /**
  * Registers and configures the DispatcherServlet with the location of your Spring configuration.
  */
@@ -28,6 +31,13 @@ public class MySpringMvcDispatcherSerlvetIntitializer extends AbstractAnnotation
     protected DispatcherServlet createDispatcherServlet(WebApplicationContext servletAppContext) {
         final DispatcherServlet servlet = (DispatcherServlet) super.createDispatcherServlet(servletAppContext);
         servlet.setThrowExceptionIfNoHandlerFound(true);
+
         return servlet;
+    }
+
+    @Override
+    public void onStartup(ServletContext servletContext) throws ServletException {
+        super.onStartup(servletContext);
+        servletContext.setInitParameter("spring.profiles.active", "prod");
     }
 }

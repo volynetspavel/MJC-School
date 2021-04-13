@@ -11,11 +11,11 @@ import java.util.List;
  */
 public interface Service<T extends AbstractDto> {
 
-    void insert(T entityDto) throws ResourceAlreadyExistException;
+    T insert(T entityDto) throws ResourceAlreadyExistException;
 
     void delete(int id) throws ResourceNotFoundException;
 
-    void update(T entityDto) throws ResourceNotFoundException, ResourceAlreadyExistException;
+    T update(T entityDto) throws ResourceNotFoundException, ResourceAlreadyExistException;
 
     List<T> findAll() throws ResourceNotFoundException;
 

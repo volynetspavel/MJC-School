@@ -38,7 +38,7 @@ public class CertificateServiceTest {
         int id = 1;
         String name = "Off road jeep tour";
         String description = "We offer the active and courageous an extreme off-road trip.";
-        BigDecimal price = new BigDecimal(350);
+        BigDecimal price = new BigDecimal("350.00");
         Integer duration = 15;
         String createDate = "2021-03-27T06:12:15.156";
         String lastUpdateDate = "2021-03-29T06:12:15.156";

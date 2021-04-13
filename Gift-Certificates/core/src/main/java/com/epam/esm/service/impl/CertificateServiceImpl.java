@@ -11,8 +11,10 @@ import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
@@ -41,8 +43,9 @@ public class CertificateServiceImpl implements CertificateService {
         this.certificateMapper = certificateMapper;
     }
 
+    @Transactional
     @Override
-    public void insert(CertificateDto certificateDto) throws ResourceAlreadyExistException {
+    public CertificateDto insert(CertificateDto certificateDto) throws ResourceAlreadyExistException {
         if (certificateDao.findByName(certificateDto.getName()) != null) {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + certificateDto.getName() + ") has already existed.");
@@ -52,15 +55,20 @@ public class CertificateServiceImpl implements CertificateService {
         insertTags(tags);
 
         Certificate certificate = certificateMapper.toEntity(certificateDto);
-        certificate.setCreateDate(Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
-        certificate.setLastUpdateDate(Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
+        certificate.setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+        certificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
         int idNewCertificate = certificateDao.insert(certificate);
         createLinkBetweenCertificateAndTag(idNewCertificate, tags);
+
+        CertificateDto newCertificateDto = certificateMapper.toDto(certificateDao.findById(idNewCertificate));
+        newCertificateDto.setTags(tags);
+        return newCertificateDto;
     }
 
+    @Transactional
     @Override
-    public void update(CertificateDto updatedCertificateDto)
+    public CertificateDto update(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException {
 
         int idUpdateCertificate = updatedCertificateDto.getId();
@@ -69,7 +77,7 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         Certificate updatedCertificate = certificateMapper.toEntity(updatedCertificateDto);
-        updatedCertificate.setLastUpdateDate(Instant.now().truncatedTo(ChronoUnit.MILLIS).toString());
+        updatedCertificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         certificateDao.update(updatedCertificate);
 
         List<Tag> tags = updatedCertificateDto.getTags();
@@ -77,6 +85,10 @@ public class CertificateServiceImpl implements CertificateService {
             insertTags(tags);
             createLinkBetweenCertificateAndTag(idUpdateCertificate, tags);
         }
+        CertificateDto certificateWithUpdatedFields = certificateMapper
+                .toDto(certificateDao.findById(idUpdateCertificate));
+        certificateWithUpdatedFields.setTags(tagDao.findTagsByCertificateId(idUpdateCertificate));
+        return certificateWithUpdatedFields;
     }
 
     @Override
@@ -93,6 +105,46 @@ public class CertificateServiceImpl implements CertificateService {
         checkListOnEmptyOrNull(certificates);
 
         return fromEntityToDtoAndAddListTags(certificates);
+    }
+
+    @Override
+    public List<CertificateDto> findByTagPartOfNamePartOfDescriptionAndOrderedByName(
+            String tagName,
+            String partOfCertificateName,
+            String partOfCertificateDescription,
+            String order) throws ResourceNotFoundException {
+
+        List<Certificate> certificateList = certificateDao.findAll();
+        checkListOnEmptyOrNull(certificateList);
+
+        Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
+
+        List<CertificateDto> certificates = fromEntityToDtoAndAddListTags(certificateList);
+        if (tagName != null) {
+            certificates = certificates.stream()
+                    .filter(cert -> (cert.getTags().stream()
+                            .anyMatch(tag -> tag.getName().equals(tagName))))
+                    .collect(Collectors.toList());
+        }
+
+        if (partOfCertificateName != null) {
+            certificates = certificates.stream()
+                    .filter(certificate -> certificate.getName().toLowerCase()
+                            .contains(partOfCertificateName.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (partOfCertificateDescription != null) {
+            certificates = certificates.stream()
+                    .filter(certificate -> certificate.getDescription().toLowerCase()
+                            .contains(partOfCertificateDescription.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        return (tagName == null && partOfCertificateName == null
+                && partOfCertificateDescription == null && order == null)
+                ? fromEntityToDtoAndAddListTags(certificateList)
+                : sortByComparatorAndOrder(certificates, certificateDtoComparatorByName, order);
     }
 
     @Override
@@ -156,6 +208,7 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificate);
     }
 
+    @Transactional
     @Override
     public void delete(int id) throws ResourceNotFoundException {
         Certificate certificate = certificateDao.findById(id);
@@ -174,6 +227,7 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificate);
     }
 
+    @Transactional
     @Override
     public void insertTags(List<Tag> tags) {
         for (Tag tag : tags) {
@@ -183,6 +237,7 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
+    @Transactional
     @Override
     public void createLinkBetweenCertificateAndTag(int idNewCertificate, List<Tag> tags) {
         for (Tag tag : tags) {
@@ -207,7 +262,7 @@ public class CertificateServiceImpl implements CertificateService {
     private List<CertificateDto> sortByComparatorAndOrder(List<CertificateDto> certificateList,
                                                           Comparator<CertificateDto> certificateDtoComparator,
                                                           String order) {
-        if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
+        if (order != null && order.equalsIgnoreCase(SORT_ORDER_DESC)) {
             certificateList = certificateList.stream()
                     .sorted(certificateDtoComparator.reversed())
                     .collect(Collectors.toList());

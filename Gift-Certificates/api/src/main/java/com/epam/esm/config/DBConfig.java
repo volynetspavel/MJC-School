@@ -3,11 +3,15 @@ package com.epam.esm.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
@@ -15,7 +19,9 @@ import javax.sql.DataSource;
  * Defines the configuration for connecting to the database.
  */
 @Configuration
-@PropertySource("classpath:database.properties")
+@EnableTransactionManagement
+@PropertySource("classpath:application-${spring.profiles.active}.properties")
+@Profile({"prod", "dev"})
 public class DBConfig {
 
     @Autowired
@@ -38,7 +44,12 @@ public class DBConfig {
     }
 
     @Bean
-    public NamedParameterJdbcTemplate namedParameterJdbcTemplate() {
-        return new NamedParameterJdbcTemplate(dataSource());
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
+        return new NamedParameterJdbcTemplate(dataSource);
+    }
+
+    @Bean
+    PlatformTransactionManager transactionManager(DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
     }
 }

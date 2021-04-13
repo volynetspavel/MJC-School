@@ -50,7 +50,6 @@ public class CertificateDaoImpl extends CertificateDao {
     private static final String SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION =
             "SELECT * FROM gift_certificate WHERE gift_certificate.description LIKE ? ;";
 
-
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -101,7 +100,6 @@ public class CertificateDaoImpl extends CertificateDao {
         return jdbcTemplate.query(SQL_FIND_ALL_CERITFICATES_BY_PART_OF_DESCRIPTION,
                 new BeanPropertyRowMapper<>(Certificate.class), partOfDescriptionWithSpecialSymbols);
     }
-
 
     @Override
     public Certificate findById(int id) {
