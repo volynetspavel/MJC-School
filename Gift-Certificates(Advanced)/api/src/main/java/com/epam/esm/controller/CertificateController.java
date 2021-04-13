@@ -3,6 +3,7 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,28 @@ public class CertificateController {
     @PostMapping
     public CertificateDto insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
         return certificateService.insert(certificateDto);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{id}")
+    public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
+            throws ResourceNotFoundException, ResourceAlreadyExistException {
+        certificateDto.setId(id);
+        return certificateService.update(certificateDto);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/single/{id}")
+    public CertificateDto updateSingleField(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
+            throws ResourceNotFoundException, ServiceException {
+        certificateDto.setId(id);
+        return certificateService.updateSingleField(certificateDto);
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
+        certificateService.delete(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -97,17 +120,7 @@ public class CertificateController {
         return certificateService.searchByPartOfDescription(partOfDescription);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
-        certificateService.delete(id);
-    }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/{id}")
-    public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
-            throws ResourceNotFoundException, ResourceAlreadyExistException {
-        certificateDto.setId(id);
-        return certificateService.update(certificateDto);
-    }
+
+
 }

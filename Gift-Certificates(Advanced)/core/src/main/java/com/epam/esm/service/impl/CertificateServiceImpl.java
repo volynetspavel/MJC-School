@@ -5,10 +5,12 @@ import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ServiceException;
 import com.epam.esm.mapper.impl.CertificateMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
+import com.epam.esm.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +33,18 @@ public class CertificateServiceImpl implements CertificateService {
     private CertificateDao certificateDao;
     private TagDao tagDao;
     private CertificateMapper certificateMapper;
+    private Validator validator;
 
     public CertificateServiceImpl() {
     }
 
     @Autowired
     public CertificateServiceImpl(CertificateDao certificateDao, TagDao tagDao,
-                                  CertificateMapper certificateMapper) {
+                                  CertificateMapper certificateMapper, Validator validator) {
         this.certificateDao = certificateDao;
         this.tagDao = tagDao;
         this.certificateMapper = certificateMapper;
+        this.validator = validator;
     }
 
     @Transactional
@@ -89,6 +93,16 @@ public class CertificateServiceImpl implements CertificateService {
                 .toDto(certificateDao.findById(idUpdateCertificate));
         certificateWithUpdatedFields.setTags(tagDao.findTagsByCertificateId(idUpdateCertificate));
         return certificateWithUpdatedFields;
+    }
+
+    @Override
+    public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
+            throws ResourceNotFoundException, ServiceException {
+
+        if (!validator.isCertificateContainsOnlySingleField(updatedCertificateDto)) {
+            throw new ServiceException("Request contains more than one field.");
+        }
+        return update(updatedCertificateDto);
     }
 
     @Override

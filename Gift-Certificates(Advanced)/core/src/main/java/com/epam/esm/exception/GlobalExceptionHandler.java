@@ -20,4 +20,10 @@ public class GlobalExceptionHandler {
         ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(ex.getCode()), ex.getMessage());
         return new ResponseEntity<>(exceptionMessage, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(ServiceException.class)
+    public ResponseEntity<ExceptionMessage> handle(ServiceException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(ex.getCode()), ex.getMessage());
+        return new ResponseEntity<>(exceptionMessage, HttpStatus.CONFLICT);
+    }
 }
