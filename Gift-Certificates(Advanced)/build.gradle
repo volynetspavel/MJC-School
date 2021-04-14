@@ -18,6 +18,9 @@ subprojects {
     }
 
     dependencies {
+        implementation group: 'org.springframework', name: 'spring-orm', version: '5.2.12.RELEASE'
+        implementation 'org.hibernate:hibernate-entitymanager:5.4.27.Final'
+
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 
