@@ -1,0 +1,37 @@
+package com.epam.esm.controller;
+
+import com.epam.esm.dto.UserDto;
+import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * Class is used to send requests from the client to the service layer for user entity.
+ */
+@RestController
+@RequestMapping("/user")
+public class UserController {
+
+    private UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping
+    public List<UserDto> findAll() throws ResourceNotFoundException {
+        return userService.findAll();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{id}")
+    public UserDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
+        return userService.findById(id);
+    }
+}
