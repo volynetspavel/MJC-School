@@ -7,15 +7,15 @@ import java.util.List;
 /**
  * This class is a basic class of dao-layer for interacting with database.
  */
-public abstract class CertificateDao extends AbstractDao<Certificate> {
+public interface CertificateDao extends Dao<Certificate> {
 
-    public abstract Certificate findByName(String name);
+    Certificate findByName(String name);
 
-    public abstract void insertLinkBetweenCertificateAndTag(int idNewCertificate, int idTag);
+    void insertLinkBetweenCertificateAndTag(int idNewCertificate, int idTag);
 
-    public abstract List<Certificate> findAllByTagId(int id);
+    List<Certificate> findAllByTagId(int id);
 
-    public abstract List<Certificate> searchByPartOfName(String partOfName);
+    List<Certificate> searchByPartOfName(String partOfName);
 
-    public abstract List<Certificate> searchByPartOfDescription(String partOfDescription);
+    List<Certificate> searchByPartOfDescription(String partOfDescription);
 }

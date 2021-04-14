@@ -13,7 +13,7 @@ import java.util.List;
  * This class is an implementation of TagDao.
  */
 @Repository
-public class TagDaoImpl extends TagDao {
+public class TagDaoImpl implements TagDao {
 
     private static final String SQL_INSERT_TAG = "INSERT INTO tag (name) VALUES (?);";
     private static final String SQL_DELETE_TAG_BY_ID = "DELETE FROM tag WHERE id = ?;";

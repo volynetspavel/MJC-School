@@ -19,7 +19,7 @@ import java.util.List;
  * This class is an implementation of CertificateDao.
  */
 @Repository
-public class CertificateDaoImpl extends CertificateDao {
+public class CertificateDaoImpl implements CertificateDao {
 
     private static final String SQL_INSERT_CERITFICATE = "INSERT INTO gift_certificate " +
             "(name, description, price, duration, create_date, last_update_date ) " +

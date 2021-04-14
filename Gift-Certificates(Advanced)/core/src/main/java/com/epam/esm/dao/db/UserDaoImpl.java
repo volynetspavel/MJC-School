@@ -14,7 +14,7 @@ import java.util.List;
  * This class is an implementation of UserDao.
  */
 @Repository
-public class UserDaoImpl extends UserDao {
+public class UserDaoImpl implements UserDao {
 
     @PersistenceContext
     private EntityManager entityManager;
