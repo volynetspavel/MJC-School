@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Tag extends AbstractEntity {
+public class Tag extends AbstractEntity<Integer> {
 
     private String name;
 }

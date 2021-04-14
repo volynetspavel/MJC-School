@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Certificate extends AbstractEntity {
+public class Certificate extends AbstractEntity<Integer> {
 
     private String name;
     private String description;
