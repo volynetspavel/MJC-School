@@ -11,7 +11,7 @@ import javax.persistence.Table;
  * User is an entity of user.
  */
 @Entity
-@Table(name = "user")
+@Table
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
