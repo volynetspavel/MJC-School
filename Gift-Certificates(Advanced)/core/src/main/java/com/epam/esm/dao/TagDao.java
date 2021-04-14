@@ -13,5 +13,9 @@ public interface TagDao extends Dao<Tag> {
 
     List<Tag> findTagsByCertificateId(int idCertificate);
 
-    void deleteTagByIdFromGiftCertificateHasTag(int id);
+    void delete(Tag tag);
+
+    @Override
+    default void delete(int id){
+    }
 }

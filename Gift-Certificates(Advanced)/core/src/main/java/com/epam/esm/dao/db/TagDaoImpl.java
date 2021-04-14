@@ -2,11 +2,13 @@ package com.epam.esm.dao.db;
 
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.model.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 /**
@@ -15,69 +17,55 @@ import java.util.List;
 @Repository
 public class TagDaoImpl implements TagDao {
 
-    private static final String SQL_INSERT_TAG = "INSERT INTO tag (name) VALUES (?);";
-    private static final String SQL_DELETE_TAG_BY_ID = "DELETE FROM tag WHERE id = ?;";
-    private static final String SQL_UPDATE_TAG_NAME = "UPDATE tag SET name=? WHERE id=?;";
-    private static final String SQL_FIND_ALL_TAGS = "SELECT * FROM tag";
-    private static final String SQL_FIND_TAG_BY_ID = "SELECT * FROM tag WHERE id = ?;";
-    private static final String SQL_FIND_TAG_BY_NAME = "SELECT * FROM tag WHERE name = ?;";
-
-    private static final String SQL_DELETE_TAG_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG =
-            "DELETE FROM gift_certificate_has_tag WHERE tag_id = ?;";
     private static final String SQL_FIND_TAG_BY_CERTIFICATE_ID =
             "SELECT id, name  FROM tag " +
                     "JOIN gift_certificate_has_tag " +
                     "ON tag.id = gift_certificate_has_tag.tag_id " +
                     "WHERE gift_certificate_has_tag.gift_certificate_id = ?;";
 
-    private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public TagDaoImpl(JdbcTemplate jdbcTemplate1) {
-        this.jdbcTemplate = jdbcTemplate1;
-    }
-
-    @Override
-    public int insert(Tag entity) {
-        jdbcTemplate.update(SQL_INSERT_TAG, entity.getName());
-        return findByName(entity.getName()).getId();
-    }
-
-    @Override
-    public void delete(int id) {
-        jdbcTemplate.update(SQL_DELETE_TAG_BY_ID, id);
-    }
-
-    @Override
-    public void deleteTagByIdFromGiftCertificateHasTag(int id) {
-        jdbcTemplate.update(SQL_DELETE_TAG_BY_ID_FROM_GIFT_CERTIFICATE_HAS_TAG, id);
-    }
-
-    @Override
-    public void update(Tag newTag) {
-        jdbcTemplate.update(SQL_UPDATE_TAG_NAME, newTag.getName(), newTag.getId());
-    }
-
-    @Override
-    public List<Tag> findAll() {
-        return jdbcTemplate.query(SQL_FIND_ALL_TAGS, new BeanPropertyRowMapper<>(Tag.class));
-    }
-
-    @Override
-    public Tag findById(int id) {
-        return jdbcTemplate.query(SQL_FIND_TAG_BY_ID, new BeanPropertyRowMapper<>(Tag.class), id)
-                .stream().findAny().orElse(null);
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public Tag findByName(String name) {
-        return jdbcTemplate.query(SQL_FIND_TAG_BY_NAME, new BeanPropertyRowMapper<>(Tag.class), name)
-                .stream().findAny().orElse(null);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
+        Root<Tag> root = criteriaQuery.from(Tag.class);
+        criteriaQuery.where(criteriaBuilder.equal(root.get("name"), name));
+        return entityManager.createQuery(criteriaQuery).getResultStream().findFirst().orElse(null);
     }
 
     @Override
     public List<Tag> findTagsByCertificateId(int idCertificate) {
-        return jdbcTemplate.query(SQL_FIND_TAG_BY_CERTIFICATE_ID,
-                new BeanPropertyRowMapper<>(Tag.class), idCertificate);
+        return entityManager.createQuery(SQL_FIND_TAG_BY_CERTIFICATE_ID, Tag.class).getResultList();
+    }
+
+    @Override
+    public int insert(Tag tag) {
+        entityManager.persist(tag);
+        return findByName(tag.getName()).getId();
+    }
+
+    @Override
+    public void delete(Tag tag) {
+        entityManager.remove(tag);
+    }
+
+    @Override
+    public void update(Tag tag) {
+        entityManager.merge(tag);
+    }
+
+    @Override
+    public List<Tag> findAll() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
+        criteriaQuery.from(Tag.class);
+        return entityManager.createQuery(criteriaQuery).getResultList();
+    }
+
+    @Override
+    public Tag findById(int id) {
+        return entityManager.find(Tag.class, id);
     }
 }

@@ -52,8 +52,7 @@ public class TagServiceImpl implements TagService {
         if (tag == null) {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
-        tagDao.deleteTagByIdFromGiftCertificateHasTag(id);
-        tagDao.delete(id);
+        tagDao.delete(tag);
     }
 
     @Transactional
