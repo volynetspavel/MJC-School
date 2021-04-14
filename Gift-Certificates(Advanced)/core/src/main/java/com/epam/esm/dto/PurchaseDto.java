@@ -9,11 +9,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Class-wrapper for order.
+ * Class-wrapper for purchase.
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class OrderDto extends AbstractDto {
+public class PurchaseDto extends AbstractDto {
 
     private User user;
     private BigDecimal cost;

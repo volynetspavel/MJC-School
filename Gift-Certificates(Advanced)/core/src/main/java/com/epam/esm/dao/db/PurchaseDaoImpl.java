@@ -1,7 +1,7 @@
 package com.epam.esm.dao.db;
 
-import com.epam.esm.dao.OrderDao;
-import com.epam.esm.model.Order;
+import com.epam.esm.dao.PurchaseDao;
+import com.epam.esm.model.Purchase;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -13,13 +13,13 @@ import java.util.List;
  * This class is an implementation of TagDao.
  */
 @Repository
-public class OrderDaoImpl implements OrderDao {
+public class PurchaseDaoImpl implements PurchaseDao {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public int insert(Order entity) {
+    public int insert(Purchase entity) {
         return 0;
     }
 
@@ -29,17 +29,17 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
-    public void update(Order entity) {
+    public void update(Purchase entity) {
 
     }
 
     @Override
-    public List<Order> findAll() {
+    public List<Purchase> findAll() {
         return null;
     }
 
     @Override
-    public Order findById(BigInteger id) {
-        return entityManager.find(Order.class, id);
+    public Purchase findById(BigInteger id) {
+        return entityManager.find(Purchase.class, id);
     }
 }

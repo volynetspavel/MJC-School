@@ -9,15 +9,15 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * Order is an entity of order.
+ * Purchase is an entity of purchase.
  */
 
 @Entity
-@Table(name = "orders")
+@Table
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class Order extends AbstractEntity<BigInteger> {
+public class Purchase extends AbstractEntity<BigInteger> {
 
     @ManyToOne
     @JoinColumn
@@ -30,8 +30,8 @@ public class Order extends AbstractEntity<BigInteger> {
 
 /*    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "order_gift_certificate",
-            joinColumns = {@JoinColumn(name = "order_id")},
+            name = "purchase_gift_certificate",
+            joinColumns = {@JoinColumn(name = "purchase_id")},
             inverseJoinColumns = {@JoinColumn(name = "gift_certificate_id")}
     )
     private List<Certificate> certificates;*/
