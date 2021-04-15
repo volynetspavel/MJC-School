@@ -17,11 +17,7 @@ import java.util.List;
 @Repository
 public class TagDaoImpl implements TagDao {
 
-    private static final String SQL_FIND_TAG_BY_CERTIFICATE_ID =
-            "SELECT id, name  FROM tag " +
-                    "JOIN gift_certificate_has_tag " +
-                    "ON tag.id = gift_certificate_has_tag.tag_id " +
-                    "WHERE gift_certificate_has_tag.gift_certificate_id = ?;";
+    private static final String NAME = "name";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -31,19 +27,14 @@ public class TagDaoImpl implements TagDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
         Root<Tag> root = criteriaQuery.from(Tag.class);
-        criteriaQuery.where(criteriaBuilder.equal(root.get("name"), name));
+        criteriaQuery.where(criteriaBuilder.equal(root.get(NAME), name));
         return entityManager.createQuery(criteriaQuery).getResultStream().findFirst().orElse(null);
     }
 
     @Override
-    public List<Tag> findTagsByCertificateId(int idCertificate) {
-        return entityManager.createQuery(SQL_FIND_TAG_BY_CERTIFICATE_ID, Tag.class).getResultList();
-    }
-
-    @Override
-    public int insert(Tag tag) {
+    public Tag insert(Tag tag) {
         entityManager.persist(tag);
-        return findByName(tag.getName()).getId();
+        return findByName(tag.getName());
     }
 
     @Override

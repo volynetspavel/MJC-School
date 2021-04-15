@@ -4,7 +4,6 @@ import com.epam.esm.dto.AbstractDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 
-import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -14,11 +13,11 @@ public interface Service<T extends AbstractDto> {
 
     T insert(T entityDto) throws ResourceAlreadyExistException;
 
-    void delete(int id) throws ResourceNotFoundException;
-
     T update(T entityDto) throws ResourceNotFoundException, ResourceAlreadyExistException;
 
-    List<T> findAll() throws ResourceNotFoundException;
+    void delete(int id) throws ResourceNotFoundException;
 
     T findById(int id) throws ResourceNotFoundException;
+
+    List<T> findAll() throws ResourceNotFoundException;
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -17,5 +18,7 @@ import javax.persistence.Table;
 @EqualsAndHashCode(callSuper = false)
 public class Tag extends AbstractEntity<Integer> {
 
+    @Column(unique = true)
     private String name;
+
 }

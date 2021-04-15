@@ -40,9 +40,9 @@ public class TagServiceImpl implements TagService {
                     + tagDto.getName() + ") has already existed.");
         }
         Tag tag = tagMapper.toEntity(tagDto);
-        int idNewTag = tagDao.insert(tag);
-
-        return tagMapper.toDto(tagDao.findById(idNewTag));
+        tag.setId(null);
+        Tag newTag = tagDao.insert(tag);
+        return tagMapper.toDto(newTag);
     }
 
     @Transactional

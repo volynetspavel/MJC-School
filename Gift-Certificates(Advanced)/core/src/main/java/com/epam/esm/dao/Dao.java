@@ -9,13 +9,13 @@ import java.util.List;
  */
 public interface Dao<T extends AbstractEntity> {
 
-    int insert(T entity);
-
-    void delete(int id);
+    T insert(T entity);
 
     void update(T entity);
 
-    List<T> findAll();
+    void delete(T entity);
 
     T findById(int id);
+
+    List<T> findAll();
 }
