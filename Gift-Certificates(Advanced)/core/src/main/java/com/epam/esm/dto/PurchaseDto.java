@@ -1,7 +1,5 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.model.Certificate;
-import com.epam.esm.model.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,8 +13,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class PurchaseDto extends AbstractDto {
 
-    private User user;
+    private String userEmail;
     private BigDecimal cost;
     private String purchaseDate;
-    private List<Certificate> certificates;
+    private List<String> certificateNames;
 }

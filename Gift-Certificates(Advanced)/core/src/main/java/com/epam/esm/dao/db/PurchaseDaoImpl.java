@@ -2,6 +2,7 @@ package com.epam.esm.dao.db;
 
 import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.model.Purchase;
+import com.epam.esm.model.Tag;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -19,12 +20,13 @@ public class PurchaseDaoImpl implements PurchaseDao {
     private EntityManager entityManager;
 
     @Override
-    public int insert(Purchase entity) {
-        return 0;
+    public Purchase insert(Purchase purchase) {
+        entityManager.persist(purchase);
+        return findById(purchase.getId());
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(Purchase entity) {
 
     }
 

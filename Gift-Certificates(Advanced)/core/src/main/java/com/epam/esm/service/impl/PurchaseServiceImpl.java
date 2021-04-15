@@ -1,17 +1,25 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.PurchaseDao;
+import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.impl.PurchaseMapper;
+import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
+import com.epam.esm.model.User;
 import com.epam.esm.service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,27 +32,46 @@ public class PurchaseServiceImpl implements PurchaseService {
     private PurchaseDao purchaseDao;
     private PurchaseMapper purchaseMapper;
 
+    private UserDao userDao;
+    private CertificateDao certificateDao;
+
     public PurchaseServiceImpl() {
     }
 
     @Autowired
-    public PurchaseServiceImpl(PurchaseDao purchaseDao, PurchaseMapper purchaseMapper) {
+
+    public PurchaseServiceImpl(PurchaseDao purchaseDao, PurchaseMapper purchaseMapper,
+                               UserDao userDao, CertificateDao certificateDao) {
         this.purchaseDao = purchaseDao;
         this.purchaseMapper = purchaseMapper;
+        this.userDao = userDao;
+        this.certificateDao = certificateDao;
     }
 
     @Transactional
     @Override
-    public PurchaseDto insert(PurchaseDto purchaseDto) throws ResourceAlreadyExistException {
-/*        if (purchaseDao.findByName(purchaseDto.getName()) != null) {
-            throw new ResourceAlreadyExistException("Requested resource (name = "
-                    + purchaseDto.getName() + ") has already existed.");
-        }
-        Purchase purchase = purchaseMapper.toEntity(purchaseDto);
-        int idNewPurchase = purchaseDao.insert(purchase);
+    public Purchase makePurchase(PurchaseDto purchaseDto) {
+        String userEmail = purchaseDto.getUserEmail();
+        User user = userDao.findByEmail(userEmail);
 
-        return purchaseMapper.toDto(purchaseDao.findById(idNewPurchase));*/
-        return null;
+        List<String> certificateNames = purchaseDto.getCertificateNames();
+        List<Certificate> certificates = certificateNames.stream()
+                .map(name -> certificateDao.findByName(name))
+                .collect(Collectors.toList());
+
+        BigDecimal totalCost = certificates.stream()
+                .map(Certificate::getPrice)
+                .reduce(BigDecimal::add)
+                .get();
+
+        Purchase purchase = new Purchase();
+        purchase.setId(null);
+        purchase.setUser(user);
+        purchase.setCost(totalCost);
+        purchase.setPurchaseDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+        purchase.setCertificates(certificates);
+
+        return purchaseDao.insert(purchase);
     }
 
     @Override

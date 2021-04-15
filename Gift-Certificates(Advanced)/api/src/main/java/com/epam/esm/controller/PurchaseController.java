@@ -3,6 +3,7 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.model.Purchase;
 import com.epam.esm.service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,8 +34,8 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public PurchaseDto insert(@RequestBody PurchaseDto purchase) throws ResourceAlreadyExistException {
-        return purchaseService.insert(purchase);
+    public Purchase makePurchase(@RequestBody PurchaseDto purchase) {
+        return purchaseService.makePurchase(purchase);
     }
 
     @ResponseStatus(HttpStatus.OK)

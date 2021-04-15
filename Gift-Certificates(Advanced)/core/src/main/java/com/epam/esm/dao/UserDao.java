@@ -8,15 +8,17 @@ import com.epam.esm.model.User;
 public interface UserDao extends Dao<User> {
 
     @Override
-    default int insert(User entityDto) {
-        return -1;
+    default User insert(User entityDto) {
+        return null;
     }
 
     @Override
-    default void delete(int id) {
+    default void delete(User entityDto) {
     }
 
     @Override
     default void update(User entityDto) {
     }
+
+    User findByEmail(String userEmail);
 }
