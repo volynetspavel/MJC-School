@@ -7,16 +7,7 @@ import com.epam.esm.exception.ServiceException;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,7 +27,8 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public CertificateDto insert(@RequestBody CertificateDto certificateDto) throws ResourceAlreadyExistException {
+    public CertificateDto insert(@RequestBody CertificateDto certificateDto)
+            throws ResourceAlreadyExistException {
         return certificateService.insert(certificateDto);
     }
 
@@ -48,6 +40,15 @@ public class CertificateController {
         return certificateService.update(certificateDto);
     }
 
+    /**
+     * Method for update only single field.
+     *
+     * @param id             - id of certificate.
+     * @param certificateDto - certificate with one field for update.
+     * @return updated certificate.
+     * @throws ResourceNotFoundException - if this certificate won't found.
+     * @throws ServiceException          - if there is more than one field to update.
+     */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/single/{id}")
     public CertificateDto updateSingleField(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
@@ -66,6 +67,17 @@ public class CertificateController {
     @GetMapping("/{id}")
     public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
         return certificateService.findById(id);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping
+    public List<CertificateDto> findCertificatesByTagPartOfNamePartOfDescriptionAndOrderedByName(
+            @RequestParam(value = "tag_name", required = false) String tagName,
+            @RequestParam(value = "part_name", required = false) String partOfCertificateName,
+            @RequestParam(value = "part_desc", required = false) String partOfCertificateDescription,
+            @RequestParam(value = "order", required = false) String order) throws ResourceNotFoundException {
+        return certificateService.findByTagPartOfNamePartOfDescriptionAndOrderedByName(tagName,
+                partOfCertificateName, partOfCertificateDescription, order);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -94,33 +106,4 @@ public class CertificateController {
             throws ResourceNotFoundException {
         return certificateService.findAllOrderByNameAndDate(order);
     }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping
-    public List<CertificateDto> findCertificatesByTagPartOfNamePartOfDescriptionAndOrderedByName(
-            @RequestParam(value = "tag_name", required = false) String tagName,
-            @RequestParam(value = "part_name", required = false) String partOfCertificateName,
-            @RequestParam(value = "part_desc", required = false) String partOfCertificateDescription,
-            @RequestParam(value = "order", required = false) String order) throws ResourceNotFoundException {
-        return certificateService.findByTagPartOfNamePartOfDescriptionAndOrderedByName(tagName,
-                partOfCertificateName, partOfCertificateDescription, order);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/search/name")
-    public List<CertificateDto> searchByPartOfName(@RequestParam("part") String partOfName)
-            throws ResourceNotFoundException {
-        return certificateService.searchByPartOfName(partOfName);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/search/description")
-    public List<CertificateDto> searchByPartOfDescription(@RequestParam("part") String partOfDescription)
-            throws ResourceNotFoundException {
-        return certificateService.searchByPartOfDescription(partOfDescription);
-    }
-
-
-
-
 }

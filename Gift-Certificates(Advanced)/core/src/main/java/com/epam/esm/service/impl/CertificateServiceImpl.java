@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,47 +55,35 @@ public class CertificateServiceImpl implements CertificateService {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + certificateDto.getName() + ") has already existed.");
         }
-
         List<Tag> tags = certificateDto.getTags();
-        insertTags(tags);
+        List<Tag> preparedTags = prepareTags(tags);
 
         Certificate certificate = certificateMapper.toEntity(certificateDto);
+        certificate.setId(null);
+        certificate.setTags(preparedTags);
         certificate.setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         certificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
-        int idNewCertificate = certificateDao.insert(certificate);
-        createLinkBetweenCertificateAndTag(idNewCertificate, tags);
-
-        CertificateDto newCertificateDto = certificateMapper.toDto(certificateDao.findById(idNewCertificate));
-        newCertificateDto.setTags(tags);
-        return newCertificateDto;
+        return certificateMapper.toDto(certificateDao.insert(certificate));
     }
 
     @Transactional
     @Override
-    public CertificateDto update(CertificateDto updatedCertificateDto)
-            throws ResourceNotFoundException {
+    public CertificateDto update(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
 
-        int idUpdateCertificate = updatedCertificateDto.getId();
-        if (certificateDao.findById(idUpdateCertificate) == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + idUpdateCertificate + ")");
-        }
-
-        Certificate updatedCertificate = certificateMapper.toEntity(updatedCertificateDto);
-        updatedCertificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+        Certificate updatedCertificate = prepareCertificate(updatedCertificateDto);
         certificateDao.update(updatedCertificate);
-
-        List<Tag> tags = updatedCertificateDto.getTags();
-        if (tags != null) {
-            insertTags(tags);
-            createLinkBetweenCertificateAndTag(idUpdateCertificate, tags);
-        }
-        CertificateDto certificateWithUpdatedFields = certificateMapper
-                .toDto(certificateDao.findById(idUpdateCertificate));
-        certificateWithUpdatedFields.setTags(tagDao.findTagsByCertificateId(idUpdateCertificate));
-        return certificateWithUpdatedFields;
+        return certificateMapper.toDto(updatedCertificate);
     }
 
+    /**
+     * Method for update only single field.
+     *
+     * @param updatedCertificateDto - certificate with one field for update.
+     * @return updated certificate.
+     * @throws ResourceNotFoundException - if this certificate won't found.
+     * @throws ServiceException          - if there is more than one field to update.
+     */
     @Override
     public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException, ServiceException {
@@ -105,20 +94,23 @@ public class CertificateServiceImpl implements CertificateService {
         return update(updatedCertificateDto);
     }
 
+    @Transactional
     @Override
-    public List<CertificateDto> findAll() throws ResourceNotFoundException {
-        List<Certificate> certificates = certificateDao.findAll();
-        checkListOnEmptyOrNull(certificates);
-
-        return fromEntityToDtoAndAddListTags(certificates);
+    public void delete(int id) throws ResourceNotFoundException {
+        Certificate certificate = certificateDao.findById(id);
+        if (certificate == null) {
+            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
+        }
+        certificateDao.delete(certificate);
     }
 
     @Override
-    public List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException {
-        List<Certificate> certificates = certificateDao.findAllByTagId(id);
-        checkListOnEmptyOrNull(certificates);
-
-        return fromEntityToDtoAndAddListTags(certificates);
+    public CertificateDto findById(int id) throws ResourceNotFoundException {
+        Certificate certificate = certificateDao.findById(id);
+        if (certificate == null) {
+            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
+        }
+        return certificateMapper.toDto(certificate);
     }
 
     @Override
@@ -133,7 +125,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
 
-        List<CertificateDto> certificates = fromEntityToDtoAndAddListTags(certificateList);
+        List<CertificateDto> certificates = migrateListFromEntityToDto(certificateList);
         if (tagName != null) {
             certificates = certificates.stream()
                     .filter(cert -> (cert.getTags().stream()
@@ -157,26 +149,29 @@ public class CertificateServiceImpl implements CertificateService {
 
         return (tagName == null && partOfCertificateName == null
                 && partOfCertificateDescription == null && order == null)
-                ? fromEntityToDtoAndAddListTags(certificateList)
+                ? certificates
                 : sortByComparatorAndOrder(certificates, certificateDtoComparatorByName, order);
     }
 
     @Override
-    public List<CertificateDto> searchByPartOfName(String partOfName) throws ResourceNotFoundException {
-        List<Certificate> certificates = certificateDao.searchByPartOfName(partOfName);
+    public List<CertificateDto> findAll() throws ResourceNotFoundException {
+        List<Certificate> certificates = certificateDao.findAll();
         checkListOnEmptyOrNull(certificates);
 
-        return fromEntityToDtoAndAddListTags(certificates);
+        return migrateListFromEntityToDto(certificates);
     }
 
     @Override
-    public List<CertificateDto> searchByPartOfDescription(String partOfDescription)
-            throws ResourceNotFoundException {
-
-        List<Certificate> certificates = certificateDao.searchByPartOfDescription(partOfDescription);
+    public List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException {
+        List<Certificate> certificates = certificateDao.findAll();
         checkListOnEmptyOrNull(certificates);
 
-        return fromEntityToDtoAndAddListTags(certificates);
+        String tagName = tagDao.findById(id).getName();
+        List<Certificate> certificatesWithTag = certificates.stream()
+                .filter(cert -> (cert.getTags().stream()
+                        .anyMatch(tag -> tag.getName().equals(tagName))))
+                .collect(Collectors.toList());
+        return migrateListFromEntityToDto(certificatesWithTag);
     }
 
     @Override
@@ -213,26 +208,6 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateList;
     }
 
-    @Override
-    public CertificateDto findById(int id) throws ResourceNotFoundException {
-        Certificate certificate = certificateDao.findById(id);
-        if (certificate == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
-        }
-        return certificateMapper.toDto(certificate);
-    }
-
-    @Transactional
-    @Override
-    public void delete(int id) throws ResourceNotFoundException {
-        Certificate certificate = certificateDao.findById(id);
-        if (certificate == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
-        }
-        certificateDao.delete(id);
-    }
-
-    @Override
     public CertificateDto findByName(String name) throws ResourceNotFoundException {
         Certificate certificate = certificateDao.findByName(name);
         if (certificate == null) {
@@ -241,23 +216,56 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificate);
     }
 
-    @Transactional
-    @Override
-    public void insertTags(List<Tag> tags) {
-        for (Tag tag : tags) {
-            if (tagDao.findByName(tag.getName()) == null) {
-                tagDao.insert(tag);
-            }
+    private List<Tag> prepareTags(List<Tag> tags) {
+        if (tags == null) {
+            return new ArrayList<>();
         }
+        return tags.stream()
+                .map(tag -> (tagDao.findByName(tag.getName()) == null
+                        ? tagDao.insert(tag)
+                        : tagDao.findByName(tag.getName())))
+                .collect(Collectors.toList());
     }
 
-    @Transactional
-    @Override
-    public void createLinkBetweenCertificateAndTag(int idNewCertificate, List<Tag> tags) {
-        for (Tag tag : tags) {
-            int idTag = tagDao.findByName(tag.getName()).getId();
-            certificateDao.insertLinkBetweenCertificateAndTag(idNewCertificate, idTag);
+
+    private Certificate prepareCertificate(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
+
+        int idUpdateCertificate = updatedCertificateDto.getId();
+        Certificate existedCertificate = certificateDao.findById(idUpdateCertificate);
+        if (existedCertificate == null) {
+            throw new ResourceNotFoundException("Requested resource not found (id = " + idUpdateCertificate + ")");
         }
+        if (updatedCertificateDto.getName() == null) {
+            updatedCertificateDto.setName(existedCertificate.getName());
+        }
+        if (updatedCertificateDto.getDescription() == null) {
+            updatedCertificateDto.setDescription(existedCertificate.getDescription());
+        }
+        if (updatedCertificateDto.getPrice() == null) {
+            updatedCertificateDto.setPrice(existedCertificate.getPrice());
+        }
+        if (updatedCertificateDto.getDuration() == null) {
+            updatedCertificateDto.setDuration(existedCertificate.getDuration());
+        }
+        updatedCertificateDto.setCreateDate(existedCertificate.getCreateDate());
+        updatedCertificateDto.setLastUpdateDate(LocalDateTime
+                .now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+
+        List<Tag> updatedTags;
+        if (updatedCertificateDto.getTags() == null) {
+            updatedTags = existedCertificate.getTags();
+        } else {
+            if (existedCertificate.getTags() != null) {
+                updatedTags = prepareTags(updatedCertificateDto.getTags());
+                updatedTags.addAll(existedCertificate.getTags());
+            } else {
+                updatedTags = prepareTags(updatedCertificateDto.getTags());
+                updatedCertificateDto.setTags(updatedTags);
+            }
+        }
+        updatedCertificateDto.setTags(updatedTags);
+
+        return certificateMapper.toEntity(updatedCertificateDto);
     }
 
     private void checkListOnEmptyOrNull(List<Certificate> certificates) throws ResourceNotFoundException {
@@ -266,10 +274,9 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
-    private List<CertificateDto> fromEntityToDtoAndAddListTags(List<Certificate> certificates) {
+    private List<CertificateDto> migrateListFromEntityToDto(List<Certificate> certificates) {
         return certificates.stream()
                 .map(certificate -> certificateMapper.toDto(certificate))
-                .peek(certificateDto -> certificateDto.setTags(tagDao.findTagsByCertificateId(certificateDto.getId())))
                 .collect(Collectors.toList());
     }
 
