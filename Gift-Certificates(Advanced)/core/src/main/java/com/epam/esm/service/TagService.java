@@ -9,4 +9,6 @@ import com.epam.esm.exception.ResourceNotFoundException;
 public interface TagService extends Service<TagDto> {
 
     TagDto findByName(String name) throws ResourceNotFoundException;
+
+    TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException;
 }

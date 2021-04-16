@@ -18,6 +18,16 @@ import java.util.List;
 public class TagDaoImpl implements TagDao {
 
     private static final String NAME = "name";
+    private static final String SQL_SELECT_MOST_POPULAR_TAG_OF_USER_WITH_HIGHEST_COST_OF_ALL_ORDERS =
+            "select t.id, t.name from tag t\n" +
+                    "join gift_certificate_has_tag gct on gct.tag_id = t.id\n" +
+                    "join purchase_gift_certificate pgc on pgc.gift_certificate_id = gct.gift_certificate_id\n" +
+                    "join purchase p on p.id = pgc.purchase_id\n" +
+                    "where user_id \n" +
+                    "= (select user_id from purchase group by user_id order by sum(cost) desc limit 1)\n" +
+                    "group by t.name\n" +
+                    "order by count(*) desc \n" +
+                    "limit 1";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -58,5 +68,11 @@ public class TagDaoImpl implements TagDao {
     @Override
     public Tag findById(int id) {
         return entityManager.find(Tag.class, id);
+    }
+
+    @Override
+    public Tag getMostPopularTagOfUserWithHighestCostOfAllOrders() {
+        return (Tag) entityManager.createNativeQuery(
+                SQL_SELECT_MOST_POPULAR_TAG_OF_USER_WITH_HIGHEST_COST_OF_ALL_ORDERS, Tag.class).getSingleResult();
     }
 }

@@ -63,4 +63,9 @@ public class TagController {
         tag.setId(id);
         return tagService.update(tag);
     }
+
+    @GetMapping("/popular")
+    public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException {
+        return tagService.getMostPopularTagOfUserWithHighestCostOfAllOrders();
+    }
 }

@@ -10,4 +10,6 @@ public interface TagDao extends Dao<Tag> {
     Tag findByName(String name);
 
     void delete(Tag tag);
+
+    Tag getMostPopularTagOfUserWithHighestCostOfAllOrders();
 }

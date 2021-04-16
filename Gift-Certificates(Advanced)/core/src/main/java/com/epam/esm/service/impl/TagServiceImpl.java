@@ -106,4 +106,13 @@ public class TagServiceImpl implements TagService {
         }
         return tagMapper.toDto(tag);
     }
+
+    @Override
+    public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException {
+        Tag tag = tagDao.getMostPopularTagOfUserWithHighestCostOfAllOrders();
+        if (tag == null) {
+            throw new ResourceNotFoundException("Requested resource not found.");
+        }
+        return tagMapper.toDto(tag);
+    }
 }

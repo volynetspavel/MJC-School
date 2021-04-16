@@ -34,8 +34,8 @@ class TagServiceTest {
     @DisplayName("Testing method findById() on positive result")
     @Test
     void testFindByIdSuccess() throws ResourceNotFoundException {
-        int id = 2;
-        String name = "beauty";
+        int id = 3;
+        String name = "rest";
 
         Tag actual = createTag(name);
         actual.setId(id);
