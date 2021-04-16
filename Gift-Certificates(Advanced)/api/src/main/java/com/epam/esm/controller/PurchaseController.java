@@ -40,7 +40,7 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<PurchaseDto> findAll() throws ResourceNotFoundException {
+    public List<PurchaseDto> findUserPurchases() throws ResourceNotFoundException {
         return purchaseService.findAll();
     }
 

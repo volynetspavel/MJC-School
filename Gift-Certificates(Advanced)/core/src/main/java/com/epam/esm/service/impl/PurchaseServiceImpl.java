@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,36 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
+    public List<PurchaseDto> findAll() throws ResourceNotFoundException {
+        List<Purchase> purchases = purchaseDao.findAll();
+        if (purchases == null || purchases.isEmpty()) {
+            throw new ResourceNotFoundException("Requested resource not found");
+        }
+
+        List<PurchaseDto> purchaseDtoList = purchases.stream()
+                .map(purchase -> purchaseMapper.toDto(purchase))
+                .collect(Collectors.toList());
+
+        return setCertificateNamesFromCertificatesOfEntityToDto(purchaseDtoList, purchases);
+    }
+
+    private List<PurchaseDto> setCertificateNamesFromCertificatesOfEntityToDto(List<PurchaseDto> purchaseDtoList,
+                                                                               List<Purchase> purchaseList) {
+        int i = 0;
+        for (PurchaseDto purchaseDto : purchaseDtoList) {
+            Purchase purchase = purchaseList.get(i);
+
+            List<String> certificateNames = purchase.getCertificates().stream()
+                    .map(Certificate::getName)
+                    .collect(Collectors.toList());
+
+            purchaseDto.setCertificateNames(certificateNames);
+            i++;
+        }
+        return purchaseDtoList;
+    }
+
+    @Override
     public void delete(int id) throws ResourceNotFoundException {
 
     }
@@ -84,16 +115,6 @@ public class PurchaseServiceImpl implements PurchaseService {
         return null;
     }
 
-    @Override
-    public List<PurchaseDto> findAll() throws ResourceNotFoundException {
-        List<Purchase> purchases = purchaseDao.findAll();
-        if (purchases == null || purchases.isEmpty()) {
-            throw new ResourceNotFoundException("Requested resource not found");
-        }
-        return purchases.stream()
-                .map(purchase -> purchaseMapper.toDto(purchase))
-                .collect(Collectors.toList());
-    }
 
     @Override
     public PurchaseDto findById(BigInteger id) throws ResourceNotFoundException {
