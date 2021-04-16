@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -19,5 +20,7 @@ public class User extends AbstractEntity<Integer> {
 
     private String name;
     private String surname;
+
+    @Column(unique = true)
     private String email;
 }
