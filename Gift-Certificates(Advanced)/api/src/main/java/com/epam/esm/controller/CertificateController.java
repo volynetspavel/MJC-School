@@ -4,12 +4,14 @@ import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class is used to send requests from the client to the service layer for certificate entity.
@@ -106,4 +108,19 @@ public class CertificateController {
             throws ResourceNotFoundException {
         return certificateService.findAllOrderByNameAndDate(order);
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search")
+    public List<CertificateDto> findCertificatesBySeveralTags(@RequestBody List<Tag> tags)
+            throws ResourceNotFoundException {
+        return certificateService.findCertificatesBySeveralTags(tags);
+    }
+
+/*    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search")
+    public List<CertificateDto> findCertificatesBySeveralTags(@RequestParam Map<String, String> params)
+            throws ResourceNotFoundException {
+        System.out.println(params.toString());
+        return null;
+    }*/
 }

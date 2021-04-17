@@ -3,6 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.model.Tag;
 
 import java.util.List;
 
@@ -25,4 +26,6 @@ public interface CertificateService extends Service<CertificateDto> {
     List<CertificateDto> findAllOrderByName(String order) throws ResourceNotFoundException;
 
     List<CertificateDto> findAllOrderByNameAndDate(String order) throws ResourceNotFoundException;
+
+    List<CertificateDto> findCertificatesBySeveralTags(List<Tag> tags) throws ResourceNotFoundException;
 }

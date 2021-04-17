@@ -208,6 +208,15 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateList;
     }
 
+    @Override
+    public List<CertificateDto> findCertificatesBySeveralTags(List<Tag> tags) throws ResourceNotFoundException {
+        List<Certificate> certificates = certificateDao.findCertificatesBySeveralTags(tags);
+        System.out.println("service " + certificates.toString());
+        checkListOnEmptyOrNull(certificates);
+
+        return migrateListFromEntityToDto(certificates);
+    }
+
     public CertificateDto findByName(String name) throws ResourceNotFoundException {
         Certificate certificate = certificateDao.findByName(name);
         if (certificate == null) {
