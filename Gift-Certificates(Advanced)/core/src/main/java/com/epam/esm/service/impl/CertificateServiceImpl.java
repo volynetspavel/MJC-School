@@ -21,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +31,13 @@ import java.util.stream.Collectors;
 public class CertificateServiceImpl implements CertificateService {
 
     private static final String SORT_ORDER_DESC = "desc";
+    private static final String PAGE = "page";
+    private static final String SIZE = "size";
+    private static final String TAG_NAME = "tag_name";
+    private static final String PART_NAME = "part_name";
+    private static final String PART_DESC = "part_desc";
+    private static final String TYPE_SORT = "type_sort";
+    private static final String ORDER = "order";
 
     private CertificateDao certificateDao;
     private TagDao tagDao;
@@ -114,53 +122,94 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public List<CertificateDto> findByTagPartOfNamePartOfDescriptionAndOrderedByName(
-            String tagName,
-            String partOfCertificateName,
-            String partOfCertificateDescription,
-            String order) throws ResourceNotFoundException {
+    public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ResourceNotFoundException {
+        int pageSize = certificateDao.getCount();
+        int pageNumber = 0;
 
-        List<Certificate> certificateList = certificateDao.findAll();
+        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
+            pageSize = Integer.parseInt(params.get(SIZE));
+            pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
+        }
+        System.out.println("service>> pageSize " + pageSize);
+        System.out.println("service>> pageNumber " + pageNumber);
+
+        String tagName = params.getOrDefault(TAG_NAME, "");
+        String partOfCertificateName = params.getOrDefault(PART_NAME, "");
+        String partOfCertificateDescription = params.getOrDefault(PART_DESC, "");
+
+        List<Certificate> certificateList = certificateDao.findCertificatesByParams(tagName,
+                partOfCertificateName, partOfCertificateDescription, pageNumber, pageSize);
         checkListOnEmptyOrNull(certificateList);
 
-        Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
-
         List<CertificateDto> certificates = migrateListFromEntityToDto(certificateList);
-        if (tagName != null) {
-            certificates = certificates.stream()
-                    .filter(cert -> (cert.getTags().stream()
-                            .anyMatch(tag -> tag.getName().equals(tagName))))
+
+        String typeOfSort = params.getOrDefault(TYPE_SORT, "name");
+        String order = params.getOrDefault(ORDER, "asc");
+
+        return sortByTypeAndOrder(certificates, typeOfSort, order);
+    }
+
+    private List<CertificateDto> sortByTypeAndOrder(List<CertificateDto> certificates, String typeOfSort, String order) {
+        Comparator<CertificateDto> comparator;
+        switch (typeOfSort) {
+            case "date":
+                comparator = Comparator.comparing(CertificateDto::getCreateDate);
+                certificates = sortByComparatorAndOrder(certificates, comparator, order);
+                break;
+            case "name_date":
+                Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
+                Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
+                if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
+                    certificates = certificates.stream()
+                            .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate).reversed())
+                            .collect(Collectors.toList());
+                } else {
+                    //sort order by default is asc
+                    certificates = certificates.stream()
+                            .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate))
+                            .collect(Collectors.toList());
+                }
+                break;
+            default:
+                comparator = Comparator.comparing(CertificateDto::getName);
+                certificates = sortByComparatorAndOrder(certificates, comparator, order);
+        }
+        return certificates;
+    }
+
+    private List<CertificateDto> sortByComparatorAndOrder(List<CertificateDto> certificateList,
+                                                          Comparator<CertificateDto> certificateDtoComparator,
+                                                          String order) {
+
+        if (order != null && order.equalsIgnoreCase(SORT_ORDER_DESC)) {
+            certificateList = certificateList.stream()
+                    .sorted(certificateDtoComparator.reversed())
+                    .collect(Collectors.toList());
+        } else {
+            //sort order by default is ASC
+            certificateList = certificateList.stream()
+                    .sorted(certificateDtoComparator)
                     .collect(Collectors.toList());
         }
-
-        if (partOfCertificateName != null) {
-            certificates = certificates.stream()
-                    .filter(certificate -> certificate.getName().toLowerCase()
-                            .contains(partOfCertificateName.toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        if (partOfCertificateDescription != null) {
-            certificates = certificates.stream()
-                    .filter(certificate -> certificate.getDescription().toLowerCase()
-                            .contains(partOfCertificateDescription.toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        return (tagName == null && partOfCertificateName == null
-                && partOfCertificateDescription == null && order == null)
-                ? certificates
-                : sortByComparatorAndOrder(certificates, certificateDtoComparatorByName, order);
+        return certificateList;
     }
 
     @Override
-    public List<CertificateDto> findAll() throws ResourceNotFoundException {
-        List<Certificate> certificates = certificateDao.findAll();
+    public List<CertificateDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+        int pageSize = certificateDao.getCount();
+        int pageNumber = 0;
+
+        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
+            pageSize = Integer.parseInt(params.get(SIZE));
+            pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
+        }
+
+        List<Certificate> certificates = certificateDao.findAll(pageNumber, pageNumber);
         checkListOnEmptyOrNull(certificates);
 
         return migrateListFromEntityToDto(certificates);
     }
-
+/*
     @Override
     public List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException {
         List<Certificate> certificates = certificateDao.findAll();
@@ -174,44 +223,12 @@ public class CertificateServiceImpl implements CertificateService {
         return migrateListFromEntityToDto(certificatesWithTag);
     }
 
-    @Override
-    public List<CertificateDto> findAllOrderByName(String order) throws ResourceNotFoundException {
-        List<CertificateDto> certificateList = findAll();
-        Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
-        return sortByComparatorAndOrder(certificateList, certificateDtoComparatorByName, order);
-    }
+   
+    }*/
 
     @Override
-    public List<CertificateDto> findAllOrderByDate(String order) throws ResourceNotFoundException {
-        List<CertificateDto> certificateList = findAll();
-        Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
-        return sortByComparatorAndOrder(certificateList, certificateDtoComparatorByDate, order);
-    }
-
-    @Override
-    public List<CertificateDto> findAllOrderByNameAndDate(String order) throws ResourceNotFoundException {
-        List<CertificateDto> certificateList = findAll();
-
-        Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
-        Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
-
-        if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
-            certificateList = certificateList.stream()
-                    .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate).reversed())
-                    .collect(Collectors.toList());
-        } else {
-            //sort order by default is asc
-            certificateList = certificateList.stream()
-                    .sorted(certificateDtoComparatorByName.thenComparing(certificateDtoComparatorByDate))
-                    .collect(Collectors.toList());
-        }
-        return certificateList;
-    }
-
-    @Override
-    public List<CertificateDto> findCertificatesBySeveralTags(List<Tag> tags) throws ResourceNotFoundException {
-        List<Certificate> certificates = certificateDao.findCertificatesBySeveralTags(tags);
-        System.out.println("service " + certificates.toString());
+    public List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames) throws ResourceNotFoundException {
+        List<Certificate> certificates = certificateDao.findCertificatesBySeveralTags(tagNames);
         checkListOnEmptyOrNull(certificates);
 
         return migrateListFromEntityToDto(certificates);
@@ -235,7 +252,6 @@ public class CertificateServiceImpl implements CertificateService {
                         : tagDao.findByName(tag.getName())))
                 .collect(Collectors.toList());
     }
-
 
     private Certificate prepareCertificate(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
 
@@ -289,19 +305,4 @@ public class CertificateServiceImpl implements CertificateService {
                 .collect(Collectors.toList());
     }
 
-    private List<CertificateDto> sortByComparatorAndOrder(List<CertificateDto> certificateList,
-                                                          Comparator<CertificateDto> certificateDtoComparator,
-                                                          String order) {
-        if (order != null && order.equalsIgnoreCase(SORT_ORDER_DESC)) {
-            certificateList = certificateList.stream()
-                    .sorted(certificateDtoComparator.reversed())
-                    .collect(Collectors.toList());
-        } else {
-            //sort order by default is ASC
-            certificateList = certificateList.stream()
-                    .sorted(certificateDtoComparator)
-                    .collect(Collectors.toList());
-        }
-        return certificateList;
-    }
 }

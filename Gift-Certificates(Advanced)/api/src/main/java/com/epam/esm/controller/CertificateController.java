@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.CertificateDto;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
@@ -73,16 +74,13 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<CertificateDto> findCertificatesByTagPartOfNamePartOfDescriptionAndOrderedByName(
-            @RequestParam(value = "tag_name", required = false) String tagName,
-            @RequestParam(value = "part_name", required = false) String partOfCertificateName,
-            @RequestParam(value = "part_desc", required = false) String partOfCertificateDescription,
-            @RequestParam(value = "order", required = false) String order) throws ResourceNotFoundException {
-        return certificateService.findByTagPartOfNamePartOfDescriptionAndOrderedByName(tagName,
-                partOfCertificateName, partOfCertificateDescription, order);
+    public List<CertificateDto> findCertificatesByParams(@RequestParam Map<String, String> params)
+            throws ResourceNotFoundException {
+        System.out.println("controller>>  " + params.toString());
+        return certificateService.findCertificatesByParams(params);
     }
 
-    @ResponseStatus(HttpStatus.OK)
+/*    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/tag/{id}")
     public List<CertificateDto> findAllByTagId(@PathVariable("id") int id) throws ResourceNotFoundException {
         return certificateService.findAllByTagId(id);
@@ -107,20 +105,12 @@ public class CertificateController {
     public List<CertificateDto> findAllOrderByNameAndDate(@RequestParam("order") String order)
             throws ResourceNotFoundException {
         return certificateService.findAllOrderByNameAndDate(order);
-    }
+    }*/
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
-    public List<CertificateDto> findCertificatesBySeveralTags(@RequestBody List<Tag> tags)
+    public List<CertificateDto> findCertificatesBySeveralTags(@RequestBody List<String> tagNames)
             throws ResourceNotFoundException {
-        return certificateService.findCertificatesBySeveralTags(tags);
+        return certificateService.findCertificatesBySeveralTags(tagNames);
     }
-
-/*    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/search")
-    public List<CertificateDto> findCertificatesBySeveralTags(@RequestParam Map<String, String> params)
-            throws ResourceNotFoundException {
-        System.out.println(params.toString());
-        return null;
-    }*/
 }

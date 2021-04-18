@@ -1,5 +1,6 @@
 package com.epam.esm.dao.db;
 
+import com.epam.esm.constant.CertificateTableColumn;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
@@ -7,9 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,12 +20,6 @@ import java.util.stream.Collectors;
 public class CertificateDaoImpl implements CertificateDao {
 
     private static final String NAME = "name";
-    private static final String SQL_FIND_CERTIFICATES_BY_SEVERAL_TAGS = "SELECT * FROM gift_certificate gc\n" +
-            "JOIN gift_certificate_has_tag gct ON gct.gift_certificate_id = gc.id\n" +
-            "JOIN tag t ON t.id = gct.tag_id\n" +
-            "WHERE t.name IN (?)\n" +
-            "GROUP BY gc.name\n" +
-            "HAVING count(t.name) = ";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -57,30 +51,84 @@ public class CertificateDaoImpl implements CertificateDao {
     }
 
     @Override
-    public Certificate findById(int id) {
+    public Certificate findById(Integer id) {
         return entityManager.find(Certificate.class, id);
     }
 
     @Override
-    public List<Certificate> findAll() {
+    public Integer getCount() {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         criteriaQuery.from(Certificate.class);
-        return entityManager.createQuery(criteriaQuery).getResultList();
+        return (int) entityManager.createQuery(criteriaQuery)
+                .getResultStream().count();
     }
 
     @Override
-    public List<Certificate> findCertificatesBySeveralTags(List<Tag> tags) {
-        String sql = buildSqlFindCertificatesBySeveralTags(tags);
-        return (List<Certificate>) entityManager.createNativeQuery(sql, Certificate.class).getResultList();
+    public List<Certificate> findAll(int pageNumber, int pageSize) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
+        criteriaQuery.from(Certificate.class);
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(pageNumber)
+                .setMaxResults(pageSize)
+                .getResultList();
     }
 
-    private String buildSqlFindCertificatesBySeveralTags(List<Tag> tags){
-        String names = tags.stream()
-                .map(tag -> ("'" + tag.getName() + "'"))
-                .collect(Collectors.joining(", "));
+    @Override
+    public List<Certificate> findCertificatesBySeveralTags(List<String> tagNames) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
+        Root<Certificate> certificateRoot = criteriaQuery.from(Certificate.class);
 
-        return SQL_FIND_CERTIFICATES_BY_SEVERAL_TAGS.replace("?", names) + tags.size();
+        Join<Certificate, Tag> tagJoin = certificateRoot.join("tags");
 
+        CriteriaBuilder.In<String> inClause = criteriaBuilder.in(tagJoin.get(NAME));
+        for (String name : tagNames) {
+            inClause.value(name);
+        }
+
+        criteriaQuery.select(certificateRoot)
+                .where(inClause)
+                .groupBy(certificateRoot.get(NAME))
+                .having(criteriaBuilder.equal(criteriaBuilder.count(tagJoin.get(NAME)), tagNames.size()));
+
+        return entityManager.createQuery(criteriaQuery)
+//                .setFirstResult(pageNumber)
+//                .setMaxResults(pageSize)
+                .getResultList();
+    }
+
+    @Override
+    public List<Certificate> findCertificatesByParams(String tagName, String partOfCertificateName,
+                                                      String partOfCertificateDescription, int pageSize, int pageNumber) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
+        Root<Certificate> certificateRoot = criteriaQuery.from(Certificate.class);
+
+        List<Predicate> predicateList = new ArrayList<>();
+        Predicate predicate;
+
+        if (!tagName.isEmpty()) {
+            predicate = criteriaBuilder.like(certificateRoot.join("tags").get(NAME),
+                    "%" + tagName + "%");
+            predicateList.add(predicate);
+        }
+        if (!partOfCertificateName.isEmpty()) {
+            predicate = criteriaBuilder.like(certificateRoot.get(CertificateTableColumn.NAME),
+                    "%" + partOfCertificateName + "%");
+            predicateList.add(predicate);
+        }
+        if (!partOfCertificateDescription.isEmpty()) {
+            predicate = criteriaBuilder.like(certificateRoot.get(CertificateTableColumn.DESCRIPTION),
+                    "%" + partOfCertificateDescription + "%");
+            predicateList.add(predicate);
+        }
+        criteriaQuery.where(predicateList.toArray(new Predicate[0]));
+
+        return entityManager.createQuery(criteriaQuery)
+//                .setFirstResult(pageNumber)
+//                .setMaxResults(pageSize)
+                .getResultList();
     }
 }
