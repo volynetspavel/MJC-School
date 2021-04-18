@@ -20,8 +20,8 @@ import java.math.BigInteger;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,11 +30,13 @@ import java.util.stream.Collectors;
 @Service
 public class PurchaseServiceImpl implements PurchaseService {
 
-    private PurchaseDao purchaseDao;
-    private PurchaseMapper purchaseMapper;
+    private static final String PAGE = "page";
+    private static final String SIZE = "size";
 
     private UserDao userDao;
     private CertificateDao certificateDao;
+    private PurchaseDao purchaseDao;
+    private PurchaseMapper purchaseMapper;
 
     public PurchaseServiceImpl() {
     }
@@ -76,8 +78,11 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
-    public List<PurchaseDto> findAll() throws ResourceNotFoundException {
-        List<Purchase> purchases = purchaseDao.findAll();
+    public List<PurchaseDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+        int pageSize = Integer.parseInt(params.get(SIZE));
+        int pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
+
+        List<Purchase> purchases = purchaseDao.findAll(pageNumber, pageNumber);
         if (purchases == null || purchases.isEmpty()) {
             throw new ResourceNotFoundException("Requested resource not found");
         }

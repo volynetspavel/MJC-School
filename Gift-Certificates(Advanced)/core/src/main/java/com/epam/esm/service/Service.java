@@ -5,6 +5,7 @@ import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Basic interface for service layer. Defines general methods for all services.
@@ -19,5 +20,5 @@ public interface Service<T extends AbstractDto> {
 
     T findById(int id) throws ResourceNotFoundException;
 
-    List<T> findAll() throws ResourceNotFoundException;
+    List<T> findAll(Map<String, String> params) throws ResourceNotFoundException;
 }

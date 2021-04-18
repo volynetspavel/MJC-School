@@ -5,7 +5,7 @@ import com.epam.esm.model.User;
 /**
  * This class is a basic class of dao-layer for interacting with database.
  */
-public interface UserDao extends Dao<User> {
+public interface UserDao extends Dao<User, Integer> {
 
     @Override
     default User insert(User entityDto) {

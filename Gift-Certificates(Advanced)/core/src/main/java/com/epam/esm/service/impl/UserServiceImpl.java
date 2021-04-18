@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final String PAGE = "page";
+    private static final String SIZE = "size";
 
     private UserDao userDao;
     private UserMapper userMapper;
@@ -31,8 +35,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> findAll() throws ResourceNotFoundException {
-        List<User> users = userDao.findAll();
+    public List<UserDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+        int pageSize = Integer.parseInt(params.get(SIZE));
+        int pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
+
+        List<User> users = userDao.findAll(pageNumber, pageNumber);
         if (users == null || users.isEmpty()) {
             throw new ResourceNotFoundException("Requested resource not found");
         }

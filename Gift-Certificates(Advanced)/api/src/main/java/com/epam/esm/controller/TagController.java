@@ -6,17 +6,10 @@ import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class is used to send requests from the client to the service layer for tag entity.
@@ -40,8 +33,8 @@ public class TagController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<TagDto> findAll() throws ResourceNotFoundException {
-        return tagService.findAll();
+    public List<TagDto> findAll(@RequestParam Map<String, String> params) throws ResourceNotFoundException {
+        return tagService.findAll(params);
     }
 
     @ResponseStatus(HttpStatus.OK)

@@ -23,16 +23,28 @@ public class UserDaoImpl implements UserDao {
     private EntityManager entityManager;
 
     @Override
-    public List<User> findAll() {
+    public List<User> findAll(int pageNumber, int pageSize) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         criteriaQuery.from(User.class);
-        return entityManager.createQuery(criteriaQuery).getResultList();
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(pageNumber)
+                .setMaxResults(pageSize)
+                .getResultList();
     }
 
     @Override
-    public User findById(int id) {
+    public User findById(Integer id) {
         return entityManager.find(User.class, id);
+    }
+
+    @Override
+    public Integer getCount() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
+        criteriaQuery.from(User.class);
+        return (int) entityManager.createQuery(criteriaQuery)
+                .getResultStream().count();
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.epam.esm.dao.db;
 
 import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.model.Purchase;
-import com.epam.esm.model.Purchase;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -28,11 +27,15 @@ public class PurchaseDaoImpl implements PurchaseDao {
     }
 
     @Override
-    public List<Purchase> findAll() {
+    public List<Purchase> findAll(int pageNumber, int pageSize) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Purchase> criteriaQuery = criteriaBuilder.createQuery(Purchase.class);
         criteriaQuery.from(Purchase.class);
-        return entityManager.createQuery(criteriaQuery).getResultList();    }
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(pageNumber)
+                .setMaxResults(pageSize)
+                .getResultList();
+    }
 
 
     @Override
@@ -48,5 +51,15 @@ public class PurchaseDaoImpl implements PurchaseDao {
     @Override
     public Purchase findById(BigInteger id) {
         return entityManager.find(Purchase.class, id);
+    }
+
+    @Override
+    public BigInteger getCount() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Purchase> criteriaQuery = criteriaBuilder.createQuery(Purchase.class);
+        criteriaQuery.from(Purchase.class);
+        return BigInteger.valueOf(entityManager.createQuery(criteriaQuery)
+                .getResultStream().count());
+
     }
 }

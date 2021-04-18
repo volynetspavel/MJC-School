@@ -1,22 +1,16 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.PurchaseDto;
-import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class is used to send requests from the client to the service layer for purchase entity.
@@ -40,8 +34,8 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<PurchaseDto> findUserPurchases() throws ResourceNotFoundException {
-        return purchaseService.findAll();
+    public List<PurchaseDto> findUserPurchases(@RequestParam Map<String, String> params) throws ResourceNotFoundException {
+        return purchaseService.findAll(params);
     }
 
     @ResponseStatus(HttpStatus.OK)

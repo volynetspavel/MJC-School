@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class is used to send requests from the client to the service layer for user entity.
@@ -25,8 +26,8 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<UserDto> findAll() throws ResourceNotFoundException {
-        return userService.findAll();
+    public List<UserDto> findAll(@RequestParam Map<String, String> params) throws ResourceNotFoundException {
+        return userService.findAll(params);
     }
 
     @ResponseStatus(HttpStatus.OK)

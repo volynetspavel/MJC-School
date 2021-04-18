@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * This class is a basic class of dao-layer for interacting with database.
  */
-public interface Dao<T extends AbstractEntity> {
+public interface Dao<T extends AbstractEntity, N extends Number> {
 
     T insert(T entity);
 
@@ -15,7 +15,9 @@ public interface Dao<T extends AbstractEntity> {
 
     void delete(T entity);
 
-    T findById(int id);
+    List<T> findAll(int pageNumber, int pageSize);
 
-    List<T> findAll();
+    T findById(N id);
+
+    N getCount();
 }

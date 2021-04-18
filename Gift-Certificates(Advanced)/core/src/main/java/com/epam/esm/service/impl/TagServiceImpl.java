@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -19,6 +20,9 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TagServiceImpl implements TagService {
+
+    private static final String PAGE = "page";
+    private static final String SIZE = "size";
 
     private TagDao tagDao;
     private TagMapper tagMapper;
@@ -79,8 +83,16 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> findAll() throws ResourceNotFoundException {
-        List<Tag> tags = tagDao.findAll();
+    public List<TagDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+        int pageSize = tagDao.getCount();
+        int pageNumber = 0;
+
+        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
+            pageSize = Integer.parseInt(params.get(SIZE));
+            pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
+        }
+
+        List<Tag> tags = tagDao.findAll(pageNumber, pageSize);
         if (tags == null || tags.isEmpty()) {
             throw new ResourceNotFoundException("Requested resource not found");
         }
