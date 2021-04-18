@@ -1,11 +1,9 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.CertificateDto;
-import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,33 +77,6 @@ public class CertificateController {
         System.out.println("controller>>  " + params.toString());
         return certificateService.findCertificatesByParams(params);
     }
-
-/*    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/tag/{id}")
-    public List<CertificateDto> findAllByTagId(@PathVariable("id") int id) throws ResourceNotFoundException {
-        return certificateService.findAllByTagId(id);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/name")
-    public List<CertificateDto> findAllOrderByName(@RequestParam("order") String order)
-            throws ResourceNotFoundException {
-        return certificateService.findAllOrderByName(order);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/date")
-    public List<CertificateDto> findAllOrderByDate(@RequestParam("order") String order)
-            throws ResourceNotFoundException {
-        return certificateService.findAllOrderByDate(order);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/name_date")
-    public List<CertificateDto> findAllOrderByNameAndDate(@RequestParam("order") String order)
-            throws ResourceNotFoundException {
-        return certificateService.findAllOrderByNameAndDate(order);
-    }*/
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")

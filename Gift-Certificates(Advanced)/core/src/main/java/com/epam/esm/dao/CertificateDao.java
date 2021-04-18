@@ -1,7 +1,6 @@
 package com.epam.esm.dao;
 
 import com.epam.esm.model.Certificate;
-import com.epam.esm.model.Tag;
 
 import java.util.List;
 

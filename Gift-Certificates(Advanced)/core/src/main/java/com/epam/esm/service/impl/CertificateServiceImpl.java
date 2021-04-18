@@ -209,22 +209,6 @@ public class CertificateServiceImpl implements CertificateService {
 
         return migrateListFromEntityToDto(certificates);
     }
-/*
-    @Override
-    public List<CertificateDto> findAllByTagId(int id) throws ResourceNotFoundException {
-        List<Certificate> certificates = certificateDao.findAll();
-        checkListOnEmptyOrNull(certificates);
-
-        String tagName = tagDao.findById(id).getName();
-        List<Certificate> certificatesWithTag = certificates.stream()
-                .filter(cert -> (cert.getTags().stream()
-                        .anyMatch(tag -> tag.getName().equals(tagName))))
-                .collect(Collectors.toList());
-        return migrateListFromEntityToDto(certificatesWithTag);
-    }
-
-   
-    }*/
 
     @Override
     public List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames) throws ResourceNotFoundException {
@@ -304,5 +288,4 @@ public class CertificateServiceImpl implements CertificateService {
                 .map(certificate -> certificateMapper.toDto(certificate))
                 .collect(Collectors.toList());
     }
-
 }
