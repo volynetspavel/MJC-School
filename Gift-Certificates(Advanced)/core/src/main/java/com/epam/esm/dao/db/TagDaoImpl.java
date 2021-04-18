@@ -58,13 +58,13 @@ public class TagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> findAll(int pageNumber, int pageSize) {
+    public List<Tag> findAll(int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
         criteriaQuery.from(Tag.class);
         return entityManager.createQuery(criteriaQuery)
-                .setFirstResult(pageNumber)
-                .setMaxResults(pageSize)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 

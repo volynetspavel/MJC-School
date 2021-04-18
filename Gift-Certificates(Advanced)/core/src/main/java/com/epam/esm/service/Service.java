@@ -21,4 +21,10 @@ public interface Service<T extends AbstractDto> {
     T findById(int id) throws ResourceNotFoundException;
 
     List<T> findAll(Map<String, String> params) throws ResourceNotFoundException;
+
+    default void checkListOnEmptyOrNull(List<T> entities) throws ResourceNotFoundException {
+        if (entities == null || entities.isEmpty()) {
+            throw new ResourceNotFoundException("Requested resource not found");
+        }
+    }
 }

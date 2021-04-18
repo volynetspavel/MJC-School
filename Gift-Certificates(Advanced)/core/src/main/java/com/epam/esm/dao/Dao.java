@@ -15,7 +15,7 @@ public interface Dao<T extends AbstractEntity, N extends Number> {
 
     void delete(T entity);
 
-    List<T> findAll(int pageNumber, int pageSize);
+    List<T> findAll(int offset, int limit);
 
     T findById(N id);
 

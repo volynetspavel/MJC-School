@@ -14,7 +14,8 @@ public interface CertificateService extends Service<CertificateDto> {
 
     CertificateDto updateSingleField(CertificateDto certificateDto) throws ResourceNotFoundException, ServiceException;
 
-    List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames) throws ResourceNotFoundException;
+    List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
+                                                       Map<String, String> params) throws ResourceNotFoundException;
 
     List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ResourceNotFoundException;
 }

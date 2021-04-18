@@ -1,7 +1,6 @@
 package com.epam.esm.service;
 
 import com.epam.esm.dto.PurchaseDto;
-import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.Purchase;
 
@@ -21,7 +20,16 @@ public interface PurchaseService extends Service<PurchaseDto> {
     Purchase makePurchase(PurchaseDto purchaseDto);
 
     @Override
-    default PurchaseDto insert(PurchaseDto entityDto) throws ResourceAlreadyExistException {
+    default PurchaseDto insert(PurchaseDto entityDto) {
+        return null;
+    }
+
+    @Override
+    default void delete(int id) {
+    }
+
+    @Override
+    default PurchaseDto update(PurchaseDto entityDto) {
         return null;
     }
 }

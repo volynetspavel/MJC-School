@@ -27,6 +27,9 @@ public class TagServiceImpl implements TagService {
     private TagDao tagDao;
     private TagMapper tagMapper;
 
+    private int limit;
+    private int offset = 0;
+
     public TagServiceImpl() {
     }
 
@@ -84,21 +87,18 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
-        int pageSize = tagDao.getCount();
-        int pageNumber = 0;
+        limit = tagDao.getCount();
 
         if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
-            pageSize = Integer.parseInt(params.get(SIZE));
-            pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
+            limit = Integer.parseInt(params.get(SIZE));
+            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
         }
 
-        List<Tag> tags = tagDao.findAll(pageNumber, pageSize);
-        if (tags == null || tags.isEmpty()) {
-            throw new ResourceNotFoundException("Requested resource not found");
-        }
-        return tags.stream()
-                .map(tag -> tagMapper.toDto(tag))
-                .collect(Collectors.toList());
+        List<Tag> tags = tagDao.findAll(offset, limit);
+        List<TagDto> tagList = migrateListFromEntityToDto(tags);
+        checkListOnEmptyOrNull(tagList);
+
+        return tagList;
     }
 
     @Override
@@ -126,5 +126,11 @@ public class TagServiceImpl implements TagService {
             throw new ResourceNotFoundException("Requested resource not found.");
         }
         return tagMapper.toDto(tag);
+    }
+
+    private List<TagDto> migrateListFromEntityToDto(List<Tag> tags) {
+        return tags.stream()
+                .map(tag -> tagMapper.toDto(tag))
+                .collect(Collectors.toList());
     }
 }

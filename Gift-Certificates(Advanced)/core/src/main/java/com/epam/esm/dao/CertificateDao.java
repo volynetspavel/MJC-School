@@ -11,8 +11,8 @@ public interface CertificateDao extends Dao<Certificate, Integer> {
 
     Certificate findByName(String name);
 
-    List<Certificate> findCertificatesBySeveralTags(List<String> tagNames);
+    List<Certificate> findCertificatesBySeveralTags(List<String> tagNames, int offset, int limit);
 
     List<Certificate> findCertificatesByParams(String tagName, String partOfCertificateName,
-                                               String partOfCertificateDescription, int pageSize, int pageNumber);
+                                               String partOfCertificateDescription, int pageSize, int offset);
 }

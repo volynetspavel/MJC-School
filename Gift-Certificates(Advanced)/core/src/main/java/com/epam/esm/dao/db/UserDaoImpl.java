@@ -23,13 +23,13 @@ public class UserDaoImpl implements UserDao {
     private EntityManager entityManager;
 
     @Override
-    public List<User> findAll(int pageNumber, int pageSize) {
+    public List<User> findAll(int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         criteriaQuery.from(User.class);
         return entityManager.createQuery(criteriaQuery)
-                .setFirstResult(pageNumber)
-                .setMaxResults(pageSize)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 

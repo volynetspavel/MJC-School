@@ -27,25 +27,14 @@ public class PurchaseDaoImpl implements PurchaseDao {
     }
 
     @Override
-    public List<Purchase> findAll(int pageNumber, int pageSize) {
+    public List<Purchase> findAll(int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Purchase> criteriaQuery = criteriaBuilder.createQuery(Purchase.class);
         criteriaQuery.from(Purchase.class);
         return entityManager.createQuery(criteriaQuery)
-                .setFirstResult(pageNumber)
-                .setMaxResults(pageSize)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
-    }
-
-
-    @Override
-    public void delete(Purchase entity) {
-
-    }
-
-    @Override
-    public void update(Purchase entity) {
-
     }
 
     @Override
@@ -59,7 +48,7 @@ public class PurchaseDaoImpl implements PurchaseDao {
         CriteriaQuery<Purchase> criteriaQuery = criteriaBuilder.createQuery(Purchase.class);
         criteriaQuery.from(Purchase.class);
         return BigInteger.valueOf(entityManager.createQuery(criteriaQuery)
-                .getResultStream().count());
-
+                .getResultStream()
+                .count());
     }
 }

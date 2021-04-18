@@ -4,7 +4,6 @@ import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.PurchaseDto;
-import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.impl.PurchaseMapper;
 import com.epam.esm.model.Certificate;
@@ -37,6 +36,9 @@ public class PurchaseServiceImpl implements PurchaseService {
     private CertificateDao certificateDao;
     private PurchaseDao purchaseDao;
     private PurchaseMapper purchaseMapper;
+
+    private int limit;
+    private int offset = 0;
 
     public PurchaseServiceImpl() {
     }
@@ -78,20 +80,27 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
-    public List<PurchaseDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
-        int pageSize = Integer.parseInt(params.get(SIZE));
-        int pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
-
-        List<Purchase> purchases = purchaseDao.findAll(pageNumber, pageNumber);
-        if (purchases == null || purchases.isEmpty()) {
-            throw new ResourceNotFoundException("Requested resource not found");
+    public PurchaseDto findById(BigInteger id) throws ResourceNotFoundException {
+        Purchase purchase = purchaseDao.findById(id);
+        if (purchase == null) {
+            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
+        return purchaseMapper.toDto(purchase);
+    }
 
-        List<PurchaseDto> purchaseDtoList = purchases.stream()
-                .map(purchase -> purchaseMapper.toDto(purchase))
-                .collect(Collectors.toList());
+    @Override
+    public List<PurchaseDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+        limit = purchaseDao.getCount().intValue();
 
-        return setCertificateNamesFromCertificatesOfEntityToDto(purchaseDtoList, purchases);
+        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
+            limit = Integer.parseInt(params.get(SIZE));
+            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
+        }
+        List<Purchase> purchases = purchaseDao.findAll(offset, limit);
+        List<PurchaseDto> purchaseList = migrateListFromEntityToDto(purchases);
+        checkListOnEmptyOrNull(purchaseList);
+
+        return setCertificateNamesFromCertificatesOfEntityToDto(purchaseList, purchases);
     }
 
     private List<PurchaseDto> setCertificateNamesFromCertificatesOfEntityToDto(List<PurchaseDto> purchaseDtoList,
@@ -110,23 +119,9 @@ public class PurchaseServiceImpl implements PurchaseService {
         return purchaseDtoList;
     }
 
-    @Override
-    public void delete(int id) throws ResourceNotFoundException {
-
-    }
-
-    @Override
-    public PurchaseDto update(PurchaseDto entityDto) throws ResourceNotFoundException, ResourceAlreadyExistException {
-        return null;
-    }
-
-
-    @Override
-    public PurchaseDto findById(BigInteger id) throws ResourceNotFoundException {
-        Purchase purchase = purchaseDao.findById(id);
-        if (purchase == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
-        }
-        return purchaseMapper.toDto(purchase);
+    private List<PurchaseDto> migrateListFromEntityToDto(List<Purchase> purchases) {
+        return purchases.stream()
+                .map(purchase -> purchaseMapper.toDto(purchase))
+                .collect(Collectors.toList());
     }
 }

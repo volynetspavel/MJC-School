@@ -134,7 +134,7 @@ class TagServiceTest {
     @DisplayName("Testing method findAll() on positive result")
     @Test
     void testFindAllSuccess() throws ResourceNotFoundException {
-        List<TagDto> expectedTags = tagService.findAll();
+        List<TagDto> expectedTags = tagService.findAll(params);
 
         String name1 = "extreme";
         String name2 = "beauty";
@@ -154,7 +154,7 @@ class TagServiceTest {
     @Test
     void testFindAllThrowsException() {
         Assertions.assertThrows(ResourceNotFoundException.class,
-                () -> tagService.findAll());
+                () -> tagService.findAll(params));
     }
 
     private Tag createTag(String name) {

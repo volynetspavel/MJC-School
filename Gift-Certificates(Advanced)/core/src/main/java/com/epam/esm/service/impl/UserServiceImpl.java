@@ -2,8 +2,10 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.UserDto;
+import com.epam.esm.dto.UserDto;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.impl.UserMapper;
+import com.epam.esm.model.User;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
     private UserMapper userMapper;
 
+    private int limit;
+    private int offset = 0;
+
     public UserServiceImpl() {
     }
 
@@ -36,16 +41,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
-        int pageSize = Integer.parseInt(params.get(SIZE));
-        int pageNumber = (Integer.parseInt(params.get(PAGE)) - 1) * pageSize;
+        limit = userDao.getCount();
 
-        List<User> users = userDao.findAll(pageNumber, pageNumber);
-        if (users == null || users.isEmpty()) {
-            throw new ResourceNotFoundException("Requested resource not found");
+        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
+            limit = Integer.parseInt(params.get(SIZE));
+            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
         }
-        return users.stream()
-                .map(user -> userMapper.toDto(user))
-                .collect(Collectors.toList());
+        List<User> users = userDao.findAll(offset, limit);
+        List<UserDto> userList = migrateListFromEntityToDto(users);
+        checkListOnEmptyOrNull(userList);
+
+        return userList;
     }
 
     @Override
@@ -55,5 +61,11 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
         return userMapper.toDto(user);
+    }
+
+    private List<UserDto> migrateListFromEntityToDto(List<User> users) {
+        return users.stream()
+                .map(user -> userMapper.toDto(user))
+                .collect(Collectors.toList());
     }
 }

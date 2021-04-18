@@ -11,4 +11,11 @@ public interface PurchaseDao extends Dao<Purchase, BigInteger> {
 
     Purchase findById(BigInteger id);
 
+    @Override
+    default void delete(Purchase entity) {
+    }
+
+    @Override
+    default void update(Purchase entity) {
+    }
 }

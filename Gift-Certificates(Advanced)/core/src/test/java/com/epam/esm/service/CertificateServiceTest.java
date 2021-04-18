@@ -152,7 +152,7 @@ public class CertificateServiceTest {
     @DisplayName("Testing method findAll() on positive result")
     @Test
     void testFindAllSuccess() throws ResourceNotFoundException {
-        List<CertificateDto> expectedCertificates = certificateService.findAll();
+        List<CertificateDto> expectedCertificates = certificateService.findAll(params);
 
         String name1 = "Off road jeep tour";
         String description1 = "We offer the active and courageous an extreme off-road trip.";

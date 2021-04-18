@@ -8,7 +8,11 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,22 +64,23 @@ public class CertificateDaoImpl implements CertificateDao {
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         criteriaQuery.from(Certificate.class);
         return (int) entityManager.createQuery(criteriaQuery)
-                .getResultStream().count();
+                .getResultStream()
+                .count();
     }
 
     @Override
-    public List<Certificate> findAll(int pageNumber, int pageSize) {
+    public List<Certificate> findAll(int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         criteriaQuery.from(Certificate.class);
         return entityManager.createQuery(criteriaQuery)
-                .setFirstResult(pageNumber)
-                .setMaxResults(pageSize)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 
     @Override
-    public List<Certificate> findCertificatesBySeveralTags(List<String> tagNames) {
+    public List<Certificate> findCertificatesBySeveralTags(List<String> tagNames, int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         Root<Certificate> certificateRoot = criteriaQuery.from(Certificate.class);
@@ -93,14 +98,14 @@ public class CertificateDaoImpl implements CertificateDao {
                 .having(criteriaBuilder.equal(criteriaBuilder.count(tagJoin.get(NAME)), tagNames.size()));
 
         return entityManager.createQuery(criteriaQuery)
-//                .setFirstResult(pageNumber)
-//                .setMaxResults(pageSize)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 
     @Override
     public List<Certificate> findCertificatesByParams(String tagName, String partOfCertificateName,
-                                                      String partOfCertificateDescription, int pageSize, int pageNumber) {
+                                                      String partOfCertificateDescription, int limit, int offset) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         Root<Certificate> certificateRoot = criteriaQuery.from(Certificate.class);
@@ -126,8 +131,8 @@ public class CertificateDaoImpl implements CertificateDao {
         criteriaQuery.where(predicateList.toArray(new Predicate[0]));
 
         return entityManager.createQuery(criteriaQuery)
-//                .setFirstResult(pageNumber)
-//                .setMaxResults(pageSize)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 }
