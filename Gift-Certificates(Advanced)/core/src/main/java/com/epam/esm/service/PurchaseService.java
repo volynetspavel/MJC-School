@@ -9,7 +9,7 @@ import java.math.BigInteger;
 /**
  * This class is a layer for interacting with PurchaseDao.
  */
-public interface PurchaseService extends Service<PurchaseDto> {
+public interface PurchaseService extends Service<PurchaseDto, Purchase> {
 
     PurchaseDto findById(BigInteger id) throws ResourceNotFoundException;
 

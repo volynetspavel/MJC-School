@@ -105,7 +105,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
     @Override
     public List<Certificate> findCertificatesByParams(String tagName, String partOfCertificateName,
-                                                      String partOfCertificateDescription, int limit, int offset) {
+                                                      String partOfCertificateDescription, int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         Root<Certificate> certificateRoot = criteriaQuery.from(Certificate.class);

@@ -10,6 +10,7 @@ import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.model.User;
 import com.epam.esm.service.PurchaseService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * This class is an implementation of PurchaseService.
  */
 @Service
+@RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
 
     private static final String PAGE = "page";
@@ -40,11 +42,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     private int limit;
     private int offset = 0;
 
-    public PurchaseServiceImpl() {
-    }
-
     @Autowired
-
     public PurchaseServiceImpl(PurchaseDao purchaseDao, PurchaseMapper purchaseMapper,
                                UserDao userDao, CertificateDao certificateDao) {
         this.purchaseDao = purchaseDao;
@@ -69,7 +67,7 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .reduce(BigDecimal::add)
                 .get();
 
-        Purchase purchase = new Purchase();
+        Purchase purchase = purchaseMapper.toEntity(purchaseDto);
         purchase.setId(null);
         purchase.setUser(user);
         purchase.setCost(totalCost);
@@ -85,7 +83,10 @@ public class PurchaseServiceImpl implements PurchaseService {
         if (purchase == null) {
             throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
         }
-        return purchaseMapper.toDto(purchase);
+        PurchaseDto purchaseDto = purchaseMapper.toDto(purchase);
+        List<String> certificateNames = getListCertificateNamesFromListCertificates(purchase.getCertificates());
+        purchaseDto.setCertificateNames(certificateNames);
+        return purchaseDto;
     }
 
     @Override
@@ -97,9 +98,9 @@ public class PurchaseServiceImpl implements PurchaseService {
             offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
         }
         List<Purchase> purchases = purchaseDao.findAll(offset, limit);
-        List<PurchaseDto> purchaseList = migrateListFromEntityToDto(purchases);
-        checkListOnEmptyOrNull(purchaseList);
+        checkListOnEmptyOrNull(purchases);
 
+        List<PurchaseDto> purchaseList = migrateListFromEntityToDto(purchases);
         return setCertificateNamesFromCertificatesOfEntityToDto(purchaseList, purchases);
     }
 
@@ -108,15 +109,17 @@ public class PurchaseServiceImpl implements PurchaseService {
         int i = 0;
         for (PurchaseDto purchaseDto : purchaseDtoList) {
             Purchase purchase = purchaseList.get(i);
-
-            List<String> certificateNames = purchase.getCertificates().stream()
-                    .map(Certificate::getName)
-                    .collect(Collectors.toList());
-
+            List<String> certificateNames = getListCertificateNamesFromListCertificates(purchase.getCertificates());
             purchaseDto.setCertificateNames(certificateNames);
             i++;
         }
         return purchaseDtoList;
+    }
+
+    private List<String> getListCertificateNamesFromListCertificates(List<Certificate> certificateList) {
+        return certificateList.stream()
+                .map(Certificate::getName)
+                .collect(Collectors.toList());
     }
 
     private List<PurchaseDto> migrateListFromEntityToDto(List<Purchase> purchases) {

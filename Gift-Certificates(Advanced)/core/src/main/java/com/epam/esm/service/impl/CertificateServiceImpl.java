@@ -11,6 +11,7 @@ import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
 import com.epam.esm.validation.Validator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * This class is an implementation of CertificateService.
  */
 @Service
+@RequiredArgsConstructor
 public class CertificateServiceImpl implements CertificateService {
 
     private static final String SORT_ORDER_DESC = "desc";
@@ -46,9 +48,6 @@ public class CertificateServiceImpl implements CertificateService {
 
     private int limit;
     private int offset = 0;
-
-    public CertificateServiceImpl() {
-    }
 
     @Autowired
     public CertificateServiceImpl(CertificateDao certificateDao, TagDao tagDao,
@@ -139,12 +138,11 @@ public class CertificateServiceImpl implements CertificateService {
 
         List<Certificate> certificates = certificateDao.findCertificatesByParams(tagName,
                 partOfCertificateName, partOfCertificateDescription, offset, limit);
+        checkListOnEmptyOrNull(certificates);
         List<CertificateDto> certificateList = migrateListFromEntityToDto(certificates);
-        checkListOnEmptyOrNull(certificateList);
 
         String typeOfSort = params.getOrDefault(TYPE_SORT, "name");
         String order = params.getOrDefault(ORDER, "asc");
-
         return sortByTypeAndOrder(certificateList, typeOfSort, order);
     }
 
@@ -158,9 +156,9 @@ public class CertificateServiceImpl implements CertificateService {
         }
 
         List<Certificate> certificates = certificateDao.findAll(offset, limit);
-        List<CertificateDto> certificateList = migrateListFromEntityToDto(certificates);
-        checkListOnEmptyOrNull(certificateList);
-        return certificateList;
+        checkListOnEmptyOrNull(certificates);
+
+        return migrateListFromEntityToDto(certificates);
     }
 
     @Override
@@ -174,9 +172,9 @@ public class CertificateServiceImpl implements CertificateService {
             offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
         }
         List<Certificate> certificates = certificateDao.findCertificatesBySeveralTags(tagNames, offset, limit);
-        List<CertificateDto> certificateList = migrateListFromEntityToDto(certificates);
-        checkListOnEmptyOrNull(certificateList);
-        return certificateList;
+        checkListOnEmptyOrNull(certificates);
+
+        return migrateListFromEntityToDto(certificates);
     }
 
     public CertificateDto findByName(String name) throws ResourceNotFoundException {

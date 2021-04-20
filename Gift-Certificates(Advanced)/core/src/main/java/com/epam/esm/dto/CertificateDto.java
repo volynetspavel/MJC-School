@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class CertificateDto extends AbstractDto {
+public class CertificateDto extends AbstractDto<Integer> {
     
     private String name;
     private String description;
