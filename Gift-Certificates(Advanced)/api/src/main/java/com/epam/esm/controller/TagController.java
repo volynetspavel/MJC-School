@@ -61,4 +61,11 @@ public class TagController {
     public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException {
         return tagService.getMostPopularTagOfUserWithHighestCostOfAllOrders();
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/user/{id}")
+    public TagDto findTagBYUserIdWithHighestCostOfAllOrders(@PathVariable("id") int userId)
+            throws ResourceNotFoundException {
+        return tagService.findTagBYUserIdWithHighestCostOfAllOrders(userId);
+    }
 }

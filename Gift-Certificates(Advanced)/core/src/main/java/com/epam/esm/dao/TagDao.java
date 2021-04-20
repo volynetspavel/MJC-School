@@ -12,4 +12,6 @@ public interface TagDao extends Dao<Tag, Integer> {
     void delete(Tag tag);
 
     Tag getMostPopularTagOfUserWithHighestCostOfAllOrders();
+
+    Tag findTagBYUserIdWithHighestCostOfAllOrders(int userId);
 }
