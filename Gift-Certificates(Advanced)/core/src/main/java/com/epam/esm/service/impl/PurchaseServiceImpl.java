@@ -55,11 +55,20 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Transactional
     @Override
-    public Purchase makePurchase(PurchaseDto purchaseDto) {
+    public Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException {
         String userEmail = purchaseDto.getUserEmail();
         User user = userDao.findByEmail(userEmail);
+        if (user == null) {
+            throw new ResourceNotFoundException("User with email: " + userEmail + " don't found.");
+        }
 
         List<String> certificateNames = purchaseDto.getCertificateNames();
+        for (String certificateName : certificateNames) {
+            if (certificateDao.findByName(certificateName) == null) {
+                throw new ResourceNotFoundException("Certificate with name '" + certificateName + "' don't found.");
+            }
+        }
+
         List<Certificate> certificates = certificateNames.stream()
                 .map(name -> certificateDao.findByName(name))
                 .collect(Collectors.toList());

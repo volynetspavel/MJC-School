@@ -11,6 +11,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class TagController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public TagDto insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException, ValidationException, ResourceNotFoundException {
+    public TagDto insert(@Valid @RequestBody TagDto tag) throws ResourceAlreadyExistException, ValidationException, ResourceNotFoundException {
         TagDto tagDto = tagService.insert(tag);
         tagHateoas.addLinksForTagDto(tagDto);
         return tagDto;
@@ -63,7 +64,7 @@ public class TagController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
-    public TagDto update(@PathVariable("id") int id, @RequestBody TagDto tag)
+    public TagDto update(@PathVariable("id") int id, @Valid @RequestBody TagDto tag)
             throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationException {
         tag.setId(id);
         TagDto tagDto = tagService.update(tag);

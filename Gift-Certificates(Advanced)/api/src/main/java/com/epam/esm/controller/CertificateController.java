@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public CertificateDto insert(@RequestBody CertificateDto certificateDto)
+    public CertificateDto insert(@Valid @RequestBody CertificateDto certificateDto)
             throws ResourceAlreadyExistException, ResourceNotFoundException, ValidationException {
         CertificateDto newCertificateDto = certificateService.insert(certificateDto);
         certificateHateoas.addLinksForCertificateDto(newCertificateDto);
@@ -42,7 +43,7 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
-    public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
+    public CertificateDto update(@PathVariable("id") int id, @Valid @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.update(certificateDto);
@@ -61,7 +62,8 @@ public class CertificateController {
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/single/{id}")
-    public CertificateDto updateSingleField(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
+    public CertificateDto updateSingleField(@PathVariable("id") int id,
+                                            @Valid @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ServiceException, ValidationException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.updateSingleField(certificateDto);
@@ -94,7 +96,7 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search")
-    public List<CertificateDto> findCertificatesBySeveralTags(@RequestBody List<String> tagNames,
+    public List<CertificateDto> findCertificatesBySeveralTags(@RequestParam(name = "tags") List<String> tagNames,
                                                               @RequestParam Map<String, String> params)
             throws ValidationException, ResourceNotFoundException {
         List<CertificateDto> certificateDtoList = certificateService.findCertificatesBySeveralTags(tagNames, params);

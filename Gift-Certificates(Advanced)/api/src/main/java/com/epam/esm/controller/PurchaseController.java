@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Purchase makePurchase(@RequestBody PurchaseDto purchase)
+    public Purchase makePurchase(@Valid @RequestBody PurchaseDto purchase)
             throws ResourceNotFoundException, ValidationException {
         Purchase newPurchase = purchaseService.makePurchase(purchase);
         purchaseHateoas.addLinksForPurchaseDtoWithUser(newPurchase);

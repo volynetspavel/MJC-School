@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.RepresentationModel;
 
+import javax.validation.constraints.Null;
+
 /**
  * Abstract class for data transfer object classes.
  */
@@ -13,5 +15,6 @@ import org.springframework.hateoas.RepresentationModel;
 @NoArgsConstructor
 public class AbstractDto<T extends Number> extends RepresentationModel<AbstractDto<Number>> {
 
+    @Null
     private T id;
 }

@@ -2,12 +2,15 @@ package com.epam.esm.dao.db;
 
 import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.model.Purchase;
+import com.epam.esm.model.User;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -16,6 +19,8 @@ import java.util.List;
  */
 @Repository
 public class PurchaseDaoImpl implements PurchaseDao {
+
+    private static final String USER = "user";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -40,6 +45,21 @@ public class PurchaseDaoImpl implements PurchaseDao {
     @Override
     public Purchase findById(BigInteger id) {
         return entityManager.find(Purchase.class, id);
+    }
+
+    @Override
+    public List<Purchase> findPurchasesByUser(User user, int offset, int limit) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Purchase> criteriaQuery = criteriaBuilder.createQuery(Purchase.class);
+        Root<Purchase> purchaseRoot = criteriaQuery.from(Purchase.class);
+
+        Predicate predicate = criteriaBuilder.equal(purchaseRoot.get(USER), user);
+        criteriaQuery.select(purchaseRoot)
+                .where(predicate);
+        return entityManager.createQuery(criteriaQuery)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
     }
 
     @Override

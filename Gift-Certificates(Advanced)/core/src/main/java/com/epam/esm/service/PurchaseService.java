@@ -20,7 +20,7 @@ public interface PurchaseService extends Service<PurchaseDto, Purchase> {
         return null;
     }
 
-    Purchase makePurchase(PurchaseDto purchaseDto);
+    Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException;
 
     @Override
     default PurchaseDto insert(PurchaseDto entityDto) {
