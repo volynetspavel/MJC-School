@@ -4,9 +4,11 @@ import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
+import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,18 +25,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
 
-    private static final String PAGE = "page";
-    private static final String SIZE = "size";
-
     private TagDao tagDao;
     private TagMapper tagMapper;
+    private PaginationValidator paginationValidator;
 
     private int offset;
 
     @Autowired
-    public TagServiceImpl(TagDao tagDao, TagMapper tagMapper) {
+    public TagServiceImpl(TagDao tagDao, TagMapper tagMapper, PaginationValidator paginationValidator) {
         this.tagDao = tagDao;
         this.tagMapper = tagMapper;
+        this.paginationValidator = paginationValidator;
     }
 
     @Transactional
@@ -45,7 +46,6 @@ public class TagServiceImpl implements TagService {
                     + tagDto.getName() + ") has already existed.");
         }
         Tag tag = tagMapper.toEntity(tagDto);
-        tag.setId(null);
         Tag newTag = tagDao.insert(tag);
         return tagMapper.toDto(newTag);
     }
@@ -81,17 +81,14 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+    public List<TagDto> findAll(Map<String, String> params) throws ValidationException {
         int limit = tagDao.getCount();
-
-        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
-            limit = Integer.parseInt(params.get(SIZE));
-            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
         }
 
         List<Tag> tags = tagDao.findAll(offset, limit);
-        checkListOnEmptyOrNull(tags);
-
         return migrateListFromEntityToDto(tags);
     }
 

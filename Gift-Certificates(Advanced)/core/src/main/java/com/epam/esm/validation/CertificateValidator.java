@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
  * Contains methods for validating data of entities.
  */
 @Component
-public class Validator {
+public class CertificateValidator {
 
     public boolean isCertificateContainsOnlySingleField(CertificateDto certificateDto){
         int countFieldsNotNull = 0;

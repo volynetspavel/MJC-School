@@ -5,6 +5,7 @@ import com.epam.esm.controller.PurchaseController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.model.Purchase;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
@@ -42,7 +43,7 @@ public class PurchaseHateoas {
         return CollectionModel.of(purchases, selfLink);
     }
 
-    public void addLinksForPurchaseDtoWithUser(Purchase newPurchase) throws ResourceNotFoundException {
+    public void addLinksForPurchaseDtoWithUser(Purchase newPurchase) throws ResourceNotFoundException, ValidationException {
         Link selfLink = linkTo(PurchaseController.class)
                 .slash(newPurchase.getId())
                 .withSelfRel();

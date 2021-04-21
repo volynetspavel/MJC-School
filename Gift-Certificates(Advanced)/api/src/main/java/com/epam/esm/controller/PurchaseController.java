@@ -2,6 +2,7 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.hateoas.PurchaseHateoas;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.service.PurchaseService;
@@ -31,7 +32,8 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Purchase makePurchase(@RequestBody PurchaseDto purchase) throws ResourceNotFoundException {
+    public Purchase makePurchase(@RequestBody PurchaseDto purchase)
+            throws ResourceNotFoundException, ValidationException {
         Purchase newPurchase = purchaseService.makePurchase(purchase);
         purchaseHateoas.addLinksForPurchaseDtoWithUser(newPurchase);
         return newPurchase;
@@ -40,7 +42,7 @@ public class PurchaseController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<PurchaseDto> findPurchases(@RequestParam Map<String, String> params)
-            throws ResourceNotFoundException {
+            throws ValidationException {
         List<PurchaseDto> purchases = purchaseService.findAll(params);
         purchaseHateoas.addLinksForListOfPurchaseDto(purchases);
         return purchases;
@@ -58,7 +60,7 @@ public class PurchaseController {
     @GetMapping("/user/{id}")
     public List<PurchaseDto> findPurchasesByUserId(@PathVariable("id") int userId,
                                                    @RequestParam Map<String, String> params)
-            throws ResourceNotFoundException {
+            throws ResourceNotFoundException, ValidationException {
         List<PurchaseDto> purchases = purchaseService.findPurchasesByUser(userId, params);
         purchaseHateoas.addLinksForListOfPurchaseDto(purchases);
         return purchases;

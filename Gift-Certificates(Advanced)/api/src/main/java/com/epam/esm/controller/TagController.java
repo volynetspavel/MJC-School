@@ -3,6 +3,7 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.hateoas.TagHateoas;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class TagController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public TagDto insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException, ResourceNotFoundException {
+    public TagDto insert(@RequestBody TagDto tag) throws ResourceAlreadyExistException, ValidationException, ResourceNotFoundException {
         TagDto tagDto = tagService.insert(tag);
         tagHateoas.addLinksForTagDto(tagDto);
         return tagDto;
@@ -40,14 +41,15 @@ public class TagController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public CollectionModel<TagDto> findAll(@RequestParam Map<String, String> params) throws ResourceNotFoundException {
+    public CollectionModel<TagDto> findAll(@RequestParam Map<String, String> params)
+            throws ValidationException, ResourceNotFoundException {
         List<TagDto> tagList = tagService.findAll(params);
         return tagHateoas.addLinksForListOfTagDto(tagList);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public TagDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
+    public TagDto findById(@PathVariable("id") int id) throws ResourceNotFoundException, ValidationException {
         TagDto tagDto = tagService.findById(id);
         tagHateoas.addLinksForTagDto(tagDto);
         return tagDto;
@@ -62,7 +64,7 @@ public class TagController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
     public TagDto update(@PathVariable("id") int id, @RequestBody TagDto tag)
-            throws ResourceNotFoundException, ResourceAlreadyExistException {
+            throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationException {
         tag.setId(id);
         TagDto tagDto = tagService.update(tag);
         tagHateoas.addLinksForTagDto(tagDto);
@@ -70,7 +72,7 @@ public class TagController {
     }
 
     @GetMapping("/popular")
-    public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException {
+    public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException, ValidationException {
         TagDto tagDto = tagService.getMostPopularTagOfUserWithHighestCostOfAllOrders();
         tagHateoas.addLinksForTagDto(tagDto);
         return tagDto;
@@ -79,7 +81,7 @@ public class TagController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/user/{id}")
     public TagDto findTagBYUserIdWithHighestCostOfAllOrders(@PathVariable("id") int userId)
-            throws ResourceNotFoundException {
+            throws ResourceNotFoundException, ValidationException {
         TagDto tagDto = tagService.findTagBYUserIdWithHighestCostOfAllOrders(userId);
         tagHateoas.addLinksForTagDto(tagDto);
         tagHateoas.addLinksForUser(tagDto, userId);

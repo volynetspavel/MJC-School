@@ -5,11 +5,13 @@ import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.mapper.impl.PurchaseMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.model.User;
 import com.epam.esm.service.PurchaseService;
+import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,24 +33,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PurchaseServiceImpl implements PurchaseService {
 
-    private static final String PAGE = "page";
-    private static final String SIZE = "size";
-
     private UserDao userDao;
     private CertificateDao certificateDao;
     private PurchaseDao purchaseDao;
     private PurchaseMapper purchaseMapper;
+    private PaginationValidator paginationValidator;
 
     private int limit;
     private int offset = 0;
 
     @Autowired
     public PurchaseServiceImpl(PurchaseDao purchaseDao, PurchaseMapper purchaseMapper,
-                               UserDao userDao, CertificateDao certificateDao) {
+                               UserDao userDao, CertificateDao certificateDao,
+                               PaginationValidator paginationValidator) {
         this.purchaseDao = purchaseDao;
         this.purchaseMapper = purchaseMapper;
         this.userDao = userDao;
         this.certificateDao = certificateDao;
+        this.paginationValidator = paginationValidator;
     }
 
     @Transactional
@@ -68,7 +70,6 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .get();
 
         Purchase purchase = purchaseMapper.toEntity(purchaseDto);
-        purchase.setId(null);
         purchase.setUser(user);
         purchase.setCost(totalCost);
         purchase.setPurchaseDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
@@ -90,15 +91,34 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
-    public List<PurchaseDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+    public List<PurchaseDto> findAll(Map<String, String> params) throws ValidationException {
         limit = purchaseDao.getCount().intValue();
-
-        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
-            limit = Integer.parseInt(params.get(SIZE));
-            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
         }
+
         List<Purchase> purchases = purchaseDao.findAll(offset, limit);
-        checkListOnEmptyOrNull(purchases);
+
+        List<PurchaseDto> purchaseList = migrateListFromEntityToDto(purchases);
+        return setCertificateNamesFromCertificatesOfEntityToDto(purchaseList, purchases);
+    }
+
+    @Override
+    public List<PurchaseDto> findPurchasesByUser(int userId, Map<String, String> params)
+            throws ValidationException, ResourceNotFoundException {
+        limit = purchaseDao.getCount().intValue();
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
+        }
+
+        User user = userDao.findById(userId);
+        if (user == null) {
+            throw new ResourceNotFoundException("Requested resource not found (id = " + userId + ")");
+        }
+
+        List<Purchase> purchases = purchaseDao.findPurchasesByUser(user, offset, limit);
 
         List<PurchaseDto> purchaseList = migrateListFromEntityToDto(purchases);
         return setCertificateNamesFromCertificatesOfEntityToDto(purchaseList, purchases);

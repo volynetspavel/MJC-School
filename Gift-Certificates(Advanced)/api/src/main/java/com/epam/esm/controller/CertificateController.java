@@ -4,20 +4,12 @@ import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.hateoas.CertificateHateoas;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +33,7 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public CertificateDto insert(@RequestBody CertificateDto certificateDto)
-            throws ResourceAlreadyExistException {
+            throws ResourceAlreadyExistException, ResourceNotFoundException, ValidationException {
         CertificateDto newCertificateDto = certificateService.insert(certificateDto);
         certificateHateoas.addLinksForCertificateDto(newCertificateDto);
         return newCertificateDto;
@@ -51,7 +43,7 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
     public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
-            throws ResourceNotFoundException, ResourceAlreadyExistException {
+            throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.update(certificateDto);
         certificateHateoas.addLinksForCertificateDto(updatedCertificateDto);
@@ -70,7 +62,7 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/single/{id}")
     public CertificateDto updateSingleField(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
-            throws ResourceNotFoundException, ServiceException {
+            throws ResourceNotFoundException, ServiceException, ValidationException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.updateSingleField(certificateDto);
         certificateHateoas.addLinksForCertificateDto(updatedCertificateDto);
@@ -85,7 +77,7 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
+    public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException, ValidationException {
         CertificateDto certificateDto = certificateService.findById(id);
         certificateHateoas.addLinksForCertificateDto(certificateDto);
         return certificateDto;
@@ -94,7 +86,7 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<CertificateDto> findCertificatesByParams(@RequestParam Map<String, String> params)
-            throws ResourceNotFoundException {
+            throws ValidationException, ResourceNotFoundException {
         List<CertificateDto> certificateDtoList = certificateService.findCertificatesByParams(params);
         certificateHateoas.addLinksForListOfCertificateDto(certificateDtoList);
         return certificateDtoList;
@@ -104,7 +96,7 @@ public class CertificateController {
     @GetMapping("/search")
     public List<CertificateDto> findCertificatesBySeveralTags(@RequestBody List<String> tagNames,
                                                               @RequestParam Map<String, String> params)
-            throws ResourceNotFoundException {
+            throws ValidationException, ResourceNotFoundException {
         List<CertificateDto> certificateDtoList = certificateService.findCertificatesBySeveralTags(tagNames, params);
         certificateHateoas.addLinksForListOfCertificateDto(certificateDtoList);
         return certificateDtoList;

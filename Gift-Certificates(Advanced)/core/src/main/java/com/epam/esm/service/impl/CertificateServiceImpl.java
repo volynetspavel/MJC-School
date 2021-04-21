@@ -3,14 +3,18 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.CertificateDto;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.mapper.impl.CertificateMapper;
+import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
-import com.epam.esm.validation.Validator;
+import com.epam.esm.validation.CertificateValidator;
+import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,8 +37,6 @@ import java.util.stream.Collectors;
 public class CertificateServiceImpl implements CertificateService {
 
     private static final String SORT_ORDER_DESC = "desc";
-    private static final String PAGE = "page";
-    private static final String SIZE = "size";
     private static final String TAG_NAME = "tag_name";
     private static final String PART_NAME = "part_name";
     private static final String PART_DESC = "part_desc";
@@ -44,18 +46,23 @@ public class CertificateServiceImpl implements CertificateService {
     private CertificateDao certificateDao;
     private TagDao tagDao;
     private CertificateMapper certificateMapper;
-    private Validator validator;
+    private TagMapper tagMapper;
+    private CertificateValidator certificateValidator;
+    private PaginationValidator paginationValidator;
 
     private int limit;
     private int offset = 0;
 
     @Autowired
     public CertificateServiceImpl(CertificateDao certificateDao, TagDao tagDao,
-                                  CertificateMapper certificateMapper, Validator validator) {
+                                  CertificateMapper certificateMapper, TagMapper tagMapper,
+                                  CertificateValidator certificateValidator, PaginationValidator paginationValidator) {
         this.certificateDao = certificateDao;
         this.tagDao = tagDao;
         this.certificateMapper = certificateMapper;
-        this.validator = validator;
+        this.tagMapper = tagMapper;
+        this.certificateValidator = certificateValidator;
+        this.paginationValidator = paginationValidator;
     }
 
     @Transactional
@@ -65,12 +72,11 @@ public class CertificateServiceImpl implements CertificateService {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + certificateDto.getName() + ") has already existed.");
         }
-        List<Tag> tags = certificateDto.getTags();
-        List<Tag> preparedTags = prepareTags(tags);
+        List<TagDto> preparedTags = prepareTags(certificateDto.getTags());
+        List<Tag> tags = migrateListTagsFromDtoToEntity(preparedTags);
 
         Certificate certificate = certificateMapper.toEntity(certificateDto);
-        certificate.setId(null);
-        certificate.setTags(preparedTags);
+        certificate.setTags(tags);
         certificate.setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         certificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
@@ -99,7 +105,7 @@ public class CertificateServiceImpl implements CertificateService {
     public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException, ServiceException {
 
-        if (!validator.isCertificateContainsOnlySingleField(updatedCertificateDto)) {
+        if (!certificateValidator.isCertificateContainsOnlySingleField(updatedCertificateDto)) {
             throw new ServiceException("Request contains more than one field.");
         }
         return update(updatedCertificateDto);
@@ -125,21 +131,20 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ResourceNotFoundException {
+    public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ValidationException {
         limit = certificateDao.getCount();
-
-        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
-            limit = Integer.parseInt(params.get(SIZE));
-            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
         }
+
         String tagName = params.getOrDefault(TAG_NAME, "");
         String partOfCertificateName = params.getOrDefault(PART_NAME, "");
         String partOfCertificateDescription = params.getOrDefault(PART_DESC, "");
 
         List<Certificate> certificates = certificateDao.findCertificatesByParams(tagName,
                 partOfCertificateName, partOfCertificateDescription, offset, limit);
-        checkListOnEmptyOrNull(certificates);
-        List<CertificateDto> certificateList = migrateListFromEntityToDto(certificates);
+        List<CertificateDto> certificateList = migrateListCertificatesFromEntityToDto(certificates);
 
         String typeOfSort = params.getOrDefault(TYPE_SORT, "name");
         String order = params.getOrDefault(ORDER, "asc");
@@ -147,34 +152,28 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public List<CertificateDto> findAll(Map<String, String> params) throws ResourceNotFoundException {
+    public List<CertificateDto> findAll(Map<String, String> params) throws ValidationException {
         limit = certificateDao.getCount();
-
-        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
-            limit = Integer.parseInt(params.get(SIZE));
-            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
         }
 
         List<Certificate> certificates = certificateDao.findAll(offset, limit);
-        checkListOnEmptyOrNull(certificates);
-
-        return migrateListFromEntityToDto(certificates);
+        return migrateListCertificatesFromEntityToDto(certificates);
     }
 
     @Override
     public List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
                                                               Map<String, String> params)
-            throws ResourceNotFoundException {
+            throws ValidationException {
         limit = certificateDao.getCount();
-
-        if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
-            limit = Integer.parseInt(params.get(SIZE));
-            offset = (Integer.parseInt(params.get(PAGE)) - 1) * limit;
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
         }
         List<Certificate> certificates = certificateDao.findCertificatesBySeveralTags(tagNames, offset, limit);
-        checkListOnEmptyOrNull(certificates);
-
-        return migrateListFromEntityToDto(certificates);
+        return migrateListCertificatesFromEntityToDto(certificates);
     }
 
     public CertificateDto findByName(String name) throws ResourceNotFoundException {
@@ -185,14 +184,14 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificate);
     }
 
-    private List<Tag> prepareTags(List<Tag> tags) {
+    private List<TagDto> prepareTags(List<TagDto> tags) {
         if (tags == null) {
             return new ArrayList<>();
         }
         return tags.stream()
-                .map(tag -> (tagDao.findByName(tag.getName()) == null
-                        ? tagDao.insert(tag)
-                        : tagDao.findByName(tag.getName())))
+                .map(tag -> tagMapper.toDto((tagDao.findByName(tag.getName()) == null
+                        ? tagDao.insert(tagMapper.toEntity(tag))
+                        : tagDao.findByName(tag.getName()))))
                 .collect(Collectors.toList());
     }
 
@@ -219,13 +218,13 @@ public class CertificateServiceImpl implements CertificateService {
         updatedCertificateDto.setLastUpdateDate(LocalDateTime
                 .now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
-        List<Tag> updatedTags;
+        List<TagDto> updatedTags;
         if (updatedCertificateDto.getTags() == null) {
-            updatedTags = existedCertificate.getTags();
+            updatedTags = migrateListTagsFromEntityToDto(existedCertificate.getTags());
         } else {
             if (existedCertificate.getTags() != null) {
                 updatedTags = prepareTags(updatedCertificateDto.getTags());
-                updatedTags.addAll(existedCertificate.getTags());
+                updatedTags.addAll(migrateListTagsFromEntityToDto(existedCertificate.getTags()));
             } else {
                 updatedTags = prepareTags(updatedCertificateDto.getTags());
                 updatedCertificateDto.setTags(updatedTags);
@@ -236,9 +235,21 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toEntity(updatedCertificateDto);
     }
 
-    private List<CertificateDto> migrateListFromEntityToDto(List<Certificate> certificates) {
+    private List<CertificateDto> migrateListCertificatesFromEntityToDto(List<Certificate> certificates) {
         return certificates.stream()
                 .map(certificate -> certificateMapper.toDto(certificate))
+                .collect(Collectors.toList());
+    }
+
+    private List<Tag> migrateListTagsFromDtoToEntity(List<TagDto> tags) {
+        return tags.stream()
+                .map(tagDto -> tagMapper.toEntity(tagDto))
+                .collect(Collectors.toList());
+    }
+
+    private List<TagDto> migrateListTagsFromEntityToDto(List<Tag> tags) {
+        return tags.stream()
+                .map(tag -> tagMapper.toDto(tag))
                 .collect(Collectors.toList());
     }
 

@@ -2,6 +2,7 @@ package com.epam.esm.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.server.core.Relation;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -12,6 +13,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@Relation(itemRelation = "purchase", collectionRelation = "purchases")
 public class PurchaseDto extends AbstractDto<BigInteger> {
 
     private String userEmail;

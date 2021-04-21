@@ -3,6 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dto.AbstractDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.model.AbstractEntity;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface Service<T extends AbstractDto, K extends AbstractEntity> {
 
     T findById(int id) throws ResourceNotFoundException;
 
-    List<T> findAll(Map<String, String> params) throws ResourceNotFoundException;
+    List<T> findAll(Map<String, String> params) throws ValidationException;
 
     default void checkListOnEmptyOrNull(List<K> entities) throws ResourceNotFoundException {
         if (entities == null || entities.isEmpty()) {
