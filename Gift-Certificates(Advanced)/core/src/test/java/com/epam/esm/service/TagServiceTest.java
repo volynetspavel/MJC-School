@@ -4,10 +4,11 @@ import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.impl.TagServiceImpl;
-import org.junit.jupiter.api.Assertions;
+import com.epam.esm.validation.PaginationValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,8 @@ class TagServiceTest {
     private TagDao tagDao;
     @Mock
     private TagMapper tagMapper;
+    @Mock
+    private PaginationValidator paginationValidator;
 
     @DisplayName("Testing method findById() on positive result")
     @Test
@@ -110,7 +113,7 @@ class TagServiceTest {
 
         when(tagDao.findByName(name)).thenReturn(newTag);
 
-        Assertions.assertThrows(ResourceAlreadyExistException.class,
+        assertThrows(ResourceAlreadyExistException.class,
                 () -> tagService.insert(newTagDto));
     }
 
@@ -147,7 +150,7 @@ class TagServiceTest {
 
         when(tagDao.findById(id)).thenReturn(null);
 
-        Assertions.assertThrows(ResourceNotFoundException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> tagService.update(newTagDto));
     }
 
@@ -165,13 +168,13 @@ class TagServiceTest {
         Tag tagWithSameName = createTag(id, newName);
         when(tagDao.findByName(newName)).thenReturn(tagWithSameName);
 
-        Assertions.assertThrows(ResourceAlreadyExistException.class,
+        assertThrows(ResourceAlreadyExistException.class,
                 () -> tagService.update(newTagDto));
     }
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
-    void findAllSuccessTest() throws ResourceNotFoundException {
+    void findAllSuccessTest() throws ValidationException {
 
         int id1 = 1;
         String name1 = "extreme";
@@ -196,6 +199,8 @@ class TagServiceTest {
         int offset = 0;
         int limit = 3;
         when(tagDao.getCount()).thenReturn(3);
+        when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
+
         when(tagDao.findAll(offset, limit)).thenReturn(expectedTagList);
         when(tagMapper.toDto(tag1)).thenReturn(tagDto1);
         when(tagMapper.toDto(tag2)).thenReturn(tagDto2);
@@ -204,18 +209,6 @@ class TagServiceTest {
         List<TagDto> actualTagDtoList = tagService.findAll(new HashMap<>());
 
         assertEquals(expectedTagDtoList, actualTagDtoList);
-    }
-
-    @DisplayName("Testing method findAll() on negative result")
-    @Test
-    void findAllThrowsExceptionTest() {
-        int offset = 0;
-        int limit = 3;
-        when(tagDao.getCount()).thenReturn(3);
-        when(tagDao.findAll(offset, limit)).thenReturn(null);
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> tagService.findAll(new HashMap<>()));
     }
 
     private Tag createTag(int id, String name) {

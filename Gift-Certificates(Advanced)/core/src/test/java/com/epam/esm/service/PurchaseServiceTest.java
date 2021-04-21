@@ -4,14 +4,14 @@ import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.PurchaseDto;
-import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.mapper.impl.PurchaseMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.model.User;
 import com.epam.esm.service.impl.PurchaseServiceImpl;
-import org.junit.jupiter.api.Assertions;
+import com.epam.esm.validation.PaginationValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Clock;
@@ -31,7 +30,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -50,7 +48,8 @@ class PurchaseServiceTest {
     private UserDao userDao;
     @Mock
     private CertificateDao certificateDao;
-
+    @Mock
+    private PaginationValidator paginationValidator;
 
     @DisplayName("Testing method findById() on positive result")
     @Test
@@ -92,7 +91,7 @@ class PurchaseServiceTest {
 
     @DisplayName("Testing method makePurchase() on positive result")
     @Test
-    void makePurchaseSuccessTest() {
+    void makePurchaseSuccessTest() throws ResourceNotFoundException {
         BigInteger id = new BigInteger("1");
         String userEmail = "jonhy@mail.com";
         BigDecimal cost = new BigDecimal("150");
@@ -124,55 +123,160 @@ class PurchaseServiceTest {
         assertEquals(newPurchase, purchaseAfterMakePurchase);
     }
 
-/*
-    @DisplayName("Testing method findAll() on positive result")
+    @DisplayName("Testing method makePurchase() on exception, when user doesn't exist")
     @Test
-    void findAllSuccessTest() throws ResourceNotFoundException {
-
-        int id1 = 1;
-        String name1 = "extreme";
-        Purchase purchase1 = createPurchase(id1, name1);
-
-        int id2 = 2;
-        String name2 = "beauty";
-        Purchase purchase2 = createPurchase(id2, name2);
-
-        int id3 = 3;
-        String name3 = "rest";
-        Purchase purchase3 = createPurchase(id3, name3);
-
-        List<Purchase> expectedPurchaseList = Arrays.asList(purchase1, purchase2, purchase3);
-
-        PurchaseDto purchaseDto1 = createPurchaseDto(id1, name1);
-        PurchaseDto purchaseDto2 = createPurchaseDto(id2, name2);
-        PurchaseDto purchaseDto3 = createPurchaseDto(id3, name3);
-
-        List<PurchaseDto> expectedPurchaseDtoList = Arrays.asList(purchaseDto1, purchaseDto2, purchaseDto3);
-
-        int offset = 0;
-        int limit = 3;
-        when(purchaseDao.getCount()).thenReturn(3);
-        when(purchaseDao.findAll(offset, limit)).thenReturn(expectedPurchaseList);
-        when(purchaseMapper.toDto(purchase1)).thenReturn(purchaseDto1);
-        when(purchaseMapper.toDto(purchase2)).thenReturn(purchaseDto2);
-        when(purchaseMapper.toDto(purchase3)).thenReturn(purchaseDto3);
-
-        List<PurchaseDto> actualPurchaseDtoList = purchaseService.findAll(new HashMap<>());
-
-        assertEquals(expectedPurchaseDtoList, actualPurchaseDtoList);
-    }
-
-    @DisplayName("Testing method findAll() on negative result")
-    @Test
-    void findAllThrowsExceptionTest() {
-        int offset = 0;
-        int limit = 3;
-        when(purchaseDao.getCount()).thenReturn(3);
-        when(purchaseDao.findAll(offset, limit)).thenReturn(null);
+    void makePurchaseThrowsExceptionWhenUserDoesNotExistTest() {
+        String userEmail = "jonhy-non-exist@mail.com";
+        PurchaseDto newPurchaseDto = createPurchaseDto(null, userEmail, null, null, null);
+        when(userDao.findByEmail(userEmail)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class,
-                () -> purchaseService.findAll(new HashMap<>()));
-    }*/
+                () -> purchaseService.makePurchase(newPurchaseDto));
+    }
+
+    @DisplayName("Testing method makePurchase() on exception, when certificate doesn't exist")
+    @Test
+    void makePurchaseThrowsExceptionWhenCertificateDoesNotExistTest() {
+        BigInteger id = new BigInteger("1");
+        String userEmail = "jonhy@mail.com";
+        BigDecimal cost = new BigDecimal("150");
+        String purchaseDate = "2021-04-19T06:12:23.523";
+
+        String certificateName = "Certificate Non-exist";
+        List<String> certificateNames = Arrays.asList(certificateName);
+
+        PurchaseDto newPurchaseDto = createPurchaseDto(id, userEmail, cost, purchaseDate, certificateNames);
+
+        User user = new User();
+        user.setEmail(userEmail);
+        when(userDao.findByEmail(userEmail)).thenReturn(user);
+        when(certificateDao.findByName(certificateName)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> purchaseService.makePurchase(newPurchaseDto));
+    }
+
+    @DisplayName("Testing method findPurchasesByUser() on positive result")
+    @Test
+    void findPurchasesByUserSuccessTest() throws ResourceNotFoundException, ValidationException {
+        int userId = 1;
+        String userEmail = "jonhy@mail.com";
+
+        int offset = 0;
+        int limit = 3;
+        when(purchaseDao.getCount()).thenReturn(new BigInteger("3"));
+        when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
+
+        User user = new User();
+        user.setId(userId);
+        when(userDao.findById(userId)).thenReturn(user);
+
+        BigInteger id1 = new BigInteger("1");
+        BigDecimal cost1 = new BigDecimal("150");
+        String purchaseDate1 = "2021-04-19T06:12:23.523";
+        String certificateName1 = "Certificate1";
+        List<String> certificateNames1 = Arrays.asList(certificateName1);
+        Certificate certificate1 = new Certificate();
+        certificate1.setName(certificateName1);
+        List<Certificate> certificateList1 = Arrays.asList(certificate1);
+
+        PurchaseDto purchaseDto1 = createPurchaseDto(id1, userEmail, cost1, purchaseDate1, certificateNames1);
+        Purchase purchase1 = createPurchase(id1, user, cost1, purchaseDate1, certificateList1);
+
+        BigInteger id2 = new BigInteger("2");
+        BigDecimal cost2 = new BigDecimal("200");
+        String purchaseDate2 = "2021-04-01T13:08:43.157";
+        String certificateName2 = "Certificate2";
+        List<String> certificateNames2 = Arrays.asList(certificateName1);
+        Certificate certificate2 = new Certificate();
+        certificate2.setName(certificateName2);
+        List<Certificate> certificateList2 = Arrays.asList(certificate2);
+
+        PurchaseDto purchaseDto2 = createPurchaseDto(id2, userEmail, cost2, purchaseDate2, certificateNames2);
+        Purchase purchase2 = createPurchase(id2, user, cost2, purchaseDate2, certificateList2);
+
+        List<PurchaseDto> purchaseDtoList = Arrays.asList(purchaseDto1, purchaseDto2);
+        List<Purchase> purchaseList = Arrays.asList(purchase1, purchase2);
+
+        when(purchaseDao.findPurchasesByUser(user, offset, limit)).thenReturn(purchaseList);
+        when(purchaseMapper.toDto(purchase1)).thenReturn(purchaseDto1);
+        when(purchaseMapper.toDto(purchase2)).thenReturn(purchaseDto2);
+
+        List<PurchaseDto> purchaseDtoListByUserId = purchaseService.findPurchasesByUserId(userId, new HashMap<>());
+
+        assertEquals(purchaseDtoListByUserId, purchaseDtoList);
+    }
+
+    @DisplayName("Testing method findPurchasesByUser() on exception, when user doesn't exist.")
+    @Test
+    void findPurchasesByUserThrowsExceptionTest() throws ValidationException {
+        int userId = 1;
+
+        when(purchaseDao.getCount()).thenReturn(new BigInteger("3"));
+        when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
+
+        when(userDao.findById(userId)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> purchaseService.findPurchasesByUserId(userId, new HashMap<>()));
+    }
+
+    @DisplayName("Testing method findAll() on positive result")
+    @Test
+    void findAllSuccessTest() throws ValidationException {
+        int offset = 0;
+        int limit = 3;
+        when(purchaseDao.getCount()).thenReturn(new BigInteger("3"));
+        when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
+
+        int userId1 = 1;
+        String userEmail1 = "jonhy2@mail.com";
+        User user1 = new User();
+        user1.setId(userId1);
+        user1.setEmail(userEmail1);
+
+        BigInteger id1 = new BigInteger("1");
+        BigDecimal cost1 = new BigDecimal("150");
+        String purchaseDate1 = "2021-04-19T06:12:23.523";
+        String certificateName1 = "Certificate1";
+        List<String> certificateNames1 = Arrays.asList(certificateName1);
+        Certificate certificate1 = new Certificate();
+        certificate1.setName(certificateName1);
+        List<Certificate> certificateList1 = Arrays.asList(certificate1);
+
+        PurchaseDto purchaseDto1 = createPurchaseDto(id1, userEmail1, cost1, purchaseDate1, certificateNames1);
+        Purchase purchase1 = createPurchase(id1, user1, cost1, purchaseDate1, certificateList1);
+
+        int userId2 = 2;
+        String userEmail2 = "jonhy2@mail.com";
+        User user2 = new User();
+        user2.setId(userId2);
+        user2.setEmail(userEmail2);
+
+        BigInteger id2 = new BigInteger("2");
+        BigDecimal cost2 = new BigDecimal("200");
+        String purchaseDate2 = "2021-04-01T13:08:43.157";
+        String certificateName2 = "Certificate2";
+        List<String> certificateNames2 = Arrays.asList(certificateName1);
+        Certificate certificate2 = new Certificate();
+        certificate2.setName(certificateName2);
+        List<Certificate> certificateList2 = Arrays.asList(certificate2);
+
+        PurchaseDto purchaseDto2 = createPurchaseDto(id2, userEmail2, cost2, purchaseDate2, certificateNames2);
+        Purchase purchase2 = createPurchase(id2, user2, cost2, purchaseDate2, certificateList2);
+
+        List<PurchaseDto> purchaseDtoList = Arrays.asList(purchaseDto1, purchaseDto2);
+        List<Purchase> purchaseList = Arrays.asList(purchase1, purchase2);
+
+
+        when(purchaseDao.findAll(offset, limit)).thenReturn(purchaseList);
+        when(purchaseMapper.toDto(purchase1)).thenReturn(purchaseDto1);
+        when(purchaseMapper.toDto(purchase2)).thenReturn(purchaseDto2);
+
+        List<PurchaseDto> purchaseDtoListFromDataBase = purchaseService.findAll(new HashMap<>());
+
+        assertEquals(purchaseDtoList, purchaseDtoListFromDataBase);
+    }
 
     private Purchase createPurchase(BigInteger id, User user, BigDecimal cost,
                                     String purchaseDate, List<Certificate> certificates) {

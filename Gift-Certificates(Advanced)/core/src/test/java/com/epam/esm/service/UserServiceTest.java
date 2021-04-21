@@ -3,9 +3,11 @@ package com.epam.esm.service;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.exception.ValidationException;
 import com.epam.esm.mapper.impl.UserMapper;
 import com.epam.esm.model.User;
 import com.epam.esm.service.impl.UserServiceImpl;
+import com.epam.esm.validation.PaginationValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +35,8 @@ class UserServiceTest {
     private UserDao userDao;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private PaginationValidator paginationValidator;
 
     @DisplayName("Testing method findById() on positive result")
     @Test
@@ -64,7 +68,7 @@ class UserServiceTest {
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
-    void findAllSuccessTest() throws ResourceNotFoundException {
+    void findAllSuccessTest() throws ValidationException {
 
         int id1 = 1;
         String name1 = "Jonh";
@@ -95,6 +99,8 @@ class UserServiceTest {
         int offset = 0;
         int limit = 3;
         when(userDao.getCount()).thenReturn(3);
+        when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
+
         when(userDao.findAll(offset, limit)).thenReturn(expectedUserList);
         when(userMapper.toDto(user1)).thenReturn(userDto1);
         when(userMapper.toDto(user2)).thenReturn(userDto2);
@@ -104,19 +110,6 @@ class UserServiceTest {
 
         assertEquals(expectedUserDtoList, actualUserDtoList);
     }
-
-    @DisplayName("Testing method findAll() on exception")
-    @Test
-    void findAllThrowsExceptionTest() {
-        int offset = 0;
-        int limit = 3;
-        when(userDao.getCount()).thenReturn(3);
-        when(userDao.findAll(offset, limit)).thenReturn(null);
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> userService.findAll(new HashMap<>()));
-    }
-
 
     private User createUser(int id, String name, String surname, String email) {
         User user = new User();
