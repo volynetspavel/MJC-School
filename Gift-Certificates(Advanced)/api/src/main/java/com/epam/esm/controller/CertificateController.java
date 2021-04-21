@@ -4,6 +4,7 @@ import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.hateoas.CertificateHateoas;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,17 +30,22 @@ import java.util.Map;
 public class CertificateController {
 
     private CertificateService certificateService;
+    private CertificateHateoas certificateHateoas;
 
     @Autowired
-    public CertificateController(CertificateService certificateService) {
+    public CertificateController(CertificateService certificateService, CertificateHateoas certificateHateoas) {
         this.certificateService = certificateService;
+        this.certificateHateoas = certificateHateoas;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public CertificateDto insert(@RequestBody CertificateDto certificateDto)
             throws ResourceAlreadyExistException {
-        return certificateService.insert(certificateDto);
+        CertificateDto newCertificateDto = certificateService.insert(certificateDto);
+        certificateHateoas.addLinksForCertificateDto(newCertificateDto);
+        return newCertificateDto;
+
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -47,7 +53,9 @@ public class CertificateController {
     public CertificateDto update(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ResourceAlreadyExistException {
         certificateDto.setId(id);
-        return certificateService.update(certificateDto);
+        CertificateDto updatedCertificateDto = certificateService.update(certificateDto);
+        certificateHateoas.addLinksForCertificateDto(updatedCertificateDto);
+        return updatedCertificateDto;
     }
 
     /**
@@ -64,7 +72,9 @@ public class CertificateController {
     public CertificateDto updateSingleField(@PathVariable("id") int id, @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ServiceException {
         certificateDto.setId(id);
-        return certificateService.updateSingleField(certificateDto);
+        CertificateDto updatedCertificateDto = certificateService.updateSingleField(certificateDto);
+        certificateHateoas.addLinksForCertificateDto(updatedCertificateDto);
+        return updatedCertificateDto;
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -76,14 +86,18 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException {
-        return certificateService.findById(id);
+        CertificateDto certificateDto = certificateService.findById(id);
+        certificateHateoas.addLinksForCertificateDto(certificateDto);
+        return certificateDto;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<CertificateDto> findCertificatesByParams(@RequestParam Map<String, String> params)
             throws ResourceNotFoundException {
-        return certificateService.findCertificatesByParams(params);
+        List<CertificateDto> certificateDtoList = certificateService.findCertificatesByParams(params);
+        certificateHateoas.addLinksForListOfCertificateDto(certificateDtoList);
+        return certificateDtoList;
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -91,6 +105,8 @@ public class CertificateController {
     public List<CertificateDto> findCertificatesBySeveralTags(@RequestBody List<String> tagNames,
                                                               @RequestParam Map<String, String> params)
             throws ResourceNotFoundException {
-        return certificateService.findCertificatesBySeveralTags(tagNames, params);
+        List<CertificateDto> certificateDtoList = certificateService.findCertificatesBySeveralTags(tagNames, params);
+        certificateHateoas.addLinksForListOfCertificateDto(certificateDtoList);
+        return certificateDtoList;
     }
 }
