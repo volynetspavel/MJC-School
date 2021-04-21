@@ -44,7 +44,8 @@ public class UserDaoImpl implements UserDao {
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         criteriaQuery.from(User.class);
         return (int) entityManager.createQuery(criteriaQuery)
-                .getResultStream().count();
+                .getResultStream()
+                .count();
     }
 
     @Override

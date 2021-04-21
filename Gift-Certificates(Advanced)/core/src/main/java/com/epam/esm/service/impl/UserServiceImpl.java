@@ -45,7 +45,6 @@ public class UserServiceImpl implements UserService {
         }
 
         List<User> users = userDao.findAll(offset, limit);
-
         return migrateListFromEntityToDto(users);
     }
 

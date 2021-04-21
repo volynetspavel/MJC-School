@@ -62,7 +62,7 @@ public class PurchaseController {
     public List<PurchaseDto> findPurchasesByUserId(@PathVariable("id") int userId,
                                                    @RequestParam Map<String, String> params)
             throws ResourceNotFoundException, ValidationException {
-        List<PurchaseDto> purchases = purchaseService.findPurchasesByUser(userId, params);
+        List<PurchaseDto> purchases = purchaseService.findPurchasesByUserId(userId, params);
         purchaseHateoas.addLinksForListOfPurchaseDto(purchases);
         return purchases;
     }

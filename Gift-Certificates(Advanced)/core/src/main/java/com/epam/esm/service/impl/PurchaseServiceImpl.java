@@ -63,15 +63,16 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
 
         List<String> certificateNames = purchaseDto.getCertificateNames();
-        for (String certificateName : certificateNames) {
-            if (certificateDao.findByName(certificateName) == null) {
-                throw new ResourceNotFoundException("Certificate with name '" + certificateName + "' don't found.");
-            }
-        }
 
         List<Certificate> certificates = certificateNames.stream()
                 .map(name -> certificateDao.findByName(name))
                 .collect(Collectors.toList());
+
+        for (Certificate certificate : certificates) {
+            if (certificate == null) {
+                throw new ResourceNotFoundException("Non-existent Certificate in list.");
+            }
+        }
 
         BigDecimal totalCost = certificates.stream()
                 .map(Certificate::getPrice)
@@ -114,7 +115,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
-    public List<PurchaseDto> findPurchasesByUser(int userId, Map<String, String> params)
+    public List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
             throws ValidationException, ResourceNotFoundException {
         limit = purchaseDao.getCount().intValue();
         if (paginationValidator.validatePaginationParameters(params)) {

@@ -45,7 +45,10 @@ public class CertificateDaoImpl implements CertificateDao {
         Root<Certificate> root = criteriaQuery.from(Certificate.class);
 
         criteriaQuery.where(criteriaBuilder.equal(root.get(NAME), name));
-        return entityManager.createQuery(criteriaQuery).getResultStream().findFirst().orElse(null);
+        return entityManager.createQuery(criteriaQuery)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
     }
 
     @Override

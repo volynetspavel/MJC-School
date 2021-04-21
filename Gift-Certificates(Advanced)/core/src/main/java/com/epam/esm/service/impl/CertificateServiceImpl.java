@@ -86,6 +86,10 @@ public class CertificateServiceImpl implements CertificateService {
     @Transactional
     @Override
     public CertificateDto update(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
+        int id = updatedCertificateDto.getId();
+
+        Certificate oldCertificate = certificateDao.findById(id);
+        checkEntityOnNull(oldCertificate, id);
 
         Certificate updatedCertificate = prepareCertificate(updatedCertificateDto);
         certificateDao.update(updatedCertificate);

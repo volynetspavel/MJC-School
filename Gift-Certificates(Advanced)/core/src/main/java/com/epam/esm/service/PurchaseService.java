@@ -36,6 +36,6 @@ public interface PurchaseService extends Service<PurchaseDto, Purchase> {
         return null;
     }
 
-    List<PurchaseDto> findPurchasesByUser(int userId, Map<String, String> params)
+    List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
             throws ResourceNotFoundException, ValidationException;
 }
