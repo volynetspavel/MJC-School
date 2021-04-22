@@ -191,7 +191,7 @@ class CertificateServiceTest {
         int id = 1;
 
         Certificate actual = getCertificate(1);
-        CertificateDto actualDto = getCertificateDto(1)
+        CertificateDto actualDto = getCertificateDto(1);
 
         when(certificateDao.findById(id)).thenReturn(actual);
         when(certificateMapper.toDto(actual)).thenReturn(actualDto);

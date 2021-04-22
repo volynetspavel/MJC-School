@@ -3,6 +3,7 @@ package com.epam.esm.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -22,6 +23,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@Audited
 public class Certificate extends AbstractEntity<Integer> {
 
     private String name;
