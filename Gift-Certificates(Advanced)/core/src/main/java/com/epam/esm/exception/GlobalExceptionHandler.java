@@ -7,8 +7,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.validation.constraints.Email;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final int METHOD_ARGUMENT_NOT_VALID_EXCEPTION_CODE = 2221;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ExceptionMessage> handle(ResourceNotFoundException ex) {
@@ -36,7 +40,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionMessage> handle(MethodArgumentNotValidException ex) {
-        ExceptionMessage exceptionMessage = new ExceptionMessage(2265, ex.getMessage());
+        ExceptionMessage exceptionMessage = new ExceptionMessage(METHOD_ARGUMENT_NOT_VALID_EXCEPTION_CODE,
+                ex.getBindingResult().getFieldError().getDefaultMessage());
         return new ResponseEntity<>(exceptionMessage, HttpStatus.BAD_REQUEST);
     }
 }

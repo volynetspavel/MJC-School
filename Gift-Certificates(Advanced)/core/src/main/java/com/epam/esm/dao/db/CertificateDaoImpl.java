@@ -23,6 +23,8 @@ import java.util.List;
 public class CertificateDaoImpl implements CertificateDao {
 
     private static final String NAME = "name";
+    private static final String TAGS = "tags";
+    private static final String PERCENT = "%";
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -88,7 +90,7 @@ public class CertificateDaoImpl implements CertificateDao {
         CriteriaQuery<Certificate> criteriaQuery = criteriaBuilder.createQuery(Certificate.class);
         Root<Certificate> certificateRoot = criteriaQuery.from(Certificate.class);
 
-        Join<Certificate, Tag> tagJoin = certificateRoot.join("tags");
+        Join<Certificate, Tag> tagJoin = certificateRoot.join(TAGS);
 
         CriteriaBuilder.In<String> inClause = criteriaBuilder.in(tagJoin.get(NAME));
         for (String name : tagNames) {
@@ -117,18 +119,18 @@ public class CertificateDaoImpl implements CertificateDao {
         Predicate predicate;
 
         if (!tagName.isEmpty()) {
-            predicate = criteriaBuilder.like(certificateRoot.join("tags").get(NAME),
-                    "%" + tagName + "%");
+            predicate = criteriaBuilder.like(certificateRoot.join(TAGS).get(NAME),
+                    PERCENT + tagName + PERCENT);
             predicateList.add(predicate);
         }
         if (!partOfCertificateName.isEmpty()) {
             predicate = criteriaBuilder.like(certificateRoot.get(CertificateTableColumn.NAME),
-                    "%" + partOfCertificateName + "%");
+                    PERCENT + partOfCertificateName + PERCENT);
             predicateList.add(predicate);
         }
         if (!partOfCertificateDescription.isEmpty()) {
             predicate = criteriaBuilder.like(certificateRoot.get(CertificateTableColumn.DESCRIPTION),
-                    "%" + partOfCertificateDescription + "%");
+                    PERCENT + partOfCertificateDescription + PERCENT);
             predicateList.add(predicate);
         }
         criteriaQuery.where(predicateList.toArray(new Predicate[0]));

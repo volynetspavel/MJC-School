@@ -14,14 +14,6 @@ import java.util.Map;
  */
 public interface PurchaseService extends Service<PurchaseDto, Purchase> {
 
-    PurchaseDto findById(BigInteger id) throws ResourceNotFoundException;
-
-    default PurchaseDto findById(int id) {
-        return null;
-    }
-
-    Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException;
-
     @Override
     default PurchaseDto insert(PurchaseDto entityDto) {
         return null;
@@ -36,6 +28,14 @@ public interface PurchaseService extends Service<PurchaseDto, Purchase> {
         return null;
     }
 
+    default PurchaseDto findById(int id) {
+        return null;
+    }
+
+    Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException;
+
     List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
             throws ResourceNotFoundException, ValidationException;
+
+    PurchaseDto findById(BigInteger id) throws ResourceNotFoundException;
 }

@@ -17,11 +17,13 @@ import javax.validation.constraints.Pattern;
 public class UserDto extends AbstractDto<Integer> {
 
     @NotBlank(message = "Name must not be blank")
-    @Pattern(regexp = "[A-Za-zА-Я \\-]+")
+    @Pattern(regexp = "[A-Za-z \\-]+", message = "Name of tag must be according [A-Za-z \\-]+")
     private String name;
+
     @NotBlank(message = "Surname must not be blank")
-    @Pattern(regexp = "[A-Za-zА-Я \\-]+")
+    @Pattern(regexp = "[A-Za-z \\-]+", message = "Name of tag must be according [A-Za-z \\-]+")
     private String surname;
-    @Email(regexp = "^[A-Za-z0-9+_.-]+@(.+)$]", message = "Please, enter correct email.")
+
+    @Email(regexp = "[A-Za-z0-9+_.-]+@(.+)", message = "Please, enter correct email.")
     private String email;
 }

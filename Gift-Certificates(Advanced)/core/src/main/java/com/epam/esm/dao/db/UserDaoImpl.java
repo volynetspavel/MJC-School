@@ -27,6 +27,7 @@ public class UserDaoImpl implements UserDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         criteriaQuery.from(User.class);
+
         return entityManager.createQuery(criteriaQuery)
                 .setFirstResult(offset)
                 .setMaxResults(limit)
@@ -43,6 +44,7 @@ public class UserDaoImpl implements UserDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         criteriaQuery.from(User.class);
+
         return (int) entityManager.createQuery(criteriaQuery)
                 .getResultStream()
                 .count();
@@ -53,6 +55,7 @@ public class UserDaoImpl implements UserDao {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
         Root<User> root = criteriaQuery.from(User.class);
+
         criteriaQuery.where(criteriaBuilder.equal(root.get(EMAIL), userEmail));
         return entityManager.createQuery(criteriaQuery).getResultStream().findFirst().orElse(null);
     }

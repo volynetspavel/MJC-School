@@ -9,7 +9,16 @@ import com.epam.esm.hateoas.CertificateHateoas;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -85,6 +94,14 @@ public class CertificateController {
         return certificateDto;
     }
 
+    /**
+     * Finding certificates by several parameters like part_name, part_desc, tag_name, type_sort, order.
+     * Also parameters include parameters for pagination page and size.
+     * @param params - requested parameters from customer.
+     * @return - list of certificates.
+     * @throws ValidationException - if parameters incorrect.
+     * @throws ResourceNotFoundException - if requested resource not found.
+     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<CertificateDto> findCertificatesByParams(@RequestParam Map<String, String> params)

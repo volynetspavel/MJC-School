@@ -9,28 +9,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class CertificateValidator {
 
-    public boolean isCertificateContainsOnlySingleField(CertificateDto certificateDto){
+    public boolean isCertificateContainsOnlySingleField(CertificateDto certificateDto) {
         int countFieldsNotNull = 0;
 
-        if (certificateDto.getName() != null){
+        if (certificateDto.getName() != null) {
             countFieldsNotNull++;
         }
-        if (certificateDto.getDescription() != null){
+        if (certificateDto.getDescription() != null) {
             countFieldsNotNull++;
         }
-        if (certificateDto.getPrice() != null){
+        if (certificateDto.getPrice() != null) {
             countFieldsNotNull++;
         }
-        if (certificateDto.getDuration() != null){
+        if (certificateDto.getDuration() != null) {
             countFieldsNotNull++;
         }
-        if (certificateDto.getCreateDate() != null){
+        if (certificateDto.getCreateDate() != null) {
             countFieldsNotNull++;
         }
-        if (certificateDto.getLastUpdateDate() != null){
+        if (certificateDto.getLastUpdateDate() != null) {
             countFieldsNotNull++;
         }
-        if (certificateDto.getTags() != null){
+        if (certificateDto.getTags() != null) {
             countFieldsNotNull++;
         }
 

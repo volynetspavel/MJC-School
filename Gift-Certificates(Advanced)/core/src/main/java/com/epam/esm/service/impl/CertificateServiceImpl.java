@@ -37,11 +37,16 @@ import java.util.stream.Collectors;
 public class CertificateServiceImpl implements CertificateService {
 
     private static final String SORT_ORDER_DESC = "desc";
+    private static final String SORT_ORDER_ASC = "asc";
     private static final String TAG_NAME = "tag_name";
     private static final String PART_NAME = "part_name";
-    private static final String PART_DESC = "part_desc";
+    private static final String PART_DESCRIPTION = "part_desc";
     private static final String TYPE_SORT = "type_sort";
+    private static final String DATE = "date";
+    private static final String NAME_DATE = "name_date";
     private static final String ORDER = "order";
+    private static final String NAME = "name";
+    private static final String DEFAULT_VALUE = "";
 
     private CertificateDao certificateDao;
     private TagDao tagDao;
@@ -142,16 +147,16 @@ public class CertificateServiceImpl implements CertificateService {
             offset = paginationValidator.getOffset();
         }
 
-        String tagName = params.getOrDefault(TAG_NAME, "");
-        String partOfCertificateName = params.getOrDefault(PART_NAME, "");
-        String partOfCertificateDescription = params.getOrDefault(PART_DESC, "");
+        String tagName = params.getOrDefault(TAG_NAME, DEFAULT_VALUE);
+        String partOfCertificateName = params.getOrDefault(PART_NAME, DEFAULT_VALUE);
+        String partOfCertificateDescription = params.getOrDefault(PART_DESCRIPTION, DEFAULT_VALUE);
 
         List<Certificate> certificates = certificateDao.findCertificatesByParams(tagName,
                 partOfCertificateName, partOfCertificateDescription, offset, limit);
         List<CertificateDto> certificateList = migrateListCertificatesFromEntityToDto(certificates);
 
-        String typeOfSort = params.getOrDefault(TYPE_SORT, "name");
-        String order = params.getOrDefault(ORDER, "asc");
+        String typeOfSort = params.getOrDefault(TYPE_SORT, NAME);
+        String order = params.getOrDefault(ORDER, SORT_ORDER_ASC);
         return sortByTypeAndOrder(certificateList, typeOfSort, order);
     }
 
@@ -226,12 +231,9 @@ public class CertificateServiceImpl implements CertificateService {
         if (updatedCertificateDto.getTags() == null) {
             updatedTags = migrateListTagsFromEntityToDto(existedCertificate.getTags());
         } else {
+            updatedTags = prepareTags(updatedCertificateDto.getTags());
             if (existedCertificate.getTags() != null) {
-                updatedTags = prepareTags(updatedCertificateDto.getTags());
                 updatedTags.addAll(migrateListTagsFromEntityToDto(existedCertificate.getTags()));
-            } else {
-                updatedTags = prepareTags(updatedCertificateDto.getTags());
-                updatedCertificateDto.setTags(updatedTags);
             }
         }
         updatedCertificateDto.setTags(updatedTags);
@@ -260,11 +262,11 @@ public class CertificateServiceImpl implements CertificateService {
     private List<CertificateDto> sortByTypeAndOrder(List<CertificateDto> certificates, String typeOfSort, String order) {
         Comparator<CertificateDto> comparator;
         switch (typeOfSort) {
-            case "date":
+            case DATE:
                 comparator = Comparator.comparing(CertificateDto::getCreateDate);
                 certificates = sortByComparatorAndOrder(certificates, comparator, order);
                 break;
-            case "name_date":
+            case NAME_DATE:
                 Comparator<CertificateDto> certificateDtoComparatorByName = Comparator.comparing(CertificateDto::getName);
                 Comparator<CertificateDto> certificateDtoComparatorByDate = Comparator.comparing(CertificateDto::getCreateDate);
                 if (order.equalsIgnoreCase(SORT_ORDER_DESC)) {
@@ -294,7 +296,7 @@ public class CertificateServiceImpl implements CertificateService {
                     .sorted(certificateDtoComparator.reversed())
                     .collect(Collectors.toList());
         } else {
-            //sort order by default is ASC
+            //sort order by default is asc
             certificateList = certificateList.stream()
                     .sorted(certificateDtoComparator)
                     .collect(Collectors.toList());

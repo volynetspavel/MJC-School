@@ -49,7 +49,10 @@ public class TagDaoImpl implements TagDao {
         CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
         Root<Tag> root = criteriaQuery.from(Tag.class);
         criteriaQuery.where(criteriaBuilder.equal(root.get(NAME), name));
-        return entityManager.createQuery(criteriaQuery).getResultStream().findFirst().orElse(null);
+        return entityManager.createQuery(criteriaQuery)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -96,14 +99,15 @@ public class TagDaoImpl implements TagDao {
 
     @Override
     public Tag getMostPopularTagOfUserWithHighestCostOfAllOrders() {
-        return (Tag) entityManager.createNativeQuery(
-                SQL_SELECT_MOST_POPULAR_TAG_OF_USER_WITH_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
+        return (Tag) entityManager
+                .createNativeQuery(SQL_SELECT_MOST_POPULAR_TAG_OF_USER_WITH_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
                 .getSingleResult();
     }
 
     @Override
     public Tag findTagBYUserIdWithHighestCostOfAllOrders(int userId) {
-        return (Tag) entityManager.createNativeQuery(SQL_SELECT_TAG_BY_USER_ID_WITH_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
+        return (Tag) entityManager
+                .createNativeQuery(SQL_SELECT_TAG_BY_USER_ID_WITH_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
                 .setParameter(1, userId)
                 .getSingleResult();
     }

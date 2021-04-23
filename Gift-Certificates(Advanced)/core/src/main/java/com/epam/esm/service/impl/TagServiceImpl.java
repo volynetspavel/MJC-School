@@ -108,12 +108,6 @@ public class TagServiceImpl implements TagService {
         return tagMapper.toDto(tag);
     }
 
-    private List<TagDto> migrateListFromEntityToDto(List<Tag> tags) {
-        return tags.stream()
-                .map(tag -> tagMapper.toDto(tag))
-                .collect(Collectors.toList());
-    }
-
     @Override
     public TagDto findTagBYUserIdWithHighestCostOfAllOrders(int userId) throws ResourceNotFoundException {
         Tag tag = tagDao.findTagBYUserIdWithHighestCostOfAllOrders(userId);
@@ -121,5 +115,11 @@ public class TagServiceImpl implements TagService {
             throw new ResourceNotFoundException("Requested resource for user (id = " + userId + ") not found ");
         }
         return tagMapper.toDto(tag);
+    }
+
+    private List<TagDto> migrateListFromEntityToDto(List<Tag> tags) {
+        return tags.stream()
+                .map(tag -> tagMapper.toDto(tag))
+                .collect(Collectors.toList());
     }
 }
