@@ -34,5 +34,5 @@ public class PurchaseDto extends AbstractDto<BigInteger> {
     @NotEmpty(message = "Certificate names must not be blank.")
     private List<
             @NotBlank(message = "Certificate names must not be blank.")
-            @Pattern(regexp = "[0-9A-Za-z ]+", message = "Name of certificate is incorrect.") String> certificateNames;
+            @Pattern(regexp = "[0-9A-Za-z \\p{Punct}]+", message = "Name of certificate is incorrect.") String> certificateNames;
 }

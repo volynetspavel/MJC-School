@@ -16,12 +16,10 @@ import java.util.List;
 @Relation(itemRelation = "certificate", collectionRelation = "certificates")
 public class CertificateDto extends AbstractDto<Integer> {
 
-    @NotBlank(message = "Name must not be blank")
-    @Pattern(regexp = "[A-Za-z \\-]+", message = "Name of tag must be according [A-Za-z \\-]+.")
+    @Pattern(regexp = "[0-9A-Za-z \\p{Punct}]+", message = "Name must be according [0-9A-Za-z \\p{Punct}]+")
     private String name;
 
-    @NotBlank(message = "Description must not be blank")
-    @Pattern(regexp = "[A-Za-z \\-]+", message = "Name of tag must be according [A-Za-z \\-]+.")
+    @Pattern(regexp = "[0-9A-Za-z \\p{Punct}]+", message = "Description must be according [0-9A-Za-z \\p{Punct}]+")
     private String description;
 
     @Digits(integer = 15, fraction = 2)
@@ -31,10 +29,10 @@ public class CertificateDto extends AbstractDto<Integer> {
     @Min(value = 1, message = "Enter certificate duration more than 1 day")
     private Integer duration;
 
-    @Null
+    @Null(message = "You cannot change createDate field.")
     private String createDate;
 
-    @Null
+    @Null(message = "You cannot set lastUpdateDate field.")
     private String lastUpdateDate;
 
     private List<TagDto> tags;

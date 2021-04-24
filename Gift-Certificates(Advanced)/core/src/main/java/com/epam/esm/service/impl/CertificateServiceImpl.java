@@ -13,10 +13,11 @@ import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
-import com.epam.esm.validation.CertificateValidator;
+import com.epam.esm.validation.FieldValidator;
 import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,8 +53,8 @@ public class CertificateServiceImpl implements CertificateService {
     private TagDao tagDao;
     private CertificateMapper certificateMapper;
     private TagMapper tagMapper;
-    private CertificateValidator certificateValidator;
     private PaginationValidator paginationValidator;
+    private FieldValidator<CertificateDto> fieldValidator;
 
     private int limit;
     private int offset = 0;
@@ -61,13 +62,14 @@ public class CertificateServiceImpl implements CertificateService {
     @Autowired
     public CertificateServiceImpl(CertificateDao certificateDao, TagDao tagDao,
                                   CertificateMapper certificateMapper, TagMapper tagMapper,
-                                  CertificateValidator certificateValidator, PaginationValidator paginationValidator) {
+                                  PaginationValidator paginationValidator,
+                                  FieldValidator<CertificateDto> fieldValidator) {
         this.certificateDao = certificateDao;
         this.tagDao = tagDao;
         this.certificateMapper = certificateMapper;
         this.tagMapper = tagMapper;
-        this.certificateValidator = certificateValidator;
         this.paginationValidator = paginationValidator;
+        this.fieldValidator = fieldValidator;
     }
 
     @Transactional
@@ -113,10 +115,8 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException, ServiceException {
-
-        if (!certificateValidator.isCertificateContainsOnlySingleField(updatedCertificateDto)) {
-            throw new ServiceException("Request contains more than one field.");
-        }
+        int startCount = 0;
+        fieldValidator.isCountFieldsEqualNullLessOne(updatedCertificateDto, startCount);
         return update(updatedCertificateDto);
     }
 
