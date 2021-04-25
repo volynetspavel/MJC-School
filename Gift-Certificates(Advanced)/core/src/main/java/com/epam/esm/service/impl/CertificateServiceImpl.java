@@ -17,7 +17,6 @@ import com.epam.esm.validation.FieldValidator;
 import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,11 +78,12 @@ public class CertificateServiceImpl implements CertificateService {
             throw new ResourceAlreadyExistException("Requested resource (name = "
                     + certificateDto.getName() + ") has already existed.");
         }
-        List<TagDto> preparedTags = prepareTags(certificateDto.getTags());
-        List<Tag> tags = migrateListTagsFromDtoToEntity(preparedTags);
+        List<TagDto> tagsFromDto = certificateDto.getTags();
+        List<Tag> tags = migrateListTagsFromDtoToEntity(tagsFromDto);
+        List<Tag> preparedTags = prepareTags(tags);
 
         Certificate certificate = certificateMapper.toEntity(certificateDto);
-        certificate.setTags(tags);
+        certificate.setTags(preparedTags);
         certificate.setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         certificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
@@ -115,8 +115,14 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException, ServiceException {
+
+        int id = updatedCertificateDto.getId();
+        Certificate oldCertificate = certificateDao.findById(id);
+        checkEntityOnNull(oldCertificate, id);
+
         int startCount = 0;
         fieldValidator.isCountFieldsEqualNullLessOne(updatedCertificateDto, startCount);
+
         return update(updatedCertificateDto);
     }
 
@@ -193,52 +199,52 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificate);
     }
 
-    private List<TagDto> prepareTags(List<TagDto> tags) {
+    private Certificate prepareCertificate(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
+
+        int idUpdateCertificate = updatedCertificateDto.getId();
+        Certificate existedCertificateForUpdate = certificateDao.findById(idUpdateCertificate);
+        if (existedCertificateForUpdate == null) {
+            throw new ResourceNotFoundException("Requested resource not found (id = " + idUpdateCertificate + ")");
+        }
+        if (updatedCertificateDto.getName() != null) {
+            existedCertificateForUpdate.setName(updatedCertificateDto.getName());
+        }
+        if (updatedCertificateDto.getDescription() != null) {
+            existedCertificateForUpdate.setDescription(updatedCertificateDto.getDescription());
+        }
+        if (updatedCertificateDto.getPrice() != null) {
+            existedCertificateForUpdate.setPrice(updatedCertificateDto.getPrice());
+        }
+        if (updatedCertificateDto.getDuration() != null) {
+            existedCertificateForUpdate.setDuration(updatedCertificateDto.getDuration());
+        }
+
+        existedCertificateForUpdate.setLastUpdateDate(LocalDateTime
+                .now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+
+        List<Tag> tagListForUpdate = new ArrayList<>();
+        if (updatedCertificateDto.getTags() != null) {
+            tagListForUpdate = migrateListTagsFromDtoToEntity(updatedCertificateDto.getTags());
+            tagListForUpdate = prepareTags(tagListForUpdate);
+        } else {
+            if (existedCertificateForUpdate.getTags() != null) {
+                tagListForUpdate = existedCertificateForUpdate.getTags();
+            }
+        }
+        existedCertificateForUpdate.setTags(tagListForUpdate);
+
+        return existedCertificateForUpdate;
+    }
+
+    private List<Tag> prepareTags(List<Tag> tags) {
         if (tags == null) {
             return new ArrayList<>();
         }
         return tags.stream()
-                .map(tag -> tagMapper.toDto((tagDao.findByName(tag.getName()) == null
-                        ? tagDao.insert(tagMapper.toEntity(tag))
-                        : tagDao.findByName(tag.getName()))))
+                .map(tag -> (tagDao.findByName(tag.getName()) == null
+                        ? tagDao.insert(tag)
+                        : tagDao.findByName(tag.getName())))
                 .collect(Collectors.toList());
-    }
-
-    private Certificate prepareCertificate(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
-
-        int idUpdateCertificate = updatedCertificateDto.getId();
-        Certificate existedCertificate = certificateDao.findById(idUpdateCertificate);
-        if (existedCertificate == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + idUpdateCertificate + ")");
-        }
-        if (updatedCertificateDto.getName() == null) {
-            updatedCertificateDto.setName(existedCertificate.getName());
-        }
-        if (updatedCertificateDto.getDescription() == null) {
-            updatedCertificateDto.setDescription(existedCertificate.getDescription());
-        }
-        if (updatedCertificateDto.getPrice() == null) {
-            updatedCertificateDto.setPrice(existedCertificate.getPrice());
-        }
-        if (updatedCertificateDto.getDuration() == null) {
-            updatedCertificateDto.setDuration(existedCertificate.getDuration());
-        }
-        updatedCertificateDto.setCreateDate(existedCertificate.getCreateDate());
-        updatedCertificateDto.setLastUpdateDate(LocalDateTime
-                .now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
-
-        List<TagDto> updatedTags;
-        if (updatedCertificateDto.getTags() == null) {
-            updatedTags = migrateListTagsFromEntityToDto(existedCertificate.getTags());
-        } else {
-            updatedTags = prepareTags(updatedCertificateDto.getTags());
-            if (existedCertificate.getTags() != null) {
-                updatedTags.addAll(migrateListTagsFromEntityToDto(existedCertificate.getTags()));
-            }
-        }
-        updatedCertificateDto.setTags(updatedTags);
-
-        return certificateMapper.toEntity(updatedCertificateDto);
     }
 
     private List<CertificateDto> migrateListCertificatesFromEntityToDto(List<Certificate> certificates) {

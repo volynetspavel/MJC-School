@@ -12,7 +12,7 @@ public class CertificateTagsValidator extends FieldValidator<CertificateDto> {
     @Override
     public void isCountFieldsEqualNullLessOne(CertificateDto certificateDto,
                                               int countFieldsNotNull) throws ServiceException {
-        if (certificateDto.getTags() != null) {
+        if (certificateDto.getTags() != null && !certificateDto.getTags().isEmpty()) {
             countFieldsNotNull++;
         }
         checkCountOfFieldsWhichNotNull(countFieldsNotNull);

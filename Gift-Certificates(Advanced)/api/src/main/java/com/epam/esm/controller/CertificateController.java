@@ -9,6 +9,7 @@ import com.epam.esm.hateoas.CertificateHateoas;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/certificate")
+@Validated
 public class CertificateController {
 
     private CertificateService certificateService;
@@ -52,7 +55,10 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
-    public CertificateDto update(@PathVariable("id") int id, @Valid @RequestBody CertificateDto certificateDto)
+    public CertificateDto update(@PathVariable("id")
+                                 @Min(value = 1, message = "Enter id more than one.")
+                                         int id,
+                                 @Valid @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.update(certificateDto);
@@ -71,7 +77,9 @@ public class CertificateController {
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/single/{id}")
-    public CertificateDto updateSingleField(@PathVariable("id") int id,
+    public CertificateDto updateSingleField(@PathVariable("id")
+                                            @Min(value = 1, message = "Enter id more than one.")
+                                                    int id,
                                             @Valid @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ServiceException, ValidationException {
         certificateDto.setId(id);
@@ -82,13 +90,18 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") int id) throws ResourceNotFoundException {
+    public void delete(@PathVariable("id")
+                       @Min(value = 1, message = "Enter id more than one.")
+                               int id) throws ResourceNotFoundException {
         certificateService.delete(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public CertificateDto findById(@PathVariable("id") int id) throws ResourceNotFoundException, ValidationException {
+    public CertificateDto findById(@PathVariable("id")
+                                   @Min(value = 1, message = "Enter id more than one.")
+                                           int id)
+            throws ResourceNotFoundException, ValidationException {
         CertificateDto certificateDto = certificateService.findById(id);
         certificateHateoas.addLinksForCertificateDto(certificateDto);
         return certificateDto;
@@ -97,9 +110,10 @@ public class CertificateController {
     /**
      * Finding certificates by several parameters like part_name, part_desc, tag_name, type_sort, order.
      * Also parameters include parameters for pagination page and size.
+     *
      * @param params - requested parameters from customer.
      * @return - list of certificates.
-     * @throws ValidationException - if parameters incorrect.
+     * @throws ValidationException       - if parameters incorrect.
      * @throws ResourceNotFoundException - if requested resource not found.
      */
     @ResponseStatus(HttpStatus.OK)

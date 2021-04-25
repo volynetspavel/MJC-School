@@ -6,6 +6,7 @@ import org.springframework.hateoas.server.core.Relation;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +36,5 @@ public class CertificateDto extends AbstractDto<Integer> {
     @Null(message = "You cannot set lastUpdateDate field.")
     private String lastUpdateDate;
 
-    private List<TagDto> tags;
-
+    private List<TagDto> tags = new ArrayList<>();
 }

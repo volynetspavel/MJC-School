@@ -8,6 +8,7 @@ import com.epam.esm.model.Purchase;
 import com.epam.esm.service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/purchase")
+@Validated
 public class PurchaseController {
 
     private PurchaseService purchaseService;
@@ -58,7 +61,8 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public PurchaseDto findById(@PathVariable("id") BigInteger id) throws ResourceNotFoundException {
+    public PurchaseDto findById(@PathVariable("id") @Min(value = 1, message = "Enter id more than one.")
+                                        BigInteger id) throws ResourceNotFoundException {
         PurchaseDto purchaseDto = purchaseService.findById(id);
         purchaseHateoas.addLinksForPurchaseDto(purchaseDto);
         return purchaseDto;
@@ -66,7 +70,9 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/user/{id}")
-    public List<PurchaseDto> findPurchasesByUserId(@PathVariable("id") int userId,
+    public List<PurchaseDto> findPurchasesByUserId(@PathVariable("id")
+                                                   @Min(value = 1, message = "Enter id more than one.")
+                                                           int userId,
                                                    @RequestParam Map<String, String> params)
             throws ResourceNotFoundException, ValidationException {
         List<PurchaseDto> purchases = purchaseService.findPurchasesByUserId(userId, params);

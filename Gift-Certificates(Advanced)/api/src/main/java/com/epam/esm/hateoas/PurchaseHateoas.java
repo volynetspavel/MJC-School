@@ -2,11 +2,14 @@ package com.epam.esm.hateoas;
 
 import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.PurchaseController;
+import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ValidationException;
+import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
+import com.epam.esm.model.Tag;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
@@ -23,6 +26,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class PurchaseHateoas {
 
     private static final String USER = "user";
+    private static final String CERTIFICATE = "certificate";
+    private static final String TAG = "tag";
 
     public void addLinksForPurchaseDto(PurchaseDto purchaseDto) {
 
@@ -51,6 +56,25 @@ public class PurchaseHateoas {
         Link userLink = linkTo(methodOn(UserController.class)
                 .findById(newPurchase.getUser().getId()))
                 .withRel(USER);
+
+        List<Certificate> certificates = newPurchase.getCertificates();
+        for (int i = 0; i < certificates.size(); i++) {
+            Link certificateLink = linkTo(methodOn(CertificateController.class)
+                    .findById(certificates.get(i).getId()))
+                    .withRel(CERTIFICATE);
+            newPurchase.getCertificates().get(i).add(certificateLink);
+
+            List<Tag> tags = newPurchase.getCertificates().get(i).getTags();
+            for (Tag tag : tags) {
+                Link tagLink = linkTo(methodOn(TagController.class)
+                        .findById(tag.getId()))
+                        .withRel(TAG);
+
+                if (!tag.hasLink(TAG)) {
+                    tag.add(tagLink);
+                }
+            }
+        }
 
         newPurchase.add(selfLink);
         newPurchase.add(userLink);

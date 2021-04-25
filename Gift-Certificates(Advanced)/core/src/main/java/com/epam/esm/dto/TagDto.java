@@ -16,6 +16,6 @@ import javax.validation.constraints.Pattern;
 public class TagDto extends AbstractDto<Integer> {
 
     @NotBlank(message = "Name must not be blank")
-    @Pattern(regexp = "[A-Za-z \\-]+", message = "Name of tag must be according [A-Za-z \\-]+.")
+    @Pattern(regexp = "[A-Za-z0-9 \\-]+", message = "Name of tag must be according [A-Za-z0-9 \\-]+.")
     private String name;
 }

@@ -7,7 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.validation.constraints.Email;
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -42,6 +42,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionMessage> handle(MethodArgumentNotValidException ex) {
         ExceptionMessage exceptionMessage = new ExceptionMessage(METHOD_ARGUMENT_NOT_VALID_EXCEPTION_CODE,
                 ex.getBindingResult().getFieldError().getDefaultMessage());
+        return new ResponseEntity<>(exceptionMessage, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ExceptionMessage> handle(ConstraintViolationException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage(METHOD_ARGUMENT_NOT_VALID_EXCEPTION_CODE,
+                ex.getMessage());
         return new ResponseEntity<>(exceptionMessage, HttpStatus.BAD_REQUEST);
     }
 }

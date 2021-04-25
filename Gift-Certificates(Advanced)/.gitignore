@@ -12,5 +12,5 @@ api/build
 core/build
 
 # Ignore external materials
-sql
+external
 javadoc

@@ -34,11 +34,14 @@ public class PaginationValidator {
             if (isPositiveNumber(sizeValue) && isPositiveNumber(pageValue)) {
                 limit = Integer.parseInt(sizeValue);
                 offset = (Integer.parseInt(pageValue) - 1) * limit;
-            }else {
-                throw new ValidationException("Parameters of page are incorrect.");
+            } else {
+                throw new ValidationException("Parameters of pagination are incorrect. Please, check parameters.");
             }
-            if (offset < 0 || limit < 1) {
-                throw new ValidationException("Parameters of page must be greater than 0.");
+            if (offset < 0) {
+                throw new ValidationException("Parameter of page must be greater than 0.");
+            }
+            if (limit < 1) {
+                throw new ValidationException("Parameter of size must be greater than 0.");
             }
             return true;
         }
