@@ -2,7 +2,7 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.hateoas.PurchaseHateoas;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.service.PurchaseService;
@@ -44,7 +44,7 @@ public class PurchaseController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Purchase makePurchase(@Valid @RequestBody PurchaseDto purchase)
-            throws ResourceNotFoundException, ValidationException {
+            throws ResourceNotFoundException, ValidationParametersException {
         Purchase newPurchase = purchaseService.makePurchase(purchase);
         purchaseHateoas.addLinksForPurchaseDtoWithUser(newPurchase);
         return newPurchase;
@@ -53,7 +53,7 @@ public class PurchaseController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<PurchaseDto> findPurchases(@RequestParam Map<String, String> params)
-            throws ValidationException {
+            throws ValidationParametersException {
         List<PurchaseDto> purchases = purchaseService.findAll(params);
         purchaseHateoas.addLinksForListOfPurchaseDto(purchases);
         return purchases;
@@ -74,7 +74,7 @@ public class PurchaseController {
                                                    @Min(value = 1, message = "Enter id more than one.")
                                                            int userId,
                                                    @RequestParam Map<String, String> params)
-            throws ResourceNotFoundException, ValidationException {
+            throws ResourceNotFoundException, ValidationParametersException {
         List<PurchaseDto> purchases = purchaseService.findPurchasesByUserId(userId, params);
         purchaseHateoas.addLinksForListOfPurchaseDto(purchases);
         return purchases;

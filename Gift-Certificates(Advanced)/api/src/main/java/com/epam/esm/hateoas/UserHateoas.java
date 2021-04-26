@@ -4,7 +4,7 @@ import com.epam.esm.controller.PurchaseController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class UserHateoas {
 
     private static final String PURCHASES = "purchases";
 
-    public void addLinksForUserDto(UserDto userDto) throws ResourceNotFoundException, ValidationException {
+    public void addLinksForUserDto(UserDto userDto) throws ResourceNotFoundException, ValidationParametersException {
 
         Link selfLink = linkTo(UserController.class)
                 .slash(userDto.getId())
@@ -41,7 +41,7 @@ public class UserHateoas {
     }
 
     public CollectionModel<UserDto> addLinksForListOfUserDto(List<UserDto> users)
-            throws ResourceNotFoundException, ValidationException {
+            throws ResourceNotFoundException, ValidationParametersException {
 
         for (UserDto user : users) {
             addLinksForUserDto(user);

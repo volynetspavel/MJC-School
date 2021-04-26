@@ -3,7 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.model.Certificate;
 
 import java.util.List;
@@ -18,8 +18,8 @@ public interface CertificateService extends Service<CertificateDto, Certificate>
 
     List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
                                                        Map<String, String> params)
-            throws ValidationException;
+            throws ValidationParametersException;
 
     List<CertificateDto> findCertificatesByParams(Map<String, String> params)
-            throws ValidationException;
+            throws ValidationParametersException;
 }

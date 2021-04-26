@@ -8,14 +8,20 @@ import lombok.Getter;
 @Getter
 public class ResourceNotFoundException extends Exception {
 
-    private final String code = "7701";
+    private String code;
+    private int entityId;
+
+    public ResourceNotFoundException(String code) {
+        this.code = code;
+    }
+
+    public ResourceNotFoundException(String code, int entityId) {
+        this.code = code;
+        this.entityId = entityId;
+    }
 
     public ResourceNotFoundException() {
         super();
-    }
-
-    public ResourceNotFoundException(String message) {
-        super(message);
     }
 
     public ResourceNotFoundException(String message, Throwable cause) {

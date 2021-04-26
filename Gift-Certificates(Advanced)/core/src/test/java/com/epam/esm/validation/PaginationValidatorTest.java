@@ -1,6 +1,6 @@
 package com.epam.esm.validation;
 
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ class PaginationValidatorTest {
 
     @DisplayName("Testing method validatePaginationParameters() on positive result")
     @Test
-    void validatePaginationParametersSuccessTest() throws ValidationException {
+    void validatePaginationParametersSuccessTest() throws ValidationParametersException {
         String page = "1";
         String size = "5";
         Map<String, String> params = getParams(page, size);
@@ -40,7 +40,7 @@ class PaginationValidatorTest {
     @DisplayName("Testing method validatePaginationParameters() on negative result " +
             "when map of params don't have params.")
     @Test
-    void validatePaginationParametersWithoutParametersTest() throws ValidationException {
+    void validatePaginationParametersWithoutParametersTest() throws ValidationParametersException {
         Map<String, String> params = new HashMap<>();
 
         Assertions.assertFalse(paginationValidator.validatePaginationParameters(params));
@@ -66,7 +66,7 @@ class PaginationValidatorTest {
     @MethodSource("badData")
     void validatePaginationParametersThrowExceptionTest(String[] arr) {
         Map<String, String> params = getParams(arr[0], arr[1]);
-        Assertions.assertThrows(ValidationException.class,
+        Assertions.assertThrows(ValidationParametersException.class,
                 () -> paginationValidator.validatePaginationParameters(params));
     }
 

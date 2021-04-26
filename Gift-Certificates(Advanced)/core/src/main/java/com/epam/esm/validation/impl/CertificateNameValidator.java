@@ -24,4 +24,12 @@ public class CertificateNameValidator extends FieldValidator<CertificateDto> {
         }
         getNextFieldValidator().isCountFieldsEqualNullLessOne(certificateDto, countFieldsNotNull);
     }
+
+    @Override
+    public void isCountFieldsEqualNullMoreOne(CertificateDto certificateDto, int countNullFields) throws ServiceException {
+        if (certificateDto.getName() == null) {
+            countNullFields++;
+        }
+        getNextFieldValidator().isCountFieldsEqualNullMoreOne(certificateDto, countNullFields);
+    }
 }

@@ -8,14 +8,14 @@ import lombok.Getter;
 @Getter
 public class ServiceException extends Exception {
 
-    private final String code = "1001";
+    private String code;
 
     public ServiceException() {
         super();
     }
 
-    public ServiceException(String message) {
-        super(message);
+    public ServiceException(String code) {
+        this.code = code;
     }
 
     public ServiceException(String message, Throwable cause) {

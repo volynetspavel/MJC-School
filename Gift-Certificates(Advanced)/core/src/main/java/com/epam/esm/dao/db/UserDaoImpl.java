@@ -17,6 +17,7 @@ import java.util.List;
 @Repository
 public class UserDaoImpl implements UserDao {
 
+    private static final String ID = "id";
     private static final String EMAIL = "email";
 
     @PersistenceContext
@@ -26,8 +27,9 @@ public class UserDaoImpl implements UserDao {
     public List<User> findAll(int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<User> criteriaQuery = criteriaBuilder.createQuery(User.class);
-        criteriaQuery.from(User.class);
+        Root<User> userRoot = criteriaQuery.from(User.class);
 
+        criteriaQuery.orderBy(criteriaBuilder.asc(userRoot.get(ID)));
         return entityManager.createQuery(criteriaQuery)
                 .setFirstResult(offset)
                 .setMaxResults(limit)

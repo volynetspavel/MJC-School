@@ -23,6 +23,7 @@ import java.util.List;
 public class CertificateDaoImpl implements CertificateDao {
 
     private static final String NAME = "name";
+    private static final String ID = "id";
     private static final String TAGS = "tags";
     private static final String PERCENT = "%";
 
@@ -99,7 +100,7 @@ public class CertificateDaoImpl implements CertificateDao {
 
         criteriaQuery.select(certificateRoot)
                 .where(inClause)
-                .groupBy(certificateRoot.get(NAME))
+                .groupBy(certificateRoot.get(ID))
                 .having(criteriaBuilder.equal(criteriaBuilder.count(tagJoin.get(NAME)), tagNames.size()));
 
         return entityManager.createQuery(criteriaQuery)
@@ -133,7 +134,8 @@ public class CertificateDaoImpl implements CertificateDao {
                     PERCENT + partOfCertificateDescription + PERCENT);
             predicateList.add(predicate);
         }
-        criteriaQuery.where(predicateList.toArray(new Predicate[0]));
+        criteriaQuery.where(predicateList.toArray(new Predicate[0]))
+                .orderBy(criteriaBuilder.asc(certificateRoot.get(ID)));
 
         return entityManager.createQuery(criteriaQuery)
                 .setFirstResult(offset)

@@ -3,7 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.UserMapper;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> findAll(Map<String, String> params) throws ValidationException {
+    public List<UserDto> findAll(Map<String, String> params) throws ValidationParametersException {
         int limit = userDao.getCount();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();

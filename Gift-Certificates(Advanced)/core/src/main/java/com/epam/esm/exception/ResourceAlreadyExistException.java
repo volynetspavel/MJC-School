@@ -8,14 +8,16 @@ import lombok.Getter;
 @Getter
 public class ResourceAlreadyExistException extends Exception {
 
-    private final String code = "9901";
+    private String code;
+    private String nameOfResource;
 
     public ResourceAlreadyExistException() {
         super();
     }
 
-    public ResourceAlreadyExistException(String message) {
-        super(message);
+    public ResourceAlreadyExistException(String code, String nameOfResource) {
+        this.code = code;
+        this.nameOfResource = nameOfResource;
     }
 
     public ResourceAlreadyExistException(String message, Throwable cause) {

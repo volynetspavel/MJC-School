@@ -4,7 +4,7 @@ import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.hateoas.CertificateHateoas;
 import com.epam.esm.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +46,10 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public CertificateDto insert(@Valid @RequestBody CertificateDto certificateDto)
-            throws ResourceAlreadyExistException, ResourceNotFoundException, ValidationException {
+            throws ResourceAlreadyExistException, ResourceNotFoundException, ValidationParametersException, ServiceException {
         CertificateDto newCertificateDto = certificateService.insert(certificateDto);
         certificateHateoas.addLinksForCertificateDto(newCertificateDto);
         return newCertificateDto;
-
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -59,7 +58,7 @@ public class CertificateController {
                                  @Min(value = 1, message = "Enter id more than one.")
                                          int id,
                                  @Valid @RequestBody CertificateDto certificateDto)
-            throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationException {
+            throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationParametersException, ServiceException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.update(certificateDto);
         certificateHateoas.addLinksForCertificateDto(updatedCertificateDto);
@@ -81,7 +80,7 @@ public class CertificateController {
                                             @Min(value = 1, message = "Enter id more than one.")
                                                     int id,
                                             @Valid @RequestBody CertificateDto certificateDto)
-            throws ResourceNotFoundException, ServiceException, ValidationException {
+            throws ResourceNotFoundException, ServiceException, ValidationParametersException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.updateSingleField(certificateDto);
         certificateHateoas.addLinksForCertificateDto(updatedCertificateDto);
@@ -101,7 +100,7 @@ public class CertificateController {
     public CertificateDto findById(@PathVariable("id")
                                    @Min(value = 1, message = "Enter id more than one.")
                                            int id)
-            throws ResourceNotFoundException, ValidationException {
+            throws ResourceNotFoundException, ValidationParametersException {
         CertificateDto certificateDto = certificateService.findById(id);
         certificateHateoas.addLinksForCertificateDto(certificateDto);
         return certificateDto;
@@ -113,13 +112,13 @@ public class CertificateController {
      *
      * @param params - requested parameters from customer.
      * @return - list of certificates.
-     * @throws ValidationException       - if parameters incorrect.
+     * @throws ValidationParametersException       - if parameters incorrect.
      * @throws ResourceNotFoundException - if requested resource not found.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<CertificateDto> findCertificatesByParams(@RequestParam Map<String, String> params)
-            throws ValidationException, ResourceNotFoundException {
+            throws ValidationParametersException, ResourceNotFoundException {
         List<CertificateDto> certificateDtoList = certificateService.findCertificatesByParams(params);
         certificateHateoas.addLinksForListOfCertificateDto(certificateDtoList);
         return certificateDtoList;
@@ -129,7 +128,7 @@ public class CertificateController {
     @GetMapping("/search")
     public List<CertificateDto> findCertificatesBySeveralTags(@RequestParam(name = "tags") List<String> tagNames,
                                                               @RequestParam Map<String, String> params)
-            throws ValidationException, ResourceNotFoundException {
+            throws ValidationParametersException, ResourceNotFoundException {
         List<CertificateDto> certificateDtoList = certificateService.findCertificatesBySeveralTags(tagNames, params);
         certificateHateoas.addLinksForListOfCertificateDto(certificateDtoList);
         return certificateDtoList;
