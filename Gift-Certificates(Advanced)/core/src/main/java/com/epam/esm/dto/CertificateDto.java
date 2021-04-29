@@ -17,23 +17,23 @@ import java.util.List;
 @Relation(itemRelation = "certificate", collectionRelation = "certificates")
 public class CertificateDto extends AbstractDto<Integer> {
 
-    @Pattern(regexp = "[0-9A-Za-z \\p{Punct}]+", message = "Name must be according [0-9A-Za-z \\p{Punct}]+")
+    @Pattern(regexp = "[0-9A-Za-z !?\\.]+")
     private String name;
 
-    @Pattern(regexp = "[0-9A-Za-z \\p{Punct}]+", message = "Description must be according [0-9A-Za-z \\p{Punct}]+")
+    @Pattern(regexp = "[0-9A-Za-z !?\\.]+")
     private String description;
 
     @Digits(integer = 15, fraction = 2)
-    @DecimalMin(value = "0", message = "Enter certificate price over 0.")
+    @DecimalMin(value = "1")
     private BigDecimal price;
 
-    @Min(value = 1, message = "Enter certificate duration more than 1 day")
+    @Min(value = 1)
     private Integer duration;
 
-    @Null(message = "You cannot change createDate field.")
+    @Null
     private String createDate;
 
-    @Null(message = "You cannot set lastUpdateDate field.")
+    @Null
     private String lastUpdateDate;
 
     private List<TagDto> tags = new ArrayList<>();

@@ -1,6 +1,7 @@
 package com.epam.esm.validation;
 
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.constant.CodeException;
+import com.epam.esm.exception.ValidationParametersException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ public class PaginationValidator {
         return offset;
     }
 
-    public boolean validatePaginationParameters(Map<String, String> params) throws ValidationException {
+    public boolean validatePaginationParameters(Map<String, String> params) throws ValidationParametersException {
         if (params.containsKey(SIZE) && params.containsKey(PAGE)) {
             String sizeValue = params.get(SIZE);
             String pageValue = params.get(PAGE);
@@ -35,13 +36,13 @@ public class PaginationValidator {
                 limit = Integer.parseInt(sizeValue);
                 offset = (Integer.parseInt(pageValue) - 1) * limit;
             } else {
-                throw new ValidationException("Parameters of pagination are incorrect. Please, check parameters.");
+                throw new ValidationParametersException(CodeException.NOT_VALID_PAGINATION);
             }
             if (offset < 0) {
-                throw new ValidationException("Parameter of page must be greater than 0.");
+                throw new ValidationParametersException(CodeException.NOT_VALID_PAGINATION_PAGE);
             }
             if (limit < 1) {
-                throw new ValidationException("Parameter of size must be greater than 0.");
+                throw new ValidationParametersException(CodeException.NOT_VALID_PAGINATION_SIZE);
             }
             return true;
         }

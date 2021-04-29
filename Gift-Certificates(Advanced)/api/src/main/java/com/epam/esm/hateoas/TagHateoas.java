@@ -5,7 +5,7 @@ import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class TagHateoas {
     private static final String CERTIFICATES = "certificates";
     private static final String USER = "user";
 
-    public void addLinksForTagDto(TagDto tagDto) throws ValidationException, ResourceNotFoundException {
+    public void addLinksForTagDto(TagDto tagDto) throws ValidationParametersException, ResourceNotFoundException {
 
         Link selfLink = linkTo(TagController.class)
                 .slash(tagDto.getId())
@@ -45,7 +45,7 @@ public class TagHateoas {
     }
 
     public CollectionModel<TagDto> addLinksForListOfTagDto(List<TagDto> tags)
-            throws ValidationException, ResourceNotFoundException {
+            throws ValidationParametersException, ResourceNotFoundException {
 
         for (TagDto tag : tags) {
             addLinksForTagDto(tag);
@@ -56,7 +56,7 @@ public class TagHateoas {
         return CollectionModel.of(tags, selfLink);
     }
 
-    public void addLinksForUser(TagDto tagDto, int userId) throws ResourceNotFoundException, ValidationException {
+    public void addLinksForUser(TagDto tagDto, int userId) throws ResourceNotFoundException, ValidationParametersException {
 
         Link userLink = linkTo(methodOn(UserController.class)
                 .findById(userId))

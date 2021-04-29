@@ -1,10 +1,11 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.constant.CodeException;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.TagService;
@@ -41,9 +42,10 @@ public class TagServiceImpl implements TagService {
     @Transactional
     @Override
     public TagDto insert(TagDto tagDto) throws ResourceAlreadyExistException {
-        if (tagDao.findByName(tagDto.getName()) != null) {
-            throw new ResourceAlreadyExistException("Requested resource (name = "
-                    + tagDto.getName() + ") has already existed.");
+        Tag tagWithSameName = tagDao.findByName(tagDto.getName());
+
+        if (tagWithSameName != null) {
+            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, tagWithSameName.getName());
         }
         Tag tag = tagMapper.toEntity(tagDto);
         Tag newTag = tagDao.insert(tag);
@@ -70,8 +72,7 @@ public class TagServiceImpl implements TagService {
 
         Tag tagWithSameName = tagDao.findByName(name);
         if (tagWithSameName != null) {
-            throw new ResourceAlreadyExistException("Requested resource (name = "
-                    + tagWithSameName.getName() + ") has already existed.");
+            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, tagWithSameName.getName());
         }
 
         Tag newTag = tagMapper.toEntity(newTagDto);
@@ -81,7 +82,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDto> findAll(Map<String, String> params) throws ValidationException {
+    public List<TagDto> findAll(Map<String, String> params) throws ValidationParametersException {
         int limit = tagDao.getCount();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
@@ -103,7 +104,7 @@ public class TagServiceImpl implements TagService {
     public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException {
         Tag tag = tagDao.getMostPopularTagOfUserWithHighestCostOfAllOrders();
         if (tag == null) {
-            throw new ResourceNotFoundException("Requested resource not found.");
+            throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_WITHOUT_ID);
         }
         return tagMapper.toDto(tag);
     }
@@ -112,7 +113,7 @@ public class TagServiceImpl implements TagService {
     public TagDto findTagBYUserIdWithHighestCostOfAllOrders(int userId) throws ResourceNotFoundException {
         Tag tag = tagDao.findTagBYUserIdWithHighestCostOfAllOrders(userId);
         if (tag == null) {
-            throw new ResourceNotFoundException("Requested resource for user (id = " + userId + ") not found ");
+            throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_BY_USER_ID, userId);
         }
         return tagMapper.toDto(tag);
     }

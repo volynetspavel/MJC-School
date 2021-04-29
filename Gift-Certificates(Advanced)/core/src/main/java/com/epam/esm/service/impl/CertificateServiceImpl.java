@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.constant.CodeException;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.CertificateDto;
@@ -7,7 +8,7 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.CertificateMapper;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Certificate;
@@ -73,10 +74,12 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Transactional
     @Override
-    public CertificateDto insert(CertificateDto certificateDto) throws ResourceAlreadyExistException {
+    public CertificateDto insert(CertificateDto certificateDto)
+            throws ResourceAlreadyExistException, ServiceException {
+        int countNullFields = 0;
+        fieldValidator.isCountFieldsEqualNullMoreOne(certificateDto, countNullFields);
         if (certificateDao.findByName(certificateDto.getName()) != null) {
-            throw new ResourceAlreadyExistException("Requested resource (name = "
-                    + certificateDto.getName() + ") has already existed.");
+            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, certificateDto.getName());
         }
         List<TagDto> tagsFromDto = certificateDto.getTags();
         List<Tag> tags = migrateListTagsFromDtoToEntity(tagsFromDto);
@@ -92,7 +95,8 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Transactional
     @Override
-    public CertificateDto update(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
+    public CertificateDto update(CertificateDto updatedCertificateDto)
+            throws ResourceNotFoundException {
         int id = updatedCertificateDto.getId();
 
         Certificate oldCertificate = certificateDao.findById(id);
@@ -130,23 +134,19 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public void delete(int id) throws ResourceNotFoundException {
         Certificate certificate = certificateDao.findById(id);
-        if (certificate == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
-        }
+        checkEntityOnNull(certificate, id);
         certificateDao.delete(certificate);
     }
 
     @Override
     public CertificateDto findById(int id) throws ResourceNotFoundException {
         Certificate certificate = certificateDao.findById(id);
-        if (certificate == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
-        }
+        checkEntityOnNull(certificate, id);
         return certificateMapper.toDto(certificate);
     }
 
     @Override
-    public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ValidationException {
+    public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ValidationParametersException {
         limit = certificateDao.getCount();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
@@ -167,7 +167,7 @@ public class CertificateServiceImpl implements CertificateService {
     }
 
     @Override
-    public List<CertificateDto> findAll(Map<String, String> params) throws ValidationException {
+    public List<CertificateDto> findAll(Map<String, String> params) throws ValidationParametersException {
         limit = certificateDao.getCount();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
@@ -181,31 +181,23 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
                                                               Map<String, String> params)
-            throws ValidationException {
+            throws ValidationParametersException {
         limit = certificateDao.getCount();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();
         }
+
         List<Certificate> certificates = certificateDao.findCertificatesBySeveralTags(tagNames, offset, limit);
         return migrateListCertificatesFromEntityToDto(certificates);
-    }
-
-    public CertificateDto findByName(String name) throws ResourceNotFoundException {
-        Certificate certificate = certificateDao.findByName(name);
-        if (certificate == null) {
-            throw new ResourceNotFoundException("Requested resource not found (name = " + name + ")");
-        }
-        return certificateMapper.toDto(certificate);
     }
 
     private Certificate prepareCertificate(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
 
         int idUpdateCertificate = updatedCertificateDto.getId();
         Certificate existedCertificateForUpdate = certificateDao.findById(idUpdateCertificate);
-        if (existedCertificateForUpdate == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + idUpdateCertificate + ")");
-        }
+        checkEntityOnNull(existedCertificateForUpdate, idUpdateCertificate);
+
         if (updatedCertificateDto.getName() != null) {
             existedCertificateForUpdate.setName(updatedCertificateDto.getName());
         }
@@ -256,12 +248,6 @@ public class CertificateServiceImpl implements CertificateService {
     private List<Tag> migrateListTagsFromDtoToEntity(List<TagDto> tags) {
         return tags.stream()
                 .map(tagDto -> tagMapper.toEntity(tagDto))
-                .collect(Collectors.toList());
-    }
-
-    private List<TagDto> migrateListTagsFromEntityToDto(List<Tag> tags) {
-        return tags.stream()
-                .map(tag -> tagMapper.toDto(tag))
                 .collect(Collectors.toList());
     }
 

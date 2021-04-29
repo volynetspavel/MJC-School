@@ -15,6 +15,6 @@ import javax.validation.constraints.Null;
 @NoArgsConstructor
 public class AbstractDto<T extends Number> extends RepresentationModel<AbstractDto<Number>> {
 
-    @Null(message = "Id must be null.")
+    @Null
     private T id;
 }

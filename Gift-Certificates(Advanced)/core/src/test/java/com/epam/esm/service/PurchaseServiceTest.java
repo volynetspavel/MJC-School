@@ -5,7 +5,7 @@ import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.PurchaseMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
@@ -158,7 +158,7 @@ class PurchaseServiceTest {
 
     @DisplayName("Testing method findPurchasesByUser() on positive result")
     @Test
-    void findPurchasesByUserSuccessTest() throws ResourceNotFoundException, ValidationException {
+    void findPurchasesByUserSuccessTest() throws ResourceNotFoundException, ValidationParametersException {
         int userId = 1;
         String userEmail = "jonhy@mail.com";
 
@@ -209,7 +209,7 @@ class PurchaseServiceTest {
 
     @DisplayName("Testing method findPurchasesByUser() on exception, when user doesn't exist.")
     @Test
-    void findPurchasesByUserThrowsExceptionTest() throws ValidationException {
+    void findPurchasesByUserThrowsExceptionTest() throws ValidationParametersException {
         int userId = 1;
 
         when(purchaseDao.getCount()).thenReturn(new BigInteger("3"));
@@ -223,7 +223,7 @@ class PurchaseServiceTest {
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
-    void findAllSuccessTest() throws ValidationException {
+    void findAllSuccessTest() throws ValidationParametersException {
         int offset = 0;
         int limit = 3;
         when(purchaseDao.getCount()).thenReturn(new BigInteger("3"));

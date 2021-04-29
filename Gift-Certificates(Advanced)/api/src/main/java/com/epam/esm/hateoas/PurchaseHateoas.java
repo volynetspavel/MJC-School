@@ -6,7 +6,7 @@ import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.model.Tag;
@@ -48,7 +48,7 @@ public class PurchaseHateoas {
         return CollectionModel.of(purchases, selfLink);
     }
 
-    public void addLinksForPurchaseDtoWithUser(Purchase newPurchase) throws ResourceNotFoundException, ValidationException {
+    public void addLinksForPurchaseDtoWithUser(Purchase newPurchase) throws ResourceNotFoundException, ValidationParametersException {
         Link selfLink = linkTo(PurchaseController.class)
                 .slash(newPurchase.getId())
                 .withSelfRel();

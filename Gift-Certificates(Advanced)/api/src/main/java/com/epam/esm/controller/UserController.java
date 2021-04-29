@@ -2,7 +2,7 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.hateoas.UserHateoas;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public CollectionModel<UserDto> findAll(@RequestParam Map<String, String> params)
-            throws ResourceNotFoundException, ValidationException {
+            throws ResourceNotFoundException, ValidationParametersException {
         List<UserDto> userList = userService.findAll(params);
         return userHateoas.addLinksForListOfUserDto(userList);
 
@@ -50,7 +50,7 @@ public class UserController {
     @GetMapping("/{id}")
     public UserDto findById(@PathVariable("id")
                             @Min(value = 1, message = "Enter id more than one.")
-                                    int id) throws ResourceNotFoundException, ValidationException {
+                                    int id) throws ResourceNotFoundException, ValidationParametersException {
         UserDto userDto = userService.findById(id);
         userHateoas.addLinksForUserDto(userDto);
         return userDto;

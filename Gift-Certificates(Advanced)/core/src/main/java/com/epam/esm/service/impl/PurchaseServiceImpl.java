@@ -5,7 +5,7 @@ import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.PurchaseMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
@@ -101,7 +101,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
-    public List<PurchaseDto> findAll(Map<String, String> params) throws ValidationException {
+    public List<PurchaseDto> findAll(Map<String, String> params) throws ValidationParametersException {
         limit = purchaseDao.getCount().intValue();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
@@ -116,7 +116,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
-            throws ValidationException, ResourceNotFoundException {
+            throws ValidationParametersException, ResourceNotFoundException {
         limit = purchaseDao.getCount().intValue();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();

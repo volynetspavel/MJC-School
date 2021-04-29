@@ -4,7 +4,7 @@ import com.epam.esm.dao.TagDao;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.impl.TagServiceImpl;
@@ -174,7 +174,7 @@ class TagServiceTest {
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
-    void findAllSuccessTest() throws ValidationException {
+    void findAllSuccessTest() throws ValidationParametersException {
 
         int id1 = 1;
         String name1 = "extreme";

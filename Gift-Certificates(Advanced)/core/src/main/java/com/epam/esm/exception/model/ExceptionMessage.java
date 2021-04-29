@@ -1,26 +1,16 @@
 package com.epam.esm.exception.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Class used for print any errors or exceptions on backend side.
  */
+@Getter
+@AllArgsConstructor
 public class ExceptionMessage {
 
     private int code;
     private String message;
 
-    public ExceptionMessage() {
-    }
-
-    public ExceptionMessage(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

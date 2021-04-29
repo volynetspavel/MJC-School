@@ -2,7 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.model.Purchase;
 
 import java.math.BigInteger;
@@ -35,7 +35,7 @@ public interface PurchaseService extends Service<PurchaseDto, Purchase> {
     Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException;
 
     List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
-            throws ResourceNotFoundException, ValidationException;
+            throws ResourceNotFoundException, ValidationParametersException;
 
     PurchaseDto findById(BigInteger id) throws ResourceNotFoundException;
 }

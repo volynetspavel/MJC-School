@@ -3,7 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.UserMapper;
 import com.epam.esm.model.User;
 import com.epam.esm.service.impl.UserServiceImpl;
@@ -68,7 +68,7 @@ class UserServiceTest {
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
-    void findAllSuccessTest() throws ValidationException {
+    void findAllSuccessTest() throws ValidationParametersException {
 
         int id1 = 1;
         String name1 = "Jonh";

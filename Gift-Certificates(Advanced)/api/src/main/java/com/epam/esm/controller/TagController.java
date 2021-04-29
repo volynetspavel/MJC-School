@@ -3,7 +3,8 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ServiceException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.hateoas.TagHateoas;
 import com.epam.esm.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class TagController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public TagDto insert(@Valid @RequestBody TagDto tag)
-            throws ResourceAlreadyExistException, ValidationException, ResourceNotFoundException {
+            throws ResourceAlreadyExistException, ValidationParametersException, ResourceNotFoundException, ServiceException {
         TagDto tagDto = tagService.insert(tag);
         tagHateoas.addLinksForTagDto(tagDto);
         return tagDto;
@@ -56,7 +57,7 @@ public class TagController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public CollectionModel<TagDto> findAll(@RequestParam Map<String, String> params)
-            throws ValidationException, ResourceNotFoundException {
+            throws ValidationParametersException, ResourceNotFoundException {
         List<TagDto> tagList = tagService.findAll(params);
         return tagHateoas.addLinksForListOfTagDto(tagList);
     }
@@ -65,7 +66,7 @@ public class TagController {
     @GetMapping("/{id}")
     public TagDto findById(@PathVariable("id")
                            @Min(value = 1, message = "Enter id more than one.")
-                                   int id) throws ResourceNotFoundException, ValidationException {
+                                   int id) throws ResourceNotFoundException, ValidationParametersException {
         TagDto tagDto = tagService.findById(id);
         tagHateoas.addLinksForTagDto(tagDto);
         return tagDto;
@@ -84,7 +85,7 @@ public class TagController {
     public TagDto update(@PathVariable("id")
                          @Min(value = 1, message = "Enter id more than one.") int id,
                          @Valid @RequestBody TagDto tag)
-            throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationException {
+            throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationParametersException, ServiceException {
         tag.setId(id);
         TagDto tagDto = tagService.update(tag);
         tagHateoas.addLinksForTagDto(tagDto);
@@ -92,7 +93,7 @@ public class TagController {
     }
 
     @GetMapping("/popular")
-    public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException, ValidationException {
+    public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException, ValidationParametersException {
         TagDto tagDto = tagService.getMostPopularTagOfUserWithHighestCostOfAllOrders();
         tagHateoas.addLinksForTagDto(tagDto);
         return tagDto;
@@ -103,7 +104,7 @@ public class TagController {
     public TagDto findTagBYUserIdWithHighestCostOfAllOrders(@PathVariable("id")
                                                             @Min(value = 1, message = "Enter id more than one.")
                                                                     int userId)
-            throws ResourceNotFoundException, ValidationException {
+            throws ResourceNotFoundException, ValidationParametersException {
         TagDto tagDto = tagService.findTagBYUserIdWithHighestCostOfAllOrders(userId);
         tagHateoas.addLinksForTagDto(tagDto);
         tagHateoas.addLinksForUser(tagDto, userId);

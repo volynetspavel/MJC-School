@@ -17,7 +17,9 @@ import java.util.List;
 @Repository
 public class TagDaoImpl implements TagDao {
 
+    private static final String ID = "id";
     private static final String NAME = "name";
+
     private static final String SQL_SELECT_MOST_POPULAR_TAG_OF_USER_WITH_HIGHEST_COST_OF_ALL_ORDERS =
             "SELECT t.id, t.name FROM tag t\n" +
                     "JOIN gift_certificate_has_tag gct ON gct.tag_id = t.id\n" +
@@ -75,7 +77,9 @@ public class TagDaoImpl implements TagDao {
     public List<Tag> findAll(int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tag> criteriaQuery = criteriaBuilder.createQuery(Tag.class);
-        criteriaQuery.from(Tag.class);
+        Root<Tag> tagRoot = criteriaQuery.from(Tag.class);
+
+        criteriaQuery.orderBy(criteriaBuilder.asc(tagRoot.get(ID)));
         return entityManager.createQuery(criteriaQuery)
                 .setFirstResult(offset)
                 .setMaxResults(limit)

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class FieldValidator<T extends AbstractDto<? extends Number>> {
 
+
     private FieldValidator nextFieldValidator;
 
     public void setNextFieldValidator(FieldValidator nextFieldValidator) {
@@ -22,9 +23,11 @@ public abstract class FieldValidator<T extends AbstractDto<? extends Number>> {
 
     public abstract void isCountFieldsEqualNullLessOne(T dto, int countFieldsNotNull) throws ServiceException;
 
-    public void checkCountOfFieldsWhichNotNull(int countFieldsNotNull) throws ServiceException {
-        if (countFieldsNotNull > 1) {
-            throw new ServiceException("Request contains more than one field.");
+    public abstract void isCountFieldsEqualNullMoreOne(T dto, int countNullFields) throws ServiceException;
+
+    public void checkCountOfFieldsOnNull(int countFields, String exceptionMessage) throws ServiceException {
+        if (countFields > 1) {
+            throw new ServiceException(exceptionMessage);
         }
     }
 }

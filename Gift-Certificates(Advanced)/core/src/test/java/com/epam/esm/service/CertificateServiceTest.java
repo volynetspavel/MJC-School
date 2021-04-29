@@ -7,7 +7,7 @@ import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ServiceException;
-import com.epam.esm.exception.ValidationException;
+import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.CertificateMapper;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Certificate;
@@ -54,7 +54,7 @@ class CertificateServiceTest {
 
     @DisplayName("Testing method insert() on positive result")
     @Test
-    void insertSuccessTest() throws ResourceAlreadyExistException {
+    void insertSuccessTest() throws ResourceAlreadyExistException, ServiceException {
         int tagId = 1;
         String tagName = "tag";
 
@@ -97,7 +97,7 @@ class CertificateServiceTest {
 
     @DisplayName("Testing method update() on positive result")
     @Test
-    void updateSuccessTest() throws ResourceNotFoundException {
+    void updateSuccessTest() throws ResourceNotFoundException, ServiceException {
         int id = 2;
         String newName = "New dermaplaning";
         String newDescription = null;
@@ -212,7 +212,7 @@ class CertificateServiceTest {
 
     @DisplayName("Testing method findAll() on positive result")
     @Test
-    void findAllSuccessTest() throws ValidationException {
+    void findAllSuccessTest() throws ValidationParametersException {
 
         int offset = 0;
         int limit = 3;
@@ -245,7 +245,7 @@ class CertificateServiceTest {
 
     @DisplayName("Testing method findCertificatesBySeveralTags() on positive result")
     @Test
-    void findCertificatesBySeveralTagsSuccessTest() throws ValidationException {
+    void findCertificatesBySeveralTagsSuccessTest() throws ValidationParametersException {
         List<String> tagNames = Arrays.asList("tag1", "tag2");
         Tag tag1 = getTag(1);
         Tag tag2 = getTag(2);
