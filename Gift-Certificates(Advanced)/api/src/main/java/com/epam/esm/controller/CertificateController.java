@@ -46,7 +46,8 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public CertificateDto insert(@Valid @RequestBody CertificateDto certificateDto)
-            throws ResourceAlreadyExistException, ResourceNotFoundException, ValidationParametersException, ServiceException {
+            throws ResourceAlreadyExistException, ResourceNotFoundException,
+            ValidationParametersException, ServiceException {
         CertificateDto newCertificateDto = certificateService.insert(certificateDto);
         certificateHateoas.addLinksForCertificateDto(newCertificateDto);
         return newCertificateDto;
@@ -58,7 +59,8 @@ public class CertificateController {
                                  @Min(value = 1, message = "Enter id more than one.")
                                          int id,
                                  @Valid @RequestBody CertificateDto certificateDto)
-            throws ResourceNotFoundException, ResourceAlreadyExistException, ValidationParametersException, ServiceException {
+            throws ResourceNotFoundException, ResourceAlreadyExistException,
+            ValidationParametersException, ServiceException {
         certificateDto.setId(id);
         CertificateDto updatedCertificateDto = certificateService.update(certificateDto);
         certificateHateoas.addLinksForCertificateDto(updatedCertificateDto);
@@ -112,8 +114,8 @@ public class CertificateController {
      *
      * @param params - requested parameters from customer.
      * @return - list of certificates.
-     * @throws ValidationParametersException       - if parameters incorrect.
-     * @throws ResourceNotFoundException - if requested resource not found.
+     * @throws ValidationParametersException - if parameters incorrect.
+     * @throws ResourceNotFoundException     - if requested resource not found.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping

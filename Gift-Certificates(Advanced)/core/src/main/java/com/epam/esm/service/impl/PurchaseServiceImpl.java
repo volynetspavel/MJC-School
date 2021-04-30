@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.constant.CodeException;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.dao.UserDao;
@@ -59,7 +60,7 @@ public class PurchaseServiceImpl implements PurchaseService {
         String userEmail = purchaseDto.getUserEmail();
         User user = userDao.findByEmail(userEmail);
         if (user == null) {
-            throw new ResourceNotFoundException("User with email: " + userEmail + " don't found.");
+            throw new ResourceNotFoundException(CodeException.USER_EMAIL_NOT_FOUND);
         }
 
         List<String> certificateNames = purchaseDto.getCertificateNames();
@@ -70,7 +71,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         for (Certificate certificate : certificates) {
             if (certificate == null) {
-                throw new ResourceNotFoundException("Non-existent Certificate in list.");
+                throw new ResourceNotFoundException(CodeException.CERTIFICATE_NOT_FOUND);
             }
         }
 
@@ -92,7 +93,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     public PurchaseDto findById(BigInteger id) throws ResourceNotFoundException {
         Purchase purchase = purchaseDao.findById(id);
         if (purchase == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + id + ")");
+            throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_WITHOUT_ID);
         }
         PurchaseDto purchaseDto = purchaseMapper.toDto(purchase);
         List<String> certificateNames = getListCertificateNamesFromListCertificates(purchase.getCertificates());
@@ -125,7 +126,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         User user = userDao.findById(userId);
         if (user == null) {
-            throw new ResourceNotFoundException("Requested resource not found (id = " + userId + ")");
+            throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_BY_USER_ID, userId);
         }
 
         List<Purchase> purchases = purchaseDao.findPurchasesByUser(user, offset, limit);

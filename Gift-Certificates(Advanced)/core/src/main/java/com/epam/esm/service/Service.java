@@ -26,12 +26,6 @@ public interface Service<T extends AbstractDto, K extends AbstractEntity> {
 
     List<T> findAll(Map<String, String> params) throws ValidationParametersException;
 
-    default void checkListOnEmptyOrNull(List<K> entities) throws ResourceNotFoundException {
-        if (entities == null || entities.isEmpty()) {
-            throw new ResourceNotFoundException("Requested resource not found");
-        }
-    }
-
     default void checkEntityOnNull(K entitiy, int id) throws ResourceNotFoundException {
         if (entitiy == null) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND, id);
