@@ -15,6 +15,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -64,7 +65,7 @@ public class PurchaseHateoas {
                     .withRel(CERTIFICATE);
             newPurchase.getCertificates().get(i).add(certificateLink);
 
-            List<Tag> tags = newPurchase.getCertificates().get(i).getTags();
+            Set<Tag> tags = newPurchase.getCertificates().get(i).getTags();
             for (Tag tag : tags) {
                 Link tagLink = linkTo(methodOn(TagController.class)
                         .findById(tag.getId()))

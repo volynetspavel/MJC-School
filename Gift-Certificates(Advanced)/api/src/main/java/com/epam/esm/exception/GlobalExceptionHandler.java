@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
 
         ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);
-        return new ResponseEntity<>(exceptionMessage, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(exceptionMessage, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ValidationParametersException.class)
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
 
         ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);
-        return new ResponseEntity<>(exceptionMessage, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(exceptionMessage, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -159,7 +159,7 @@ public class GlobalExceptionHandler {
 
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
         ExceptionMessage response = new ExceptionMessage(Integer.parseInt(code), exMessage);
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(Throwable.class)

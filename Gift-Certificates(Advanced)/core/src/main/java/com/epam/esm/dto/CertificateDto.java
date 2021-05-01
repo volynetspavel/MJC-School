@@ -4,10 +4,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.server.core.Relation;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class-wrapper for certificate.
@@ -36,5 +40,5 @@ public class CertificateDto extends AbstractDto<Integer> {
     @Null
     private String lastUpdateDate;
 
-    private List<TagDto> tags = new ArrayList<>();
+    private Set<TagDto> tags = new HashSet<>();
 }
