@@ -8,6 +8,8 @@ public class CodeException {
     public static final String RESOURCE_NOT_FOUND = "7701";
     public static final String RESOURCE_NOT_FOUND_WITHOUT_ID = "7702";
     public static final String RESOURCE_NOT_FOUND_BY_USER_ID = "7703";
+    public static final String USER_EMAIL_NOT_FOUND = "7704";
+    public static final String CERTIFICATE_NOT_FOUND = "7705";
 
     public static final String RESOURCE_ALREADY_EXIST = "9901";
 
@@ -26,6 +28,5 @@ public class CodeException {
     public static final String AUDIT_LOG_ERROR = "6601";
 
     public static final String UNEXPECTED_ERROR = "1101";
-
 
 }

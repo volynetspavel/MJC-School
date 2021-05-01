@@ -24,10 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -81,9 +82,9 @@ public class CertificateServiceImpl implements CertificateService {
         if (certificateDao.findByName(certificateDto.getName()) != null) {
             throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, certificateDto.getName());
         }
-        List<TagDto> tagsFromDto = certificateDto.getTags();
-        List<Tag> tags = migrateListTagsFromDtoToEntity(tagsFromDto);
-        List<Tag> preparedTags = prepareTags(tags);
+        Set<TagDto> tagsFromDto = certificateDto.getTags();
+        Set<Tag> tags = migrateListTagsFromDtoToEntity(tagsFromDto);
+        Set<Tag> preparedTags = prepareTags(tags);
 
         Certificate certificate = certificateMapper.toEntity(certificateDto);
         certificate.setTags(preparedTags);
@@ -214,29 +215,33 @@ public class CertificateServiceImpl implements CertificateService {
         existedCertificateForUpdate.setLastUpdateDate(LocalDateTime
                 .now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
-        List<Tag> tagListForUpdate = new ArrayList<>();
-        if (updatedCertificateDto.getTags() != null) {
-            tagListForUpdate = migrateListTagsFromDtoToEntity(updatedCertificateDto.getTags());
+        Set<Tag> tagListForUpdate;
+        Set<TagDto> updatedTagDtoList = updatedCertificateDto.getTags();
+        Set<Tag> existedTagList = existedCertificateForUpdate.getTags();
+
+        if (!updatedTagDtoList.isEmpty()) {
+            tagListForUpdate = migrateListTagsFromDtoToEntity(updatedTagDtoList);
             tagListForUpdate = prepareTags(tagListForUpdate);
-        } else {
-            if (existedCertificateForUpdate.getTags() != null) {
-                tagListForUpdate = existedCertificateForUpdate.getTags();
+            if (!existedTagList.isEmpty()) {
+                tagListForUpdate.addAll(existedTagList);
             }
+        } else {
+            tagListForUpdate = existedTagList;
         }
         existedCertificateForUpdate.setTags(tagListForUpdate);
 
         return existedCertificateForUpdate;
     }
 
-    private List<Tag> prepareTags(List<Tag> tags) {
+    private Set<Tag> prepareTags(Set<Tag> tags) {
         if (tags == null) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
         return tags.stream()
                 .map(tag -> (tagDao.findByName(tag.getName()) == null
                         ? tagDao.insert(tag)
                         : tagDao.findByName(tag.getName())))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     private List<CertificateDto> migrateListCertificatesFromEntityToDto(List<Certificate> certificates) {
@@ -245,10 +250,10 @@ public class CertificateServiceImpl implements CertificateService {
                 .collect(Collectors.toList());
     }
 
-    private List<Tag> migrateListTagsFromDtoToEntity(List<TagDto> tags) {
+    private Set<Tag> migrateListTagsFromDtoToEntity(Set<TagDto> tags) {
         return tags.stream()
                 .map(tagDto -> tagMapper.toEntity(tagDto))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     private List<CertificateDto> sortByTypeAndOrder(List<CertificateDto> certificates, String typeOfSort, String order) {
