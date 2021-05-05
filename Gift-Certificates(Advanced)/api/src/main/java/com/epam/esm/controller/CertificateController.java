@@ -30,7 +30,7 @@ import java.util.Map;
  * Class is used to send requests from the client to the service layer for certificate entity.
  */
 @RestController
-@RequestMapping("/certificate")
+@RequestMapping("/certificates")
 @Validated
 public class CertificateController {
 

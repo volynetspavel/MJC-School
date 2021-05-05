@@ -28,7 +28,7 @@ import java.util.Map;
  * Class is used to send requests from the client to the service layer for purchase entity.
  */
 @RestController
-@RequestMapping("/purchase")
+@RequestMapping("/purchases")
 @Validated
 public class PurchaseController {
 

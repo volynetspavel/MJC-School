@@ -24,7 +24,7 @@ import java.util.Map;
  * Class is used to send requests from the client to the service layer for user entity.
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @Validated
 public class UserController {
 

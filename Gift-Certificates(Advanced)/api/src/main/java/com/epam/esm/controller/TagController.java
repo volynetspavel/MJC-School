@@ -32,7 +32,7 @@ import java.util.Map;
  * Class is used to send requests from the client to the service layer for tag entity.
  */
 @RestController
-@RequestMapping("/tag")
+@RequestMapping("/tags")
 @Validated
 public class TagController {
 
