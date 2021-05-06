@@ -1,17 +1,19 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.dao.crud.ReadableDao;
+import com.epam.esm.dao.crud.DeletableDao;
+import com.epam.esm.dao.crud.InsertableDao;
+import com.epam.esm.dao.crud.UpdatableDao;
 import com.epam.esm.model.Tag;
 
 /**
- * This class is a basic class of dao-layer for interacting with database.
+ * This class is a basic class of tag dao-layer for interacting with database.
  */
-public interface TagDao extends Dao<Tag, Integer> {
+public abstract class TagDao implements ReadableDao<Tag, Integer>, InsertableDao<Tag>, UpdatableDao<Tag>, DeletableDao<Tag> {
 
-    Tag findByName(String name);
+    public abstract Tag findByName(String name);
 
-    void delete(Tag tag);
+    public abstract Tag getMostPopularTagOfUserWithHighestCostOfAllOrders();
 
-    Tag getMostPopularTagOfUserWithHighestCostOfAllOrders();
-
-    Tag findTagBYUserIdWithHighestCostOfAllOrders(int userId);
+    public abstract Tag findTagBYUserIdWithHighestCostOfAllOrders(int userId);
 }

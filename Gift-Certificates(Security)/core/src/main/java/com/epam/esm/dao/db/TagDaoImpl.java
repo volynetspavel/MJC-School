@@ -15,7 +15,7 @@ import java.util.List;
  * This class is an implementation of TagDao.
  */
 @Repository
-public class TagDaoImpl implements TagDao {
+public class TagDaoImpl extends TagDao {
 
     private static final String ID = "id";
     private static final String NAME = "name";

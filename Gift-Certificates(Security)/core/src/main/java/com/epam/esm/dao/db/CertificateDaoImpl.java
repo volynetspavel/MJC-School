@@ -20,7 +20,7 @@ import java.util.List;
  * This class is an implementation of CertificateDao.
  */
 @Repository
-public class CertificateDaoImpl implements CertificateDao {
+public class CertificateDaoImpl extends CertificateDao {
 
     private static final String NAME = "name";
     private static final String ID = "id";

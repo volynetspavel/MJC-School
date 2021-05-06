@@ -15,7 +15,7 @@ import java.util.List;
  * This class is an implementation of UserDao.
  */
 @Repository
-public class UserDaoImpl implements UserDao {
+public class UserDaoImpl extends UserDao {
 
     private static final String ID = "id";
     private static final String EMAIL = "email";

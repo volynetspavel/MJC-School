@@ -1,4 +1,4 @@
-package com.epam.esm.service;
+package com.epam.esm.service.crud;
 
 import com.epam.esm.constant.CodeException;
 import com.epam.esm.dto.AbstractDto;
@@ -12,15 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Basic interface for service layer. Defines general methods for all services.
+ * Basic interface for service layer. Defines read methods for all services.
  */
-public interface Service<T extends AbstractDto, K extends AbstractEntity> {
-
-    T insert(T entityDto) throws ResourceAlreadyExistException, ServiceException, ResourceNotFoundException;
-
-    T update(T entityDto) throws ResourceNotFoundException, ResourceAlreadyExistException, ServiceException;
-
-    void delete(int id) throws ResourceNotFoundException;
+public interface ReadableService<T extends AbstractDto, K extends AbstractEntity> {
 
     T findById(int id) throws ResourceNotFoundException;
 

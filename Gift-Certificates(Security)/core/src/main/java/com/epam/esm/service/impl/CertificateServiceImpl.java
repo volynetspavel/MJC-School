@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class CertificateServiceImpl implements CertificateService {
+public class CertificateServiceImpl extends CertificateService {
 
     private static final String SORT_ORDER_DESC = "desc";
     private static final String SORT_ORDER_ASC = "asc";

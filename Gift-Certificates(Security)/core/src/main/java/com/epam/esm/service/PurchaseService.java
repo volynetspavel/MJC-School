@@ -12,30 +12,12 @@ import java.util.Map;
 /**
  * This class is a layer for interacting with PurchaseDao.
  */
-public interface PurchaseService extends Service<PurchaseDto, Purchase> {
+public abstract class PurchaseService {
 
-    @Override
-    default PurchaseDto insert(PurchaseDto entityDto) {
-        return null;
-    }
+    public abstract Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException;
 
-    @Override
-    default void delete(int id) {
-    }
+    public abstract PurchaseDto findById(BigInteger id) throws ResourceNotFoundException;
 
-    @Override
-    default PurchaseDto update(PurchaseDto entityDto) {
-        return null;
-    }
-
-    default PurchaseDto findById(int id) {
-        return null;
-    }
-
-    Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException;
-
-    List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
+    public abstract List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
             throws ResourceNotFoundException, ValidationParametersException;
-
-    PurchaseDto findById(BigInteger id) throws ResourceNotFoundException;
 }

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends UserService {
 
     private UserDao userDao;
     private UserMapper userMapper;

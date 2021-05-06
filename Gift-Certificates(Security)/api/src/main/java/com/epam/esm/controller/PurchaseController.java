@@ -51,15 +51,6 @@ public class PurchaseController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping
-    public List<PurchaseDto> findPurchases(@RequestParam Map<String, String> params)
-            throws ValidationParametersException {
-        List<PurchaseDto> purchases = purchaseService.findAll(params);
-        purchaseHateoas.addLinksForListOfPurchaseDto(purchases);
-        return purchases;
-    }
-
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public PurchaseDto findById(@PathVariable("id") @Min(value = 1, message = "Enter id more than one.")
                                         BigInteger id) throws ResourceNotFoundException {

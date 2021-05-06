@@ -1,4 +1,4 @@
-package com.epam.esm.dao;
+package com.epam.esm.dao.crud;
 
 import com.epam.esm.model.AbstractEntity;
 
@@ -7,13 +7,7 @@ import java.util.List;
 /**
  * This class is a basic class of dao-layer for interacting with database.
  */
-public interface Dao<T extends AbstractEntity, N extends Number> {
-
-    T insert(T entity);
-
-    void update(T entity);
-
-    void delete(T entity);
+public interface ReadableDao<T extends AbstractEntity, N extends Number> {
 
     List<T> findAll(int offset, int limit);
 

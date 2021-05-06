@@ -18,7 +18,7 @@ import java.util.List;
  * This class is an implementation of PurchaseDao.
  */
 @Repository
-public class PurchaseDaoImpl implements PurchaseDao {
+public class PurchaseDaoImpl extends PurchaseDao {
 
     private static final String USER = "user";
 

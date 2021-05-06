@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class PurchaseServiceImpl implements PurchaseService {
+public class PurchaseServiceImpl extends PurchaseService {
 
     private UserDao userDao;
     private CertificateDao certificateDao;
@@ -99,20 +99,6 @@ public class PurchaseServiceImpl implements PurchaseService {
         List<String> certificateNames = getListCertificateNamesFromListCertificates(purchase.getCertificates());
         purchaseDto.setCertificateNames(certificateNames);
         return purchaseDto;
-    }
-
-    @Override
-    public List<PurchaseDto> findAll(Map<String, String> params) throws ValidationParametersException {
-        limit = purchaseDao.getCount().intValue();
-        if (paginationValidator.validatePaginationParameters(params)) {
-            limit = paginationValidator.getLimit();
-            offset = paginationValidator.getOffset();
-        }
-
-        List<Purchase> purchases = purchaseDao.findAll(offset, limit);
-
-        List<PurchaseDto> purchaseList = migrateListFromEntityToDto(purchases);
-        return setCertificateNamesFromCertificatesOfEntityToDto(purchaseList, purchases);
     }
 
     @Override

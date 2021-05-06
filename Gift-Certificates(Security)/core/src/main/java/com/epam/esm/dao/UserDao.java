@@ -1,24 +1,12 @@
 package com.epam.esm.dao;
 
+import com.epam.esm.dao.crud.ReadableDao;
 import com.epam.esm.model.User;
 
 /**
- * This class is a basic class of dao-layer for interacting with database.
+ * This class is a basic class of user dao-layer for interacting with database.
  */
-public interface UserDao extends Dao<User, Integer> {
+public abstract class UserDao implements ReadableDao<User, Integer> {
 
-    @Override
-    default User insert(User entityDto) {
-        return null;
-    }
-
-    @Override
-    default void delete(User entityDto) {
-    }
-
-    @Override
-    default void update(User entityDto) {
-    }
-
-    User findByEmail(String userEmail);
+    public abstract User findByEmail(String userEmail);
 }

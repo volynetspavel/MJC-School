@@ -2,23 +2,11 @@ package com.epam.esm.service;
 
 import com.epam.esm.dto.UserDto;
 import com.epam.esm.model.User;
+import com.epam.esm.service.crud.ReadableService;
 
 /**
  * This class is a layer for interacting with UserDao.
  */
-public interface UserService extends Service<UserDto, User> {
+public abstract class UserService implements ReadableService<UserDto, User> {
 
-    @Override
-    default UserDto insert(UserDto entityDto) {
-        return null;
-    }
-
-    @Override
-    default void delete(int id) {
-    }
-
-    @Override
-    default UserDto update(UserDto entityDto) {
-        return null;
-    }
 }
