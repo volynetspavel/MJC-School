@@ -117,8 +117,7 @@ public class GlobalExceptionHandler {
      * @return - exception message with code.
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ExceptionMessage> handleMethodArgumentTypeMismatchException(
-            MethodArgumentTypeMismatchException e, WebRequest wr) {
+    public ResponseEntity<ExceptionMessage> handle(MethodArgumentTypeMismatchException e, WebRequest wr) {
         String code = CodeException.INVALID_URI;
 
         String errorMessage = messageSource.getMessage(code, new Object[]{}, wr.getLocale());
@@ -135,8 +134,7 @@ public class GlobalExceptionHandler {
      * @return - exception message with code.
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ExceptionMessage> handleMethodArgumentTypeMismatchException(
-            MissingServletRequestParameterException e, WebRequest wr) {
+    public ResponseEntity<ExceptionMessage> handle(MissingServletRequestParameterException e, WebRequest wr) {
         String code = CodeException.NOT_VALID_PARAMETER_OF_REQUEST;
 
         String errorMessage = messageSource.getMessage(code, new Object[]{}, wr.getLocale());
@@ -153,7 +151,7 @@ public class GlobalExceptionHandler {
      * @return - exception message with code.
      */
     @ExceptionHandler(JpaSystemException.class)
-    public ResponseEntity<ExceptionMessage> handleThrowable(JpaSystemException e, HttpServletRequest request) {
+    public ResponseEntity<ExceptionMessage> handle(JpaSystemException e, HttpServletRequest request) {
         e.printStackTrace();
         String code = CodeException.AUDIT_LOG_ERROR;
 

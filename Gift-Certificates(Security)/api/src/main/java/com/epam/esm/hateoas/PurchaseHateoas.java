@@ -4,12 +4,12 @@ import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.PurchaseController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
+import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.dto.PurchaseDto;
+import com.epam.esm.dto.PurchaseDtoAfterOrder;
+import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ValidationParametersException;
-import com.epam.esm.model.Certificate;
-import com.epam.esm.model.Purchase;
-import com.epam.esm.model.Tag;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
@@ -49,30 +49,31 @@ public class PurchaseHateoas {
         return CollectionModel.of(purchases, selfLink);
     }
 
-    public void addLinksForPurchaseDtoWithUser(Purchase newPurchase) throws ResourceNotFoundException, ValidationParametersException {
+    public void addLinksForPurchaseDtoWithUser(PurchaseDtoAfterOrder newPurchase) throws ResourceNotFoundException,
+            ValidationParametersException {
         Link selfLink = linkTo(PurchaseController.class)
                 .slash(newPurchase.getId())
                 .withSelfRel();
 
         Link userLink = linkTo(methodOn(UserController.class)
-                .findById(newPurchase.getUser().getId()))
+                .findById(newPurchase.getUserDto().getId()))
                 .withRel(USER);
 
-        List<Certificate> certificates = newPurchase.getCertificates();
+        List<CertificateDto> certificates = newPurchase.getCertificates();
         for (int i = 0; i < certificates.size(); i++) {
             Link certificateLink = linkTo(methodOn(CertificateController.class)
                     .findById(certificates.get(i).getId()))
                     .withRel(CERTIFICATE);
             newPurchase.getCertificates().get(i).add(certificateLink);
 
-            Set<Tag> tags = newPurchase.getCertificates().get(i).getTags();
-            for (Tag tag : tags) {
+            Set<TagDto> tags = newPurchase.getCertificates().get(i).getTags();
+            for (TagDto tagDto : tags) {
                 Link tagLink = linkTo(methodOn(TagController.class)
-                        .findById(tag.getId()))
+                        .findById(tagDto.getId()))
                         .withRel(TAG);
 
-                if (!tag.hasLink(TAG)) {
-                    tag.add(tagLink);
+                if (!tagDto.hasLink(TAG)) {
+                    tagDto.add(tagLink);
                 }
             }
         }

@@ -1,10 +1,10 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.PurchaseDto;
+import com.epam.esm.dto.PurchaseDtoAfterOrder;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.hateoas.PurchaseHateoas;
-import com.epam.esm.model.Purchase;
 import com.epam.esm.service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,9 +43,9 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Purchase makePurchase(@Valid @RequestBody PurchaseDto purchase)
+    public PurchaseDtoAfterOrder makePurchase(@Valid @RequestBody PurchaseDto purchase)
             throws ResourceNotFoundException, ValidationParametersException {
-        Purchase newPurchase = purchaseService.makePurchase(purchase);
+        PurchaseDtoAfterOrder newPurchase = purchaseService.makePurchase(purchase);
         purchaseHateoas.addLinksForPurchaseDtoWithUser(newPurchase);
         return newPurchase;
     }

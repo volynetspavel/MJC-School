@@ -14,7 +14,7 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public abstract class AbstractEntity<T extends Number> extends RepresentationModel<AbstractEntity<Number>> {
+public abstract class AbstractEntity<T extends Number> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

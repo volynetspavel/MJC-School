@@ -5,9 +5,12 @@ import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.PurchaseDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.PurchaseDto;
+import com.epam.esm.dto.PurchaseDtoAfterOrder;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ValidationParametersException;
+import com.epam.esm.mapper.impl.PurchaseAfterOrderMapper;
 import com.epam.esm.mapper.impl.PurchaseMapper;
+import com.epam.esm.mapper.impl.UserMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.model.User;
@@ -38,6 +41,8 @@ public class PurchaseServiceImpl extends PurchaseService {
     private CertificateDao certificateDao;
     private PurchaseDao purchaseDao;
     private PurchaseMapper purchaseMapper;
+    private UserMapper userMapper;
+    private PurchaseAfterOrderMapper purchaseAfterOrderMapper;
     private PaginationValidator paginationValidator;
 
     private int limit;
@@ -46,17 +51,20 @@ public class PurchaseServiceImpl extends PurchaseService {
     @Autowired
     public PurchaseServiceImpl(PurchaseDao purchaseDao, PurchaseMapper purchaseMapper,
                                UserDao userDao, CertificateDao certificateDao,
+                               UserMapper userMapper, PurchaseAfterOrderMapper purchaseAfterOrderMapper,
                                PaginationValidator paginationValidator) {
         this.purchaseDao = purchaseDao;
         this.purchaseMapper = purchaseMapper;
         this.userDao = userDao;
         this.certificateDao = certificateDao;
+        this.userMapper = userMapper;
+        this.purchaseAfterOrderMapper = purchaseAfterOrderMapper;
         this.paginationValidator = paginationValidator;
     }
 
     @Transactional
     @Override
-    public Purchase makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException {
+    public PurchaseDtoAfterOrder makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException {
         String userEmail = purchaseDto.getUserEmail();
         User user = userDao.findByEmail(userEmail);
         if (user == null) {
@@ -86,7 +94,9 @@ public class PurchaseServiceImpl extends PurchaseService {
         purchase.setPurchaseDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         purchase.setCertificates(certificates);
 
-        return purchaseDao.insert(purchase);
+        PurchaseDtoAfterOrder newPurchaseDto = purchaseAfterOrderMapper.toDto(purchaseDao.insert(purchase));
+        newPurchaseDto.setUserDto(userMapper.toDto(user));
+        return newPurchaseDto;
     }
 
     @Override
