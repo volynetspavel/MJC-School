@@ -1,0 +1,2 @@
+rootProject.name = 'Gift-Certificates(Security)'
+include('api', 'core')

@@ -1,0 +1,5 @@
+dependencies {
+
+    //for mysql java connector
+    implementation "mysql:mysql-connector-java:8.0.15"
+}
