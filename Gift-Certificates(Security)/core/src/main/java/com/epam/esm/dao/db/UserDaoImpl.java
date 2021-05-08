@@ -3,6 +3,7 @@ package com.epam.esm.dao.db;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.model.User;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -52,6 +53,7 @@ public class UserDaoImpl extends UserDao {
                 .count();
     }
 
+    @Transactional
     @Override
     public User findByEmail(String userEmail) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -60,5 +62,11 @@ public class UserDaoImpl extends UserDao {
 
         criteriaQuery.where(criteriaBuilder.equal(root.get(EMAIL), userEmail));
         return entityManager.createQuery(criteriaQuery).getResultStream().findFirst().orElse(null);
+    }
+
+    @Override
+    public User insert(User user) {
+        entityManager.persist(user);
+        return user;
     }
 }

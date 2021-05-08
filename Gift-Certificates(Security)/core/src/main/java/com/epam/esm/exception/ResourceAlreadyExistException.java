@@ -11,7 +11,7 @@ public class ResourceAlreadyExistException extends Exception {
     private String code;
     private String nameOfResource;
 
-    public ResourceAlreadyExistException() {
+    public ResourceAlreadyExistException(String message) {
         super();
     }
 

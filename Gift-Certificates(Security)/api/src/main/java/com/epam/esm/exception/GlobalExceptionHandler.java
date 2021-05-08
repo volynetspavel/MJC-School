@@ -8,6 +8,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -69,6 +71,26 @@ public class GlobalExceptionHandler {
 
         ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);
         return new ResponseEntity<>(exceptionMessage, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ExceptionMessage> handleAuthenticationException(AuthenticationException ex,
+                                                                          HttpServletRequest request) {
+        String code = ex.getMessage();
+        String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
+
+        ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);
+        return new ResponseEntity<>(exceptionMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ExceptionMessage> handleUsernameNotFoundException(UsernameNotFoundException ex,
+                                                                          HttpServletRequest request) {
+        String code = ex.getMessage();
+        String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
+
+        ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);
+        return new ResponseEntity<>(exceptionMessage, HttpStatus.NOT_FOUND);
     }
 
     /**

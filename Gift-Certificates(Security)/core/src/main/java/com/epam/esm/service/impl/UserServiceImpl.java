@@ -1,16 +1,22 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.constant.CodeException;
 import com.epam.esm.dao.UserDao;
+import com.epam.esm.dto.RegistrationUserDto;
 import com.epam.esm.dto.UserDto;
+import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.UserMapper;
+import com.epam.esm.model.Role;
 import com.epam.esm.model.User;
 import com.epam.esm.service.UserService;
 import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -26,14 +32,18 @@ public class UserServiceImpl extends UserService {
     private UserDao userDao;
     private UserMapper userMapper;
     private PaginationValidator paginationValidator;
+    private PasswordEncoder passwordEncoder;
 
     private int offset;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, UserMapper userMapper, PaginationValidator paginationValidator) {
+    public UserServiceImpl(UserDao userDao, UserMapper userMapper,
+                           PaginationValidator paginationValidator,
+                           PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
         this.userMapper = userMapper;
         this.paginationValidator = paginationValidator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -59,5 +69,25 @@ public class UserServiceImpl extends UserService {
         return users.stream()
                 .map(user -> userMapper.toDto(user))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public UserDto registration(RegistrationUserDto newUserDto) throws ResourceAlreadyExistException {
+        String userEmail = newUserDto.getEmail();
+        User user = userDao.findByEmail(userEmail);
+        if (user != null) {
+            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, userEmail);
+        }
+
+        User newUser = new User();
+        newUser.setName(newUserDto.getName());
+        newUser.setSurname(newUserDto.getSurname());
+        newUser.setEmail(newUserDto.getEmail());
+        newUser.setPassword(passwordEncoder.encode(newUserDto.getPassword()));
+        newUser.setRole(Role.ROLE_USER);
+
+        userDao.insert(newUser);
+        return userMapper.toDto(newUser);
     }
 }

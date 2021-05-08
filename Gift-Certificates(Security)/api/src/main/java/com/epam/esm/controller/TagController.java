@@ -27,7 +27,6 @@ import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Class is used to send requests from the client to the service layer for tag entity.
  */

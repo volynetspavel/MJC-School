@@ -7,6 +7,8 @@ import org.hibernate.envers.Audited;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 /**
@@ -25,4 +27,8 @@ public class User extends AbstractEntity<Integer> {
 
     @Column(unique = true)
     private String email;
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }
