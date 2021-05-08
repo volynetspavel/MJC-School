@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ExceptionMessage> handleUsernameNotFoundException(UsernameNotFoundException ex,
-                                                                          HttpServletRequest request) {
+                                                                            HttpServletRequest request) {
         String code = ex.getMessage();
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
 

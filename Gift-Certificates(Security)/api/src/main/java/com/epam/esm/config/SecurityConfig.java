@@ -1,5 +1,6 @@
 package com.epam.esm.config;
 
+import com.epam.esm.exception.security.CustomAccessDeniedHandler;
 import com.epam.esm.filter.JwtTokenFilter;
 import com.epam.esm.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final int BCRYPT_STRENGTH = 12;
 
-    @Autowired
-    private JwtTokenFilter jwtTokenFilter;
+    private final JwtTokenFilter jwtTokenFilter;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
+    @Autowired
+    public SecurityConfig(JwtTokenFilter jwtTokenFilter, CustomAccessDeniedHandler accessDeniedHandler) {
+        this.jwtTokenFilter = jwtTokenFilter;
+        this.accessDeniedHandler = accessDeniedHandler;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -35,9 +41,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth").permitAll()
-                .antMatchers(HttpMethod.POST,"/purchases").hasAuthority(Role.ROLE_USER.name())
-                .antMatchers(HttpMethod.GET, "/tags", "/certificates").hasAuthority(Role.ROLE_USER.name())
-                .antMatchers("/**").hasAuthority(Role.ROLE_ADMIN.name())
+                .antMatchers(HttpMethod.GET, "/tags", "/certificates").permitAll()
+                .antMatchers(HttpMethod.POST, "/purchases").hasAuthority(Role.ROLE_USER.name())
+                .antMatchers(HttpMethod.POST, "/tags").hasAuthority(Role.ROLE_ADMIN.name())
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .addFilterBefore(jwtTokenFilter, BasicAuthenticationFilter.class);
     }
@@ -52,5 +61,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(BCRYPT_STRENGTH);
     }
-
 }

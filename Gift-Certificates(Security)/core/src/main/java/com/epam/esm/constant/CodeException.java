@@ -32,5 +32,6 @@ public class CodeException {
     public static final String UNAUTHORIZED = "4401";
     public static final String TOKEN_EXPIRED = "4402";
     public static final String INVALID_TOKEN = "4403";
+    public static final String FORBIDDEN = "4404";
 
 }
