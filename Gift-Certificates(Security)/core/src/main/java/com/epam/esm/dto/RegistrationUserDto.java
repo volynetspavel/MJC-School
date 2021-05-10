@@ -28,7 +28,7 @@ public class RegistrationUserDto extends AbstractDto<Integer> {
     private String email;
 
     @NotBlank
-    @Pattern(regexp = "[\\w\\W]{4,256}")
+    @Pattern(regexp = "[\\w\\W]{4,}")
     private String password;
 
 }

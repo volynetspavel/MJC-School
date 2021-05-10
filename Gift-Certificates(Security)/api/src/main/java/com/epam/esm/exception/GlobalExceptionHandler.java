@@ -8,6 +8,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
@@ -80,7 +82,22 @@ public class GlobalExceptionHandler {
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
 
         ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);
-        return new ResponseEntity<>(exceptionMessage, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(exceptionMessage, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Catch exception when login or password is incorrect.
+     *
+     * @param request - HttpServletRequest
+     * @return - exception message with code.
+     */
+    @ExceptionHandler({BadCredentialsException.class, InternalAuthenticationServiceException.class})
+    public ResponseEntity<ExceptionMessage> handleBadCredentialException(HttpServletRequest request) {
+        String code = CodeException.INVALID_USERNAME_OR_PASSWORD;
+        String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
+
+        ExceptionMessage response = new ExceptionMessage(Integer.parseInt(code), exMessage);
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)

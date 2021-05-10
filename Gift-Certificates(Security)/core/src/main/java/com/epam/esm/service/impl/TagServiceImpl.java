@@ -2,12 +2,14 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.constant.CodeException;
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
+import com.epam.esm.model.User;
 import com.epam.esm.service.TagService;
 import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +29,16 @@ import java.util.stream.Collectors;
 public class TagServiceImpl extends TagService {
 
     private TagDao tagDao;
+    private UserDao userDao;
     private TagMapper tagMapper;
     private PaginationValidator paginationValidator;
 
     private int offset;
 
     @Autowired
-    public TagServiceImpl(TagDao tagDao, TagMapper tagMapper, PaginationValidator paginationValidator) {
+    public TagServiceImpl(TagDao tagDao, UserDao userDao, TagMapper tagMapper, PaginationValidator paginationValidator) {
         this.tagDao = tagDao;
+        this.userDao = userDao;
         this.tagMapper = tagMapper;
         this.paginationValidator = paginationValidator;
     }
@@ -111,6 +115,10 @@ public class TagServiceImpl extends TagService {
 
     @Override
     public TagDto findTagBYUserIdWithHighestCostOfAllOrders(int userId) throws ResourceNotFoundException {
+        User user = userDao.findById(userId);
+        if (user == null) {
+            throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND, userId);
+        }
         Tag tag = tagDao.findTagBYUserIdWithHighestCostOfAllOrders(userId);
         if (tag == null) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_BY_USER_ID, userId);

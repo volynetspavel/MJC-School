@@ -21,8 +21,7 @@ import java.util.List;
 @Relation(itemRelation = "purchase", collectionRelation = "purchases")
 public class PurchaseDto extends AbstractDto<BigInteger> {
 
-    @NotBlank
-    @Email(regexp = "[A-Za-z0-9+_.-]+@(.+)")
+    @Null
     private String userEmail;
 
     @Null

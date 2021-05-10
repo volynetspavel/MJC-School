@@ -49,8 +49,12 @@ public class AuthenticationController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/registration")
-    public UserDto registration(@RequestBody @Valid RegistrationUserDto newUserDto)
+    public AuthenticationResponseDto registration(@RequestBody @Valid RegistrationUserDto newUserDto)
             throws ResourceAlreadyExistException {
-        return userService.registration(newUserDto);
+                userService.registration(newUserDto);
+        AuthenticationRequestDto authenticationRequestDto = new AuthenticationRequestDto();
+        authenticationRequestDto.setEmail(newUserDto.getEmail());
+        authenticationRequestDto.setPassword(newUserDto.getPassword());
+        return authenticate(authenticationRequestDto);
     }
 }

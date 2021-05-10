@@ -1,5 +1,7 @@
 package com.epam.esm.constant;
 
+import java.sql.SQLException;
+
 /**
  * Contains list of codes for exceptions.
  */
@@ -29,7 +31,7 @@ public class CodeException {
 
     public static final String UNEXPECTED_ERROR = "1101";
 
-    public static final String UNAUTHORIZED = "4401";
+    public static final String INVALID_USERNAME_OR_PASSWORD = "4401";
     public static final String TOKEN_EXPIRED = "4402";
     public static final String INVALID_TOKEN = "4403";
     public static final String FORBIDDEN = "4404";

@@ -14,10 +14,13 @@ import com.epam.esm.mapper.impl.UserMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Purchase;
 import com.epam.esm.model.User;
+import com.epam.esm.security.JwtUser;
 import com.epam.esm.service.PurchaseService;
 import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,7 +68,7 @@ public class PurchaseServiceImpl extends PurchaseService {
     @Transactional
     @Override
     public PurchaseDtoAfterOrder makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException {
-        String userEmail = purchaseDto.getUserEmail();
+        String userEmail = getUserFromAuthentication().getEmail();
         User user = userDao.findByEmail(userEmail);
         if (user == null) {
             throw new ResourceNotFoundException(CodeException.USER_EMAIL_NOT_FOUND);
@@ -97,6 +100,11 @@ public class PurchaseServiceImpl extends PurchaseService {
         PurchaseDtoAfterOrder newPurchaseDto = purchaseAfterOrderMapper.toDto(purchaseDao.insert(purchase));
         newPurchaseDto.setUserDto(userMapper.toDto(user));
         return newPurchaseDto;
+    }
+
+    private JwtUser getUserFromAuthentication() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (JwtUser) authentication.getPrincipal();
     }
 
     @Override

@@ -22,8 +22,8 @@ import java.io.IOException;
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-    private JwtTokenProvider jwtTokenProvider;
-    private HandlerExceptionResolver resolver;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final HandlerExceptionResolver resolver;
 
     @Autowired
     public JwtTokenFilter(JwtTokenProvider jwtTokenProvider,
