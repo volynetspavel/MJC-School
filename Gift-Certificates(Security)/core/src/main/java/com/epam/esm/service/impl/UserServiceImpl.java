@@ -1,6 +1,8 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.constant.CodeException;
+import com.epam.esm.constant.RoleValue;
+import com.epam.esm.dao.RoleDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.RegistrationUserDto;
 import com.epam.esm.dto.UserDto;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends UserService {
 
     private UserDao userDao;
+    private RoleDao roleDao;
     private UserMapper userMapper;
     private PaginationValidator paginationValidator;
     private PasswordEncoder passwordEncoder;
@@ -37,10 +41,11 @@ public class UserServiceImpl extends UserService {
     private int offset;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, UserMapper userMapper,
+    public UserServiceImpl(UserDao userDao, RoleDao roleDao, UserMapper userMapper,
                            PaginationValidator paginationValidator,
                            PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
+        this.roleDao = roleDao;
         this.userMapper = userMapper;
         this.paginationValidator = paginationValidator;
         this.passwordEncoder = passwordEncoder;
@@ -79,13 +84,14 @@ public class UserServiceImpl extends UserService {
         if (user != null) {
             throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, userEmail);
         }
+        Role role = roleDao.findByName(RoleValue.ROLE_USER);
 
         User newUser = new User();
         newUser.setName(newUserDto.getName());
         newUser.setSurname(newUserDto.getSurname());
         newUser.setEmail(newUserDto.getEmail());
         newUser.setPassword(passwordEncoder.encode(newUserDto.getPassword()));
-        newUser.setRole(Role.ROLE_USER);
+        newUser.setRoles(Collections.singletonList(role));
 
         userDao.insert(newUser);
         return userMapper.toDto(newUser);

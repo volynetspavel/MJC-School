@@ -3,7 +3,7 @@ package com.epam.esm.constant;
 /**
  * Defines list of constants for response.
  */
-public class ConstantsForResponse {
+public class ResponseConstants {
 
     public static final String CONTENT_TYPE = "application/json";
     public static final String ENCODING = "UTF-8";

@@ -1,8 +1,8 @@
 package com.epam.esm.config;
 
+import com.epam.esm.constant.RoleValue;
 import com.epam.esm.exception.security.CustomAccessDeniedHandler;
 import com.epam.esm.filter.JwtTokenFilter;
-import com.epam.esm.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -43,15 +43,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth").permitAll()
                 .antMatchers(HttpMethod.GET, "/tags", "/certificates").permitAll()
                 .antMatchers(HttpMethod.POST, "/purchases")
-                .hasAuthority(Role.ROLE_USER.name())
+                .hasAuthority(RoleValue.ROLE_USER)
                 .antMatchers(HttpMethod.POST, "/tags", "/certificates")
-                .hasAuthority(Role.ROLE_ADMIN.name())
+                .hasAuthority(RoleValue.ROLE_ADMIN)
                 .antMatchers(HttpMethod.DELETE, "/tags/**", "/certificates/**")
-                .hasAuthority(Role.ROLE_ADMIN.name())
+                .hasAuthority(RoleValue.ROLE_ADMIN)
                 .antMatchers(HttpMethod.PUT, "/tags/**", "/certificates/**")
-                .hasAuthority(Role.ROLE_ADMIN.name())
-                .antMatchers( HttpMethod.GET,"/users/**", "/tags/user/**", "/purchases/user/**")
-                .hasAuthority(Role.ROLE_ADMIN.name())
+                .hasAuthority(RoleValue.ROLE_ADMIN)
+                .antMatchers(HttpMethod.GET, "/users/**", "/tags/user/**", "/purchases/user/**")
+                .hasAuthority(RoleValue.ROLE_ADMIN)
                 .and()
                 .exceptionHandling().authenticationEntryPoint(accessDeniedHandler)
                 .accessDeniedHandler(accessDeniedHandler)

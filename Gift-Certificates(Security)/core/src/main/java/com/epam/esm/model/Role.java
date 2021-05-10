@@ -1,15 +1,29 @@
 package com.epam.esm.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.hibernate.envers.Audited;
+import org.springframework.security.core.GrantedAuthority;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
- * Contains user roles.
+ * Role is an entity of role.
  */
-@Getter
-@AllArgsConstructor
-public enum Role {
+@Entity
+@Table
+@Data
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@Audited
+public class Role extends AbstractEntity<Integer> implements GrantedAuthority {
 
-    ROLE_USER, ROLE_ADMIN;
+    private String name;
 
+    @Override
+    public String getAuthority() {
+        return this.name;
+    }
 }

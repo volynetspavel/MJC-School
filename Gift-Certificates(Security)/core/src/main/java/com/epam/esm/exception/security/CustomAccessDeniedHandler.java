@@ -14,10 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static com.epam.esm.constant.CodeException.FORBIDDEN;
-import static com.epam.esm.constant.ConstantsForResponse.CODE;
-import static com.epam.esm.constant.ConstantsForResponse.CONTENT_TYPE;
-import static com.epam.esm.constant.ConstantsForResponse.ENCODING;
-import static com.epam.esm.constant.ConstantsForResponse.MESSAGE;
+import static com.epam.esm.constant.ResponseConstants.CODE;
+import static com.epam.esm.constant.ResponseConstants.CONTENT_TYPE;
+import static com.epam.esm.constant.ResponseConstants.ENCODING;
+import static com.epam.esm.constant.ResponseConstants.MESSAGE;
 import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 
 /**
