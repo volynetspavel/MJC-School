@@ -16,10 +16,11 @@ import java.util.Map;
 /**
  * This class is a layer for interacting with CertificateDao.
  */
-public abstract class CertificateService implements ReadableService<CertificateDto, Certificate>, InsertableService<CertificateDto>,
-        UpdatableService<CertificateDto>, DeletableService<CertificateDto> {
+public abstract class CertificateService implements ReadableService<CertificateDto, Certificate>,
+        InsertableService<CertificateDto>, UpdatableService<CertificateDto>, DeletableService<CertificateDto> {
 
-    public abstract CertificateDto updateSingleField(CertificateDto certificateDto) throws ResourceNotFoundException, ServiceException;
+    public abstract CertificateDto updateSingleField(CertificateDto certificateDto)
+            throws ResourceNotFoundException, ServiceException;
 
     public abstract List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
                                                                        Map<String, String> params)

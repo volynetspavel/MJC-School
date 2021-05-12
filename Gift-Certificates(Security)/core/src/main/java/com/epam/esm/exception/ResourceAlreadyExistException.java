@@ -6,17 +6,16 @@ import lombok.Getter;
  * ResourceAlreadyExistException is used when required resource has already existed.
  */
 @Getter
-public class ResourceAlreadyExistException extends Exception {
+public class ResourceAlreadyExistException extends RuntimeException {
 
-    private String code;
     private String nameOfResource;
 
     public ResourceAlreadyExistException(String message) {
-        super();
+        super(message);
     }
 
     public ResourceAlreadyExistException(String code, String nameOfResource) {
-        this.code = code;
+        super(code);
         this.nameOfResource = nameOfResource;
     }
 

@@ -13,6 +13,7 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 public class JwtUser implements UserDetails {
+
     private Integer id;
     private String email;
     private String password;

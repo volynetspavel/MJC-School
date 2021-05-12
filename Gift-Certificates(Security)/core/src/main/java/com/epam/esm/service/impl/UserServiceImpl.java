@@ -12,8 +12,10 @@ import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.UserMapper;
 import com.epam.esm.model.Role;
 import com.epam.esm.model.User;
+import com.epam.esm.security.SecurityUtil;
 import com.epam.esm.service.UserService;
 import com.epam.esm.validation.PaginationValidator;
+import com.epam.esm.validation.SecurityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +68,9 @@ public class UserServiceImpl extends UserService {
 
     @Override
     public UserDto findById(int id) throws ResourceNotFoundException {
+        if (SecurityValidator.isCurrentUserHasRoleUser()) {
+            id = Objects.requireNonNull(SecurityUtil.getJwtUserId());
+        }
         User user = userDao.findById(id);
         checkEntityOnNull(user, id);
         return userMapper.toDto(user);

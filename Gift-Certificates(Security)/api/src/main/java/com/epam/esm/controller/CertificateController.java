@@ -55,9 +55,7 @@ public class CertificateController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}")
-    public CertificateDto update(@PathVariable("id")
-                                 @Min(value = 1, message = "Enter id more than one.")
-                                         int id,
+    public CertificateDto update(@PathVariable("id") @Min(value = 1) int id,
                                  @Valid @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ResourceAlreadyExistException,
             ValidationParametersException, ServiceException {
@@ -78,9 +76,7 @@ public class CertificateController {
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/single/{id}")
-    public CertificateDto updateSingleField(@PathVariable("id")
-                                            @Min(value = 1, message = "Enter id more than one.")
-                                                    int id,
+    public CertificateDto updateSingleField(@PathVariable("id") @Min(value = 1) int id,
                                             @Valid @RequestBody CertificateDto certificateDto)
             throws ResourceNotFoundException, ServiceException, ValidationParametersException {
         certificateDto.setId(id);
@@ -92,16 +88,13 @@ public class CertificateController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id")
-                       @Min(value = 1, message = "Enter id more than one.")
-                               int id) throws ResourceNotFoundException {
+                       @Min(value = 1) int id) throws ResourceNotFoundException {
         certificateService.delete(id);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public CertificateDto findById(@PathVariable("id")
-                                   @Min(value = 1, message = "Enter id more than one.")
-                                           int id)
+    public CertificateDto findById(@PathVariable("id") @Min(value = 1) int id)
             throws ResourceNotFoundException, ValidationParametersException {
         CertificateDto certificateDto = certificateService.findById(id);
         certificateHateoas.addLinksForCertificateDto(certificateDto);

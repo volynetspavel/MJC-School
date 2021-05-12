@@ -6,17 +6,16 @@ import lombok.Getter;
  * ResourceNotFoundException is used when required resource is not found.
  */
 @Getter
-public class ResourceNotFoundException extends Exception {
+public class ResourceNotFoundException extends RuntimeException {
 
-    private String code;
     private int entityId;
 
     public ResourceNotFoundException(String code) {
-        this.code = code;
+        super(code);
     }
 
     public ResourceNotFoundException(String code, int entityId) {
-        this.code = code;
+        super(code);
         this.entityId = entityId;
     }
 

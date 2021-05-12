@@ -49,8 +49,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public UserDto findById(@PathVariable("id")
-                            @Min(value = 1, message = "Enter id more than one.")
-                                    int id) throws ResourceNotFoundException, ValidationParametersException {
+                            @Min(value = 1) int id)
+            throws ResourceNotFoundException, ValidationParametersException {
         UserDto userDto = userService.findById(id);
         userHateoas.addLinksForUserDto(userDto);
         return userDto;

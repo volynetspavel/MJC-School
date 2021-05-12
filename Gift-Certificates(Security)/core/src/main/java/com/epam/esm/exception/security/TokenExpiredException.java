@@ -9,11 +9,8 @@ import org.springframework.security.core.AuthenticationException;
 @Getter
 public class TokenExpiredException extends AuthenticationException {
 
-    private String code;
-
     public TokenExpiredException(String code) {
         super(code);
-        this.code = code;
     }
 
     public TokenExpiredException(String message, Throwable cause) {

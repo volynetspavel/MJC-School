@@ -6,16 +6,14 @@ import lombok.Getter;
  * ValidationException is used when some parameters are not valid.
  */
 @Getter
-public class ValidationParametersException extends Exception {
-
-    private String code;
+public class ValidationParametersException extends RuntimeException {
 
     public ValidationParametersException() {
         super();
     }
 
     public ValidationParametersException(String code) {
-        this.code = code;
+        super(code);
     }
 
     public ValidationParametersException(String message, Throwable cause) {

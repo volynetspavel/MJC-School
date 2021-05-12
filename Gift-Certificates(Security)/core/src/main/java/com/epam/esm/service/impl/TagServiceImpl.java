@@ -10,8 +10,10 @@ import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Tag;
 import com.epam.esm.model.User;
+import com.epam.esm.security.SecurityUtil;
 import com.epam.esm.service.TagService;
 import com.epam.esm.validation.PaginationValidator;
+import com.epam.esm.validation.SecurityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -115,15 +119,18 @@ public class TagServiceImpl extends TagService {
 
     @Override
     public TagDto findTagBYUserIdWithHighestCostOfAllOrders(int userId) throws ResourceNotFoundException {
+        if (SecurityValidator.isCurrentUserHasRoleUser()) {
+            userId = Objects.requireNonNull(SecurityUtil.getJwtUserId());
+        }
         User user = userDao.findById(userId);
         if (user == null) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND, userId);
         }
-        Tag tag = tagDao.findTagBYUserIdWithHighestCostOfAllOrders(userId);
-        if (tag == null) {
+        Optional<Tag> tag = tagDao.findTagBYUserIdWithHighestCostOfAllOrders(userId);
+        if (!tag.isPresent()) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_BY_USER_ID, userId);
         }
-        return tagMapper.toDto(tag);
+        return tagMapper.toDto(tag.get());
     }
 
     private List<TagDto> migrateListFromEntityToDto(List<Tag> tags) {

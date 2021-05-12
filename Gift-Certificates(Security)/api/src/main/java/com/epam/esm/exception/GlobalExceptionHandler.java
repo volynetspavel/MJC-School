@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ExceptionMessage> handle(ResourceNotFoundException ex, HttpServletRequest request) {
-        String code = ex.getCode();
+        String code = ex.getMessage();
         int entityId = ex.getEntityId();
         String exMessage = messageSource.getMessage(code, new Object[]{entityId}, request.getLocale());
 
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceAlreadyExistException.class)
     public ResponseEntity<ExceptionMessage> handle(ResourceAlreadyExistException ex, HttpServletRequest request) {
-        String code = ex.getCode();
+        String code = ex.getMessage();
         String nameOfResource = ex.getNameOfResource();
         String exMessage = messageSource.getMessage(code, new Object[]{nameOfResource}, request.getLocale());
 
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<ExceptionMessage> handle(ServiceException ex, HttpServletRequest request) {
-        String code = ex.getCode();
+        String code = ex.getMessage();
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
 
         ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ValidationParametersException.class)
     public ResponseEntity<ExceptionMessage> handle(ValidationParametersException ex, HttpServletRequest request) {
-        String code = ex.getCode();
+        String code = ex.getMessage();
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
 
         ExceptionMessage exceptionMessage = new ExceptionMessage(Integer.parseInt(code), exMessage);

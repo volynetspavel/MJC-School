@@ -15,6 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import static com.epam.esm.constant.RoleValue.ROLE_ADMIN;
+import static com.epam.esm.constant.RoleValue.ROLE_USER;
+
 /**
  * Defines the configuration for security of application.
  */
@@ -43,15 +46,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth").permitAll()
                 .antMatchers(HttpMethod.GET, "/tags", "/certificates").permitAll()
                 .antMatchers(HttpMethod.POST, "/purchases")
-                .hasAuthority(RoleValue.ROLE_USER)
+                .hasAuthority(ROLE_USER)
                 .antMatchers(HttpMethod.POST, "/tags", "/certificates")
-                .hasAuthority(RoleValue.ROLE_ADMIN)
+                .hasAuthority(ROLE_ADMIN)
                 .antMatchers(HttpMethod.DELETE, "/tags/**", "/certificates/**")
-                .hasAuthority(RoleValue.ROLE_ADMIN)
+                .hasAuthority(ROLE_ADMIN)
                 .antMatchers(HttpMethod.PUT, "/tags/**", "/certificates/**")
-                .hasAuthority(RoleValue.ROLE_ADMIN)
+                .hasAuthority(ROLE_ADMIN)
                 .antMatchers(HttpMethod.GET, "/users/**", "/tags/user/**", "/purchases/user/**")
-                .hasAuthority(RoleValue.ROLE_ADMIN)
+                .hasAnyAuthority(ROLE_ADMIN, ROLE_USER)
                 .and()
                 .exceptionHandling().authenticationEntryPoint(accessDeniedHandler)
                 .accessDeniedHandler(accessDeniedHandler)

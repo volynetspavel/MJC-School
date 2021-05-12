@@ -6,6 +6,8 @@ import com.epam.esm.dao.crud.InsertableDao;
 import com.epam.esm.dao.crud.UpdatableDao;
 import com.epam.esm.model.Tag;
 
+import java.util.Optional;
+
 /**
  * This class is a basic class of tag dao-layer for interacting with database.
  */
@@ -15,5 +17,5 @@ public abstract class TagDao implements ReadableDao<Tag, Integer>, InsertableDao
 
     public abstract Tag getMostPopularTagOfUserWithHighestCostOfAllOrders();
 
-    public abstract Tag findTagBYUserIdWithHighestCostOfAllOrders(int userId);
+    public abstract Optional<Tag> findTagBYUserIdWithHighestCostOfAllOrders(int userId);
 }

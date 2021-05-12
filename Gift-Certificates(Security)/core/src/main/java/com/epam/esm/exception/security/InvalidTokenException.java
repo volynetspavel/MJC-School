@@ -9,11 +9,8 @@ import org.springframework.security.core.AuthenticationException;
 @Getter
 public class InvalidTokenException extends AuthenticationException {
 
-    private String code;
-
     public InvalidTokenException(String code) {
         super(code);
-        this.code = code;
     }
 
     public InvalidTokenException(String message, Throwable cause) {

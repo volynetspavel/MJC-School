@@ -52,8 +52,8 @@ public class PurchaseController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public PurchaseDto findById(@PathVariable("id") @Min(value = 1, message = "Enter id more than one.")
-                                        BigInteger id) throws ResourceNotFoundException {
+    public PurchaseDto findById(@PathVariable("id") @Min(value = 1) BigInteger id)
+            throws ResourceNotFoundException {
         PurchaseDto purchaseDto = purchaseService.findById(id);
         purchaseHateoas.addLinksForPurchaseDto(purchaseDto);
         return purchaseDto;
@@ -62,8 +62,7 @@ public class PurchaseController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/user/{id}")
     public List<PurchaseDto> findPurchasesByUserId(@PathVariable("id")
-                                                   @Min(value = 1, message = "Enter id more than one.")
-                                                           int userId,
+                                                   @Min(value = 1) int userId,
                                                    @RequestParam Map<String, String> params)
             throws ResourceNotFoundException, ValidationParametersException {
         List<PurchaseDto> purchases = purchaseService.findPurchasesByUserId(userId, params);

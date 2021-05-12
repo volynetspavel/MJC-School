@@ -10,6 +10,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is an implementation of TagDao.
@@ -109,10 +110,12 @@ public class TagDaoImpl extends TagDao {
     }
 
     @Override
-    public Tag findTagBYUserIdWithHighestCostOfAllOrders(int userId) {
-        return (Tag) entityManager
+    public Optional<Tag> findTagBYUserIdWithHighestCostOfAllOrders(int userId) {
+        return (Optional<Tag>) entityManager
                 .createNativeQuery(SQL_SELECT_TAG_BY_USER_ID_WITH_HIGHEST_COST_OF_ALL_ORDERS, Tag.class)
                 .setParameter(1, userId)
-                .getSingleResult();
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
     }
 }
