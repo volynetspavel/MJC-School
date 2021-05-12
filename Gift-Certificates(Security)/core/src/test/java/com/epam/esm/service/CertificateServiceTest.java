@@ -27,11 +27,15 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Class for testing methods from service layer for certificate.
@@ -105,7 +109,7 @@ class CertificateServiceTest {
         Integer newDuration = null;
         String newCreateDate = null;
         String newLastUpdateDate = null;
-        List<TagDto> newTagDtoList = Arrays.asList(new TagDto());
+        Set<TagDto> newTagDtoList = new HashSet<>(Arrays.asList(new TagDto()));
         CertificateDto updatedCertificateDto = createCertificateDto(id, newName, newDescription,
                 newPrice, newDuration, newCreateDate, newLastUpdateDate, newTagDtoList);
 
@@ -114,7 +118,8 @@ class CertificateServiceTest {
         Tag tag = getTag(tagId);
 
         TagDto tagDto = getTagDto(tagId);
-        List<TagDto> tagDtoList = Arrays.asList(tagDto);
+        Set<TagDto> tagDtoList = new HashSet<>();
+        tagDtoList.add(tagDto);
 
         Certificate certificateFromDataBase = getCertificate(id);
 
@@ -155,7 +160,7 @@ class CertificateServiceTest {
         Integer newDuration = null;
         String newCreateDate = null;
         String newLastUpdateDate = null;
-        List<TagDto> newTagDtoList = Arrays.asList(new TagDto());
+        Set<TagDto> newTagDtoList = new HashSet<>(Arrays.asList(new TagDto()));
 
         CertificateDto updatedCertificateDto = createCertificateDto(id, newName, newDescription,
                 newPrice, newDuration, newCreateDate, newLastUpdateDate, newTagDtoList);
@@ -249,11 +254,11 @@ class CertificateServiceTest {
         List<String> tagNames = Arrays.asList("tag1", "tag2");
         Tag tag1 = getTag(1);
         Tag tag2 = getTag(2);
-        List<Tag> tagList = Arrays.asList(tag1, tag2);
+        Set<Tag> tagList = new HashSet<>(Arrays.asList(tag1, tag2));
 
         TagDto tagDto1 = getTagDto(1);
         TagDto tagDto2 = getTagDto(2);
-        List<TagDto> tagDtoList = Arrays.asList(tagDto1, tagDto2);
+        Set<TagDto> tagDtoList = new HashSet<>(Arrays.asList(tagDto1, tagDto2));
 
         int offset = 0;
         int limit = 3;
@@ -314,7 +319,7 @@ class CertificateServiceTest {
         int tagId = 1 + num;
         String tagName = "tag1" + num;
         Tag tag = createTag(tagId, tagName);
-        List<Tag> tagList = Arrays.asList(tag);
+        Set<Tag> tagList = new HashSet<>(Arrays.asList(tag));
 
         return createCertificate(id, name, description, price, duration, createDate, lastUpdateDate, tagList);
     }
@@ -331,14 +336,14 @@ class CertificateServiceTest {
         int tagId = 1 + num;
         String tagName = "tag1" + num;
         TagDto tagDto = createTagDto(tagId, tagName);
-        List<TagDto> tagDtoList = Arrays.asList(tagDto);
+        Set<TagDto> tagDtoList = new HashSet<>(Arrays.asList(tagDto));
 
         return createCertificateDto(id, name, description, price, duration, createDate, lastUpdateDate, tagDtoList);
     }
 
     private Certificate createCertificate(int id, String name, String description, BigDecimal price,
                                           Integer duration, String createDate, String lastUpdateDate,
-                                          List<Tag> tagList) {
+                                          Set<Tag> tagList) {
 
         Certificate certificate = new Certificate();
         certificate.setId(id);
@@ -355,7 +360,7 @@ class CertificateServiceTest {
 
     private CertificateDto createCertificateDto(int id, String name, String description, BigDecimal price,
                                                 Integer duration, String createDate, String lastUpdateDate,
-                                                List<TagDto> tagDtoList) {
+                                                Set<TagDto> tagDtoList) {
 
         CertificateDto certificateDto = new CertificateDto();
         certificateDto.setId(id);

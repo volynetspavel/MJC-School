@@ -34,8 +34,8 @@ import java.util.Map;
 @Validated
 public class CertificateController {
 
-    private CertificateService certificateService;
-    private CertificateHateoas certificateHateoas;
+    private final CertificateService certificateService;
+    private final CertificateHateoas certificateHateoas;
 
     @Autowired
     public CertificateController(CertificateService certificateService, CertificateHateoas certificateHateoas) {

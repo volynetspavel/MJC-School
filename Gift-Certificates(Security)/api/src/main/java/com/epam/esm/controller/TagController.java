@@ -35,8 +35,8 @@ import java.util.Map;
 @Validated
 public class TagController {
 
-    private TagService tagService;
-    private TagHateoas tagHateoas;
+    private final TagService tagService;
+    private final TagHateoas tagHateoas;
 
     @Autowired
     public TagController(TagService tagService, TagHateoas tagHateoas) {

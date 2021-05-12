@@ -16,7 +16,8 @@ import org.modelmapper.ModelMapper;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
 
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 class CertificateMapperTest {
-    
+
     @InjectMocks
     private CertificateMapper certificateMapper;
     @Mock
@@ -87,7 +88,7 @@ class CertificateMapperTest {
         int tagId = 1;
         String tagName = "tag1";
         Tag tag = createTag(tagId, tagName);
-        List<Tag> tagList = Arrays.asList(tag);
+        Set<Tag> tagList = new HashSet<>(Arrays.asList(tag));
 
         return createCertificate(id, name, description, price, duration, createDate, lastUpdateDate, tagList);
     }
@@ -104,14 +105,14 @@ class CertificateMapperTest {
         int tagId = 1;
         String tagName = "tag1";
         TagDto tagDto = createTagDto(tagId, tagName);
-        List<TagDto> tagDtoList = Arrays.asList(tagDto);
+        Set<TagDto> tagDtoList = new HashSet<>(Arrays.asList(tagDto));
 
         return createCertificateDto(id, name, description, price, duration, createDate, lastUpdateDate, tagDtoList);
     }
 
     private Certificate createCertificate(int id, String name, String description, BigDecimal price,
                                           Integer duration, String createDate, String lastUpdateDate,
-                                          List<Tag> tagList) {
+                                          Set<Tag> tagList) {
 
         Certificate certificate = new Certificate();
         certificate.setId(id);
@@ -128,7 +129,7 @@ class CertificateMapperTest {
 
     private CertificateDto createCertificateDto(int id, String name, String description, BigDecimal price,
                                                 Integer duration, String createDate, String lastUpdateDate,
-                                                List<TagDto> tagDtoList) {
+                                                Set<TagDto> tagDtoList) {
 
         CertificateDto certificateDto = new CertificateDto();
         certificateDto.setId(id);

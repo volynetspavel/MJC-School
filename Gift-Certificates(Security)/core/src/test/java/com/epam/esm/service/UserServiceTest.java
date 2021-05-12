@@ -1,10 +1,15 @@
 package com.epam.esm.service;
 
+import com.epam.esm.constant.RoleValue;
+import com.epam.esm.dao.RoleDao;
 import com.epam.esm.dao.UserDao;
+import com.epam.esm.dto.RegistrationUserDto;
 import com.epam.esm.dto.UserDto;
+import com.epam.esm.exception.ResourceAlreadyExistException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.ValidationParametersException;
 import com.epam.esm.mapper.impl.UserMapper;
+import com.epam.esm.model.Role;
 import com.epam.esm.model.User;
 import com.epam.esm.service.impl.UserServiceImpl;
 import com.epam.esm.validation.PaginationValidator;
@@ -14,8 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,6 +40,10 @@ class UserServiceTest {
     private UserServiceImpl userService;
     @Mock
     private UserDao userDao;
+    @Mock
+    private RoleDao roleDao;
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @Mock
     private UserMapper userMapper;
     @Mock
@@ -109,6 +120,71 @@ class UserServiceTest {
         List<UserDto> actualUserDtoList = userService.findAll(new HashMap<>());
 
         assertEquals(expectedUserDtoList, actualUserDtoList);
+    }
+
+    @DisplayName("Testing method registration() on positive result")
+    @Test
+    void registrationSuccessTest() {
+        int id = 1;
+        String name = "Jonh";
+        String surname = "Smith";
+        String email = "jonhy@mail.com";
+        String password = "jonhy";
+        String encodePassword = "$2y$12$y7VYtQv9l2eMgasIDeGoRerE/sIS09CfzSLIgQL1D1n3P2AcbD2Hu";
+        Role role = new Role();
+        role.setName(RoleValue.ROLE_USER);
+        List<Role> roles = Collections.singletonList(role);
+
+        RegistrationUserDto newUser = createRegistrationUserDto(id, name, surname, email, password);
+        User user = getUser(id, name, surname, email, encodePassword, roles);
+        UserDto expectedDto = createUserDto(id, name, surname, email);
+
+        when(userDao.findByEmail(email)).thenReturn(null);
+        when(roleDao.findByName(RoleValue.ROLE_USER)).thenReturn(role);
+        when(passwordEncoder.encode(password)).thenReturn(encodePassword);
+        when(userDao.insert(user)).thenReturn(user);
+
+        when(userMapper.toDto(user)).thenReturn(expectedDto);
+        UserDto actualDto = userService.registration(newUser);
+
+        assertEquals(expectedDto, actualDto);
+    }
+
+    @DisplayName("Testing method registration() on exception")
+    @Test
+    void registrationThrowsExceptionTest() {
+        String email = "jonhy@mail.com";
+
+        RegistrationUserDto newUser = new RegistrationUserDto();
+        newUser.setEmail(email);
+        User user = new User();
+        when(userDao.findByEmail(email)).thenReturn(user);
+
+        assertThrows(ResourceAlreadyExistException.class,
+                () -> userService.registration(newUser));
+    }
+
+    private User getUser(int id, String name, String surname, String email, String password, List<Role> roles) {
+        User user = new User();
+        user.setId(id);
+        user.setName(name);
+        user.setSurname(surname);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setRoles(roles);
+
+        return user;
+    }
+
+    private RegistrationUserDto createRegistrationUserDto(int id, String name, String surname, String email, String password) {
+        RegistrationUserDto user = new RegistrationUserDto();
+        user.setId(id);
+        user.setName(name);
+        user.setSurname(surname);
+        user.setEmail(email);
+        user.setPassword(password);
+
+        return user;
     }
 
     private User createUser(int id, String name, String surname, String email) {

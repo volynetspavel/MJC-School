@@ -3,6 +3,7 @@ package com.epam.esm.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Class-wrapper for response after authentication user.
@@ -10,7 +11,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class AuthenticationResponseDto {
+public class AuthenticationResponseDto extends RepresentationModel<AuthenticationResponseDto> {
 
     private String email;
     private String token;

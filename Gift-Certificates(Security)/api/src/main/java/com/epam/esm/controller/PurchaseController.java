@@ -32,8 +32,8 @@ import java.util.Map;
 @Validated
 public class PurchaseController {
 
-    private PurchaseService purchaseService;
-    private PurchaseHateoas purchaseHateoas;
+    private final PurchaseService purchaseService;
+    private final PurchaseHateoas purchaseHateoas;
 
     @Autowired
     public PurchaseController(PurchaseService purchaseService, PurchaseHateoas purchaseHateoas) {

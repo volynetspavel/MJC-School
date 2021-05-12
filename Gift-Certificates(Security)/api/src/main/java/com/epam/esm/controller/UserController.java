@@ -28,8 +28,8 @@ import java.util.Map;
 @Validated
 public class UserController {
 
-    private UserService userService;
-    private UserHateoas userHateoas;
+    private final UserService userService;
+    private final UserHateoas userHateoas;
 
     @Autowired
     public UserController(UserService userService, UserHateoas userHateoas) {

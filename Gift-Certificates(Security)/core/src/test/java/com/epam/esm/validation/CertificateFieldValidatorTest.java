@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class for testing certificates fields validation.
@@ -45,7 +46,7 @@ class CertificateFieldValidatorTest {
 
     private static CertificateDto createCertificateDto(int id, String name, String description, BigDecimal price,
                                                        Integer duration, String createDate, String lastUpdateDate,
-                                                       List<TagDto> tagDtoList) {
+                                                       Set<TagDto> tagDtoList) {
 
         CertificateDto certificateDto = new CertificateDto();
         certificateDto.setId(id);
@@ -68,7 +69,7 @@ class CertificateFieldValidatorTest {
         Integer newDuration = null;
         String newCreateDate = null;
         String newLastUpdateDate = null;
-        List<TagDto> newTagDtoList = null;
+        Set<TagDto> newTagDtoList = null;
 
         return createCertificateDto(id, newName, newDescription,
                 newPrice, newDuration, newCreateDate, newLastUpdateDate, newTagDtoList);
@@ -83,7 +84,7 @@ class CertificateFieldValidatorTest {
         Integer newDuration = null;
         String newCreateDate = null;
         String newLastUpdateDate = null;
-        List<TagDto> newTagDtoList = null;
+        Set<TagDto> newTagDtoList = null;
 
         return createCertificateDto(id, newName, newDescription,
                 newPrice, newDuration, newCreateDate, newLastUpdateDate, newTagDtoList);
