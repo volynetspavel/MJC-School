@@ -16,6 +16,7 @@ import com.epam.esm.validation.PaginationValidator;
 import com.epam.esm.validation.SecurityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,23 +51,21 @@ public class TagServiceImpl extends TagService {
     @Transactional
     @Override
     public TagDto insert(TagDto tagDto) throws ResourceAlreadyExistException {
-        Tag tagWithSameName = tagDao.findByName(tagDto.getName());
-
-        if (tagWithSameName != null) {
-            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, tagWithSameName.getName());
+        Optional<Tag> tagWithSameName = tagDao.findByName(tagDto.getName());
+        if (tagWithSameName.isPresent()) {
+            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, tagDto.getName());
         }
-        Tag tag = tagMapper.toEntity(tagDto);
-        Tag newTag = tagDao.insert(tag);
+
+        Tag newTag = tagDao.save(tagMapper.toEntity(tagDto));
         return tagMapper.toDto(newTag);
     }
 
     @Transactional
     @Override
     public void delete(int id) throws ResourceNotFoundException {
-        Tag tag = tagDao.findById(id);
+        Optional<Tag> tag = tagDao.findById(id);
         checkEntityOnNull(tag, id);
-
-        tagDao.delete(tag);
+        tagDao.delete(tag.get());
     }
 
     @Transactional
@@ -75,46 +74,43 @@ public class TagServiceImpl extends TagService {
         int id = newTagDto.getId();
         String name = newTagDto.getName();
 
-        Tag oldTag = tagDao.findById(id);
+        Optional<Tag> oldTag = tagDao.findById(id);
         checkEntityOnNull(oldTag, id);
 
-        Tag tagWithSameName = tagDao.findByName(name);
-        if (tagWithSameName != null) {
-            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, tagWithSameName.getName());
+        Optional<Tag> tagWithSameName = tagDao.findByName(name);
+        if (tagWithSameName.isPresent()) {
+            throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, name);
         }
-
-        Tag newTag = tagMapper.toEntity(newTagDto);
-        tagDao.update(newTag);
-        Tag updatesTagFromDataBase = tagDao.findById(id);
-        return tagMapper.toDto(updatesTagFromDataBase);
+        oldTag.get().setName(name);
+        return tagMapper.toDto(oldTag.get());
     }
 
     @Override
     public List<TagDto> findAll(Map<String, String> params) throws ValidationParametersException {
-        int limit = tagDao.getCount();
+        int limit = (int) tagDao.count();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();
         }
 
-        List<Tag> tags = tagDao.findAll(offset, limit);
+        List<Tag> tags = tagDao.findAll(PageRequest.of(offset, limit)).toList();
         return migrateListFromEntityToDto(tags);
     }
 
     @Override
     public TagDto findById(int id) throws ResourceNotFoundException {
-        Tag tag = tagDao.findById(id);
+        Optional<Tag> tag = tagDao.findById(id);
         checkEntityOnNull(tag, id);
-        return tagMapper.toDto(tag);
+        return tagMapper.toDto(tag.get());
     }
 
     @Override
     public TagDto getMostPopularTagOfUserWithHighestCostOfAllOrders() throws ResourceNotFoundException {
-        Tag tag = tagDao.getMostPopularTagOfUserWithHighestCostOfAllOrders();
-        if (tag == null) {
+        Optional<Tag> tag = tagDao.getMostPopularTagOfUserWithHighestCostOfAllOrders();
+        if (!tag.isPresent()) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_WITHOUT_ID);
         }
-        return tagMapper.toDto(tag);
+        return tagMapper.toDto(tag.get());
     }
 
     @Override
@@ -122,8 +118,8 @@ public class TagServiceImpl extends TagService {
         if (SecurityValidator.isCurrentUserHasRoleUser()) {
             userId = Objects.requireNonNull(SecurityUtil.getJwtUserId());
         }
-        User user = userDao.findById(userId);
-        if (user == null) {
+        Optional<User> user = userDao.findById(userId);
+        if (!user.isPresent()) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND, userId);
         }
         Optional<Tag> tag = tagDao.findTagBYUserIdWithHighestCostOfAllOrders(userId);

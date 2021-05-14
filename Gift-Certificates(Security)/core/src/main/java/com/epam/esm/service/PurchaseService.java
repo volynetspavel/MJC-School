@@ -7,7 +7,6 @@ import com.epam.esm.exception.ValidationParametersException;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class is a layer for interacting with PurchaseDao.
@@ -18,6 +17,6 @@ public abstract class PurchaseService {
 
     public abstract PurchaseDto findById(BigInteger id) throws ResourceNotFoundException;
 
-    public abstract List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
+    public abstract List<PurchaseDto> findPurchasesByUserId(int userId)
             throws ResourceNotFoundException, ValidationParametersException;
 }

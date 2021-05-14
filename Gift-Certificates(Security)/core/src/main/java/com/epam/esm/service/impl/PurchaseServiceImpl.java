@@ -16,7 +16,6 @@ import com.epam.esm.model.Purchase;
 import com.epam.esm.model.User;
 import com.epam.esm.security.SecurityUtil;
 import com.epam.esm.service.PurchaseService;
-import com.epam.esm.validation.PaginationValidator;
 import com.epam.esm.validation.SecurityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +28,8 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -46,45 +45,34 @@ public class PurchaseServiceImpl extends PurchaseService {
     private PurchaseMapper purchaseMapper;
     private UserMapper userMapper;
     private PurchaseAfterOrderMapper purchaseAfterOrderMapper;
-    private PaginationValidator paginationValidator;
-
-    private int limit;
-    private int offset = 0;
 
     @Autowired
     public PurchaseServiceImpl(PurchaseDao purchaseDao, PurchaseMapper purchaseMapper,
                                UserDao userDao, CertificateDao certificateDao,
-                               UserMapper userMapper, PurchaseAfterOrderMapper purchaseAfterOrderMapper,
-                               PaginationValidator paginationValidator) {
+                               UserMapper userMapper, PurchaseAfterOrderMapper purchaseAfterOrderMapper) {
         this.purchaseDao = purchaseDao;
         this.purchaseMapper = purchaseMapper;
         this.userDao = userDao;
         this.certificateDao = certificateDao;
         this.userMapper = userMapper;
         this.purchaseAfterOrderMapper = purchaseAfterOrderMapper;
-        this.paginationValidator = paginationValidator;
     }
 
     @Transactional
     @Override
     public PurchaseDtoAfterOrder makePurchase(PurchaseDto purchaseDto) throws ResourceNotFoundException {
         String userEmail = SecurityUtil.getJwtUser().getEmail();
-        User user = userDao.findByEmail(userEmail);
-        if (user == null) {
+        Optional<User> user = userDao.findByEmail(userEmail);
+        if (!user.isPresent()) {
             throw new ResourceNotFoundException(CodeException.USER_EMAIL_NOT_FOUND);
         }
 
         List<String> certificateNames = purchaseDto.getCertificateNames();
 
         List<Certificate> certificates = certificateNames.stream()
-                .map(name -> certificateDao.findByName(name))
+                .map(name -> certificateDao.findByName(name).orElseThrow(() ->
+                        new ResourceNotFoundException(CodeException.CERTIFICATE_NOT_FOUND)))
                 .collect(Collectors.toList());
-
-        for (Certificate certificate : certificates) {
-            if (certificate == null) {
-                throw new ResourceNotFoundException(CodeException.CERTIFICATE_NOT_FOUND);
-            }
-        }
 
         BigDecimal totalCost = certificates.stream()
                 .map(Certificate::getPrice)
@@ -92,53 +80,48 @@ public class PurchaseServiceImpl extends PurchaseService {
                 .get();
 
         Purchase purchase = purchaseMapper.toEntity(purchaseDto);
-        purchase.setUser(user);
+        purchase.setUser(user.get());
         purchase.setCost(totalCost);
         purchase.setPurchaseDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         purchase.setCertificates(certificates);
 
-        PurchaseDtoAfterOrder newPurchaseDto = purchaseAfterOrderMapper.toDto(purchaseDao.insert(purchase));
-        newPurchaseDto.setUserDto(userMapper.toDto(user));
+        PurchaseDtoAfterOrder newPurchaseDto = purchaseAfterOrderMapper.toDto(purchaseDao.save(purchase));
+        newPurchaseDto.setUserDto(userMapper.toDto(user.get()));
         return newPurchaseDto;
     }
 
     @Override
     public PurchaseDto findById(BigInteger id) throws ResourceNotFoundException {
-        Purchase purchase = purchaseDao.findById(id);
-        if (purchase == null) {
+        Optional<Purchase> purchase = purchaseDao.findById(id);
+        if (!purchase.isPresent()) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_WITHOUT_ID);
         }
-        PurchaseDto purchaseDto = purchaseMapper.toDto(purchase);
-        List<String> certificateNames = getListCertificateNamesFromListCertificates(purchase.getCertificates());
+        PurchaseDto purchaseDto = purchaseMapper.toDto(purchase.get());
+        List<String> certificateNames = getListCertificateNamesFromListCertificates(purchase.get().getCertificates());
         purchaseDto.setCertificateNames(certificateNames);
         return purchaseDto;
     }
 
     @Override
-    public List<PurchaseDto> findPurchasesByUserId(int userId, Map<String, String> params)
+    public List<PurchaseDto> findPurchasesByUserId(int userId)
             throws ValidationParametersException, ResourceNotFoundException {
         if (SecurityValidator.isCurrentUserHasRoleUser()) {
             userId = Objects.requireNonNull(SecurityUtil.getJwtUserId());
         }
-        limit = purchaseDao.getCount().intValue();
-        if (paginationValidator.validatePaginationParameters(params)) {
-            limit = paginationValidator.getLimit();
-            offset = paginationValidator.getOffset();
-        }
 
-        User user = userDao.findById(userId);
-        if (user == null) {
+        Optional<User> user = userDao.findById(userId);
+        if (!user.isPresent()) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND_BY_USER_ID, userId);
         }
 
-        List<Purchase> purchases = purchaseDao.findPurchasesByUser(user, offset, limit);
+        List<Purchase> purchases = purchaseDao.findAllByUserId(userId);
 
         List<PurchaseDto> purchaseList = migrateListFromEntityToDto(purchases);
-        return setCertificateNamesFromCertificatesOfEntityToDto(purchaseList, purchases);
+        return setCertificateNamesFromCertificatesEntityToDto(purchaseList, purchases);
     }
 
-    private List<PurchaseDto> setCertificateNamesFromCertificatesOfEntityToDto(List<PurchaseDto> purchaseDtoList,
-                                                                               List<Purchase> purchaseList) {
+    private List<PurchaseDto> setCertificateNamesFromCertificatesEntityToDto(List<PurchaseDto> purchaseDtoList,
+                                                                             List<Purchase> purchaseList) {
         int i = 0;
         for (PurchaseDto purchaseDto : purchaseDtoList) {
             Purchase purchase = purchaseList.get(i);

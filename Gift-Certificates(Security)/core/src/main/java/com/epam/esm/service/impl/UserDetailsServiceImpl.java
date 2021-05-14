@@ -25,10 +25,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userDao.findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException(CodeException.RESOURCE_NOT_FOUND);
-        }
+        User user = userDao.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException(CodeException.RESOURCE_NOT_FOUND));
+
         return new JwtUser(
                 user.getId(),
                 user.getEmail(),

@@ -3,6 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.constant.CodeException;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.specification.CertificateSpecification;
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
@@ -18,6 +19,8 @@ import com.epam.esm.validation.FieldValidator;
 import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -79,9 +83,12 @@ public class CertificateServiceImpl extends CertificateService {
             throws ResourceAlreadyExistException, ServiceException {
         int countNullFields = 0;
         fieldValidator.isCountFieldsEqualNullMoreOne(certificateDto, countNullFields);
-        if (certificateDao.findByName(certificateDto.getName()) != null) {
+
+        Optional<Certificate> existedCertificate = certificateDao.findByName(certificateDto.getName());
+        if (existedCertificate.isPresent()) {
             throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, certificateDto.getName());
         }
+
         Set<TagDto> tagsFromDto = certificateDto.getTags();
         Set<Tag> tags = migrateListTagsFromDtoToEntity(tagsFromDto);
         Set<Tag> preparedTags = prepareTags(tags);
@@ -91,113 +98,23 @@ public class CertificateServiceImpl extends CertificateService {
         certificate.setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
         certificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
-        return certificateMapper.toDto(certificateDao.insert(certificate));
+        return certificateMapper.toDto(certificateDao.save(certificate));
     }
 
     @Transactional
     @Override
     public CertificateDto update(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException {
-        int id = updatedCertificateDto.getId();
-
-        Certificate oldCertificate = certificateDao.findById(id);
-        checkEntityOnNull(oldCertificate, id);
 
         Certificate updatedCertificate = prepareCertificate(updatedCertificateDto);
-        certificateDao.update(updatedCertificate);
         return certificateMapper.toDto(updatedCertificate);
-    }
-
-    /**
-     * Method for update only single field.
-     *
-     * @param updatedCertificateDto - certificate with one field for update.
-     * @return updated certificate.
-     * @throws ResourceNotFoundException - if this certificate won't found.
-     * @throws ServiceException          - if there is more than one field to update.
-     */
-    @Transactional
-    @Override
-    public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
-            throws ResourceNotFoundException, ServiceException {
-
-        int id = updatedCertificateDto.getId();
-        Certificate oldCertificate = certificateDao.findById(id);
-        checkEntityOnNull(oldCertificate, id);
-
-        int startCount = 0;
-        fieldValidator.isCountFieldsEqualNullLessOne(updatedCertificateDto, startCount);
-
-        return update(updatedCertificateDto);
-    }
-
-    @Transactional
-    @Override
-    public void delete(int id) throws ResourceNotFoundException {
-        Certificate certificate = certificateDao.findById(id);
-        checkEntityOnNull(certificate, id);
-        certificateDao.delete(certificate);
-    }
-
-    @Override
-    public CertificateDto findById(int id) throws ResourceNotFoundException {
-        Certificate certificate = certificateDao.findById(id);
-        checkEntityOnNull(certificate, id);
-        return certificateMapper.toDto(certificate);
-    }
-
-    @Override
-    public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ValidationParametersException {
-        limit = certificateDao.getCount();
-        if (paginationValidator.validatePaginationParameters(params)) {
-            limit = paginationValidator.getLimit();
-            offset = paginationValidator.getOffset();
-        }
-
-        String tagName = params.getOrDefault(TAG_NAME, DEFAULT_VALUE);
-        String partOfCertificateName = params.getOrDefault(PART_NAME, DEFAULT_VALUE);
-        String partOfCertificateDescription = params.getOrDefault(PART_DESCRIPTION, DEFAULT_VALUE);
-
-        List<Certificate> certificates = certificateDao.findCertificatesByParams(tagName,
-                partOfCertificateName, partOfCertificateDescription, offset, limit);
-        List<CertificateDto> certificateList = migrateListCertificatesFromEntityToDto(certificates);
-
-        String typeOfSort = params.getOrDefault(TYPE_SORT, NAME);
-        String order = params.getOrDefault(ORDER, SORT_ORDER_ASC);
-        return sortByTypeAndOrder(certificateList, typeOfSort, order);
-    }
-
-    @Override
-    public List<CertificateDto> findAll(Map<String, String> params) throws ValidationParametersException {
-        limit = certificateDao.getCount();
-        if (paginationValidator.validatePaginationParameters(params)) {
-            limit = paginationValidator.getLimit();
-            offset = paginationValidator.getOffset();
-        }
-
-        List<Certificate> certificates = certificateDao.findAll(offset, limit);
-        return migrateListCertificatesFromEntityToDto(certificates);
-    }
-
-    @Override
-    public List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
-                                                              Map<String, String> params)
-            throws ValidationParametersException {
-        limit = certificateDao.getCount();
-        if (paginationValidator.validatePaginationParameters(params)) {
-            limit = paginationValidator.getLimit();
-            offset = paginationValidator.getOffset();
-        }
-
-        List<Certificate> certificates = certificateDao.findCertificatesBySeveralTags(tagNames, offset, limit);
-        return migrateListCertificatesFromEntityToDto(certificates);
     }
 
     private Certificate prepareCertificate(CertificateDto updatedCertificateDto) throws ResourceNotFoundException {
 
         int idUpdateCertificate = updatedCertificateDto.getId();
-        Certificate existedCertificateForUpdate = certificateDao.findById(idUpdateCertificate);
-        checkEntityOnNull(existedCertificateForUpdate, idUpdateCertificate);
+        Certificate existedCertificateForUpdate = certificateDao.findById(idUpdateCertificate)
+                .orElseThrow(() -> new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND, idUpdateCertificate));
 
         if (updatedCertificateDto.getName() != null) {
             existedCertificateForUpdate.setName(updatedCertificateDto.getName());
@@ -238,11 +155,96 @@ public class CertificateServiceImpl extends CertificateService {
             return new HashSet<>();
         }
         return tags.stream()
-                .map(tag -> (tagDao.findByName(tag.getName()) == null
-                        ? tagDao.insert(tag)
-                        : tagDao.findByName(tag.getName())))
+                .map(tag -> (!tagDao.findByName(tag.getName()).isPresent()
+                        ? tagDao.save(tag)
+                        : tagDao.findByName(tag.getName()).get()))
                 .collect(Collectors.toSet());
     }
+
+    /**
+     * Method for update only single field.
+     *
+     * @param updatedCertificateDto - certificate with one field for update.
+     * @return updated certificate.
+     * @throws ResourceNotFoundException - if this certificate won't found.
+     * @throws ServiceException          - if there is more than one field to update.
+     */
+    @Transactional
+    @Override
+    public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
+            throws ResourceNotFoundException, ServiceException {
+
+        int startCount = 0;
+        fieldValidator.isCountFieldsEqualNullLessOne(updatedCertificateDto, startCount);
+        return update(updatedCertificateDto);
+    }
+
+    @Transactional
+    @Override
+    public void delete(int id) throws ResourceNotFoundException {
+        Optional<Certificate> certificate = certificateDao.findById(id);
+        checkEntityOnNull(certificate, id);
+        certificateDao.delete(certificate.get());
+    }
+
+    @Override
+    public CertificateDto findById(int id) throws ResourceNotFoundException {
+        Optional<Certificate> certificate = certificateDao.findById(id);
+        checkEntityOnNull(certificate, id);
+        return certificateMapper.toDto(certificate.get());
+    }
+
+    @Override
+    public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ValidationParametersException {
+        limit = (int) certificateDao.count();
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
+        }
+
+        String tagName = params.getOrDefault(TAG_NAME, DEFAULT_VALUE);
+        String partOfCertificateName = params.getOrDefault(PART_NAME, DEFAULT_VALUE);
+        String partOfCertificateDescription = params.getOrDefault(PART_DESCRIPTION, DEFAULT_VALUE);
+
+        Specification<Certificate> specification = CertificateSpecification.hasSeveralParams(tagName,
+                partOfCertificateName, partOfCertificateDescription);
+
+        List<Certificate> certificates = certificateDao.findAll(specification, PageRequest.of(offset, limit)).toList();
+        List<CertificateDto> certificateList = migrateListCertificatesFromEntityToDto(certificates);
+
+        String typeOfSort = params.getOrDefault(TYPE_SORT, NAME);
+        String order = params.getOrDefault(ORDER, SORT_ORDER_ASC);
+        return sortByTypeAndOrder(certificateList, typeOfSort, order);
+    }
+
+    @Override
+    public List<CertificateDto> findAll(Map<String, String> params) throws ValidationParametersException {
+        limit = (int) certificateDao.count();
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
+        }
+
+        List<Certificate> certificates = certificateDao.findAll(PageRequest.of(offset, limit)).toList();
+        return migrateListCertificatesFromEntityToDto(certificates);
+    }
+
+    @Override
+    public List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
+                                                              Map<String, String> params)
+            throws ValidationParametersException {
+        limit = (int) certificateDao.count();
+        if (paginationValidator.validatePaginationParameters(params)) {
+            limit = paginationValidator.getLimit();
+            offset = paginationValidator.getOffset();
+        }
+
+        Specification<Certificate> specification = CertificateSpecification.hasSeveralTags(tagNames);
+
+        List<Certificate> certificates = certificateDao.findAll(specification, PageRequest.of(offset, limit)).toList();
+        return migrateListCertificatesFromEntityToDto(certificates);
+    }
+
 
     private List<CertificateDto> migrateListCertificatesFromEntityToDto(List<Certificate> certificates) {
         return certificates.stream()

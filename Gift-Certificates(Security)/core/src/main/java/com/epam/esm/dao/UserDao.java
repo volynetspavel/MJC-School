@@ -1,14 +1,17 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.dao.crud.InsertableDao;
-import com.epam.esm.dao.crud.ReadableDao;
 import com.epam.esm.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 /**
  * This class is a basic class of user dao-layer for interacting with database.
  */
-public abstract class UserDao implements ReadableDao<User, Integer>, InsertableDao<User> {
+@Repository
+public interface UserDao extends JpaRepository<User, Integer> {
 
-    public abstract User findByEmail(String userEmail);
+    Optional<User> findByEmail(String userEmail);
 
 }

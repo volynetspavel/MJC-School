@@ -18,6 +18,7 @@ import com.epam.esm.validation.PaginationValidator;
 import com.epam.esm.validation.SecurityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -56,13 +58,13 @@ public class UserServiceImpl extends UserService {
 
     @Override
     public List<UserDto> findAll(Map<String, String> params) throws ValidationParametersException {
-        int limit = userDao.getCount();
+        int limit = (int) userDao.count();
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();
         }
 
-        List<User> users = userDao.findAll(offset, limit);
+        List<User> users = userDao.findAll(PageRequest.of(offset, limit)).toList();
         return migrateListFromEntityToDto(users);
     }
 
@@ -71,9 +73,9 @@ public class UserServiceImpl extends UserService {
         if (SecurityValidator.isCurrentUserHasRoleUser()) {
             id = Objects.requireNonNull(SecurityUtil.getJwtUserId());
         }
-        User user = userDao.findById(id);
+        Optional<User> user = userDao.findById(id);
         checkEntityOnNull(user, id);
-        return userMapper.toDto(user);
+        return userMapper.toDto(user.get());
     }
 
     private List<UserDto> migrateListFromEntityToDto(List<User> users) {
@@ -86,20 +88,20 @@ public class UserServiceImpl extends UserService {
     @Override
     public UserDto registration(RegistrationUserDto newUserDto) throws ResourceAlreadyExistException {
         String userEmail = newUserDto.getEmail();
-        User user = userDao.findByEmail(userEmail);
-        if (user != null) {
+        Optional<User> user = userDao.findByEmail(userEmail);
+        if (user.isPresent()) {
             throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, userEmail);
         }
-        Role role = roleDao.findByName(RoleValue.ROLE_USER);
+        Optional<Role> role = roleDao.findByName(RoleValue.ROLE_USER);
 
         User newUser = new User();
         newUser.setName(newUserDto.getName());
         newUser.setSurname(newUserDto.getSurname());
         newUser.setEmail(newUserDto.getEmail());
         newUser.setPassword(passwordEncoder.encode(newUserDto.getPassword()));
-        newUser.setRoles(Collections.singletonList(role));
+        newUser.setRoles(Collections.singletonList(role.get()));
 
-        userDao.insert(newUser);
+        userDao.save(newUser);
         return userMapper.toDto(newUser);
     }
 }

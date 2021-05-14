@@ -10,6 +10,7 @@ import com.epam.esm.model.AbstractEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Basic interface for service layer. Defines read methods for all services.
@@ -20,8 +21,8 @@ public interface ReadableService<T extends AbstractDto, K extends AbstractEntity
 
     List<T> findAll(Map<String, String> params) throws ValidationParametersException;
 
-    default void checkEntityOnNull(K entitiy, int id) throws ResourceNotFoundException {
-        if (entitiy == null) {
+    default void checkEntityOnNull(Optional<K> entitiy, int id) throws ResourceNotFoundException {
+        if (!entitiy.isPresent()) {
             throw new ResourceNotFoundException(CodeException.RESOURCE_NOT_FOUND, id);
         }
     }

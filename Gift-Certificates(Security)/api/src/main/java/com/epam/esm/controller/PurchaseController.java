@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +21,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Class is used to send requests from the client to the service layer for purchase entity.
@@ -62,10 +60,9 @@ public class PurchaseController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/user/{id}")
     public List<PurchaseDto> findPurchasesByUserId(@PathVariable("id")
-                                                   @Min(value = 1) int userId,
-                                                   @RequestParam Map<String, String> params)
+                                                   @Min(value = 1) int userId)
             throws ResourceNotFoundException, ValidationParametersException {
-        List<PurchaseDto> purchases = purchaseService.findPurchasesByUserId(userId, params);
+        List<PurchaseDto> purchases = purchaseService.findPurchasesByUserId(userId);
         purchaseHateoas.addLinksForListOfPurchaseDto(purchases);
         return purchases;
     }

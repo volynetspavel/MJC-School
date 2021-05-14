@@ -1,23 +1,18 @@
 package com.epam.esm.dao;
 
-import com.epam.esm.dao.crud.ReadableDao;
-import com.epam.esm.dao.crud.DeletableDao;
-import com.epam.esm.dao.crud.InsertableDao;
-import com.epam.esm.dao.crud.UpdatableDao;
 import com.epam.esm.model.Certificate;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is a basic class of certificate dao-layer for interacting with database.
  */
-public abstract class CertificateDao implements ReadableDao<Certificate, Integer>,
-        InsertableDao<Certificate>, UpdatableDao<Certificate>, DeletableDao<Certificate> {
+@Repository
+public interface CertificateDao extends JpaRepository<Certificate, Integer>, JpaSpecificationExecutor<Certificate> {
 
-    public abstract Certificate findByName(String name);
+    Optional<Certificate> findByName(String name);
 
-    public abstract List<Certificate> findCertificatesBySeveralTags(List<String> tagNames, int offset, int limit);
-
-    public abstract List<Certificate> findCertificatesByParams(String tagName, String partOfCertificateName,
-                                                               String partOfCertificateDescription, int pageSize, int offset);
 }
