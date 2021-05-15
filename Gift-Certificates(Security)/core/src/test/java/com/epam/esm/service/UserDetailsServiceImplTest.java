@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -45,7 +46,7 @@ public class UserDetailsServiceImplTest {
         role.setName(RoleValue.ROLE_USER);
         List<Role> roles = Collections.singletonList(role);
 
-        User expected = createUser(id, name, surname, email, password, roles);
+        Optional<User> expected = createUser(id, name, surname, email, password, roles);
         UserDetails expectedUserDetails = createJwtUser(id, email, password, roles);
 
         when(userDao.findByEmail(email)).thenReturn(expected);
@@ -59,7 +60,7 @@ public class UserDetailsServiceImplTest {
     void loadUserByUsernameThrowsExceptionTest() throws UsernameNotFoundException {
 
         String email = "jonhy@mail.com";
-        User expected = null;
+        Optional<User> expected = Optional.empty();
 
         when(userDao.findByEmail(email)).thenReturn(expected);
 
@@ -71,7 +72,7 @@ public class UserDetailsServiceImplTest {
         return new JwtUser(id, email, password, roles);
     }
 
-    private User createUser(int id, String name, String surname, String email, String password, List<Role> roles) {
+    private Optional<User> createUser(int id, String name, String surname, String email, String password, List<Role> roles) {
         User user = new User();
         user.setId(id);
         user.setName(name);
@@ -80,6 +81,6 @@ public class UserDetailsServiceImplTest {
         user.setPassword(password);
         user.setRoles(roles);
 
-        return user;
+        return Optional.of(user);
     }
 }

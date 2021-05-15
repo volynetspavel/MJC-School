@@ -11,7 +11,9 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Purchase is an entity of purchase.
@@ -40,5 +42,5 @@ public class Purchase extends AbstractEntity<BigInteger> {
             inverseJoinColumns = {@JoinColumn(name = "gift_certificate_id")}
     )
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<Certificate> certificates = new ArrayList<>();
+    private Set<Certificate> certificates = new HashSet<>();
 }

@@ -30,10 +30,8 @@ public class UserHateoas {
                 .slash(userDto.getId())
                 .withSelfRel();
 
-        Map<String, String> params = new HashMap<>();
-
         Link purchases = linkTo(methodOn(PurchaseController.class)
-                .findPurchasesByUserId(userDto.getId(), params))
+                .findPurchasesByUserId(userDto.getId()))
                 .withRel(PURCHASES);
 
         userDto.add(selfLink);

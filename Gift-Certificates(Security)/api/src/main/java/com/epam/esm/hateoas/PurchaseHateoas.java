@@ -56,7 +56,7 @@ public class PurchaseHateoas {
                 .withSelfRel();
 
         Link userLink = linkTo(methodOn(UserController.class)
-                .findById(newPurchase.getUserDto().getId()))
+                .findById(newPurchase.getUser().getId()))
                 .withRel(USER);
 
         List<CertificateDto> certificates = newPurchase.getCertificates();

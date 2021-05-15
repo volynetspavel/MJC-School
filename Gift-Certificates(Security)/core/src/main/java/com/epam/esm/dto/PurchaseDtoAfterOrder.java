@@ -17,7 +17,7 @@ import java.util.List;
 @Relation(itemRelation = "purchase", collectionRelation = "purchases")
 public class PurchaseDtoAfterOrder extends AbstractDto<BigInteger> {
 
-    private UserDto userDto;
+    private UserDto user;
     private BigDecimal cost;
     private String purchaseDate;
     private List<CertificateDto> certificates = new ArrayList<>();

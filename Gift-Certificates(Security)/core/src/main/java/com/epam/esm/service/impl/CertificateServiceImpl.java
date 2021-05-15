@@ -84,7 +84,7 @@ public class CertificateServiceImpl extends CertificateService {
         int countNullFields = 0;
         fieldValidator.isCountFieldsEqualNullMoreOne(certificateDto, countNullFields);
 
-        Optional<Certificate> existedCertificate = certificateDao.findByName(certificateDto.getName());
+        Optional<Certificate> existedCertificate = certificateDao.findFirstByName(certificateDto.getName());
         if (existedCertificate.isPresent()) {
             throw new ResourceAlreadyExistException(CodeException.RESOURCE_ALREADY_EXIST, certificateDto.getName());
         }

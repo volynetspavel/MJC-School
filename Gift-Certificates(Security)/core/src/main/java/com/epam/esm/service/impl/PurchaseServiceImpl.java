@@ -30,6 +30,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -69,10 +70,10 @@ public class PurchaseServiceImpl extends PurchaseService {
 
         List<String> certificateNames = purchaseDto.getCertificateNames();
 
-        List<Certificate> certificates = certificateNames.stream()
-                .map(name -> certificateDao.findByName(name).orElseThrow(() ->
+        Set<Certificate> certificates = certificateNames.stream()
+                .map(name -> certificateDao.findFirstByName(name).orElseThrow(() ->
                         new ResourceNotFoundException(CodeException.CERTIFICATE_NOT_FOUND)))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         BigDecimal totalCost = certificates.stream()
                 .map(Certificate::getPrice)
@@ -86,7 +87,7 @@ public class PurchaseServiceImpl extends PurchaseService {
         purchase.setCertificates(certificates);
 
         PurchaseDtoAfterOrder newPurchaseDto = purchaseAfterOrderMapper.toDto(purchaseDao.save(purchase));
-        newPurchaseDto.setUserDto(userMapper.toDto(user.get()));
+        newPurchaseDto.setUser(userMapper.toDto(user.get()));
         return newPurchaseDto;
     }
 
@@ -132,7 +133,7 @@ public class PurchaseServiceImpl extends PurchaseService {
         return purchaseDtoList;
     }
 
-    private List<String> getListCertificateNamesFromListCertificates(List<Certificate> certificateList) {
+    private List<String> getListCertificateNamesFromListCertificates(Set<Certificate> certificateList) {
         return certificateList.stream()
                 .map(Certificate::getName)
                 .collect(Collectors.toList());

@@ -1,15 +1,14 @@
 package com.epam.esm.hateoas;
 
+import com.epam.esm.constant.RoleValue;
 import com.epam.esm.controller.PurchaseController;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.AuthenticationResponseDto;
 import com.epam.esm.dto.UserDto;
+import com.epam.esm.model.Role;
 import com.epam.esm.security.JwtUser;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -28,13 +27,17 @@ public class AuthenticationHateoas {
                 .slash(id)
                 .withSelfRel();
 
-        Map<String, String> params = new HashMap<>();
         Link purchases = linkTo(methodOn(PurchaseController.class)
-                .findPurchasesByUserId(id, params))
+                .findPurchasesByUserId(id))
                 .withRel(PURCHASES);
 
         userDto.add(selfLink);
-        userDto.add(purchases);
+
+        Role role = new Role();
+        role.setName(RoleValue.ROLE_USER);
+        if (jwtUser.getAuthorities().contains(role)) {
+            userDto.add(purchases);
+        }
     }
 
     public void addLinksForUserAfterRegistration(UserDto userDto, AuthenticationResponseDto authenticationResponseDto) {

@@ -13,6 +13,6 @@ import java.util.Optional;
 @Repository
 public interface CertificateDao extends JpaRepository<Certificate, Integer>, JpaSpecificationExecutor<Certificate> {
 
-    Optional<Certificate> findByName(String name);
+    Optional<Certificate> findFirstByName(String name);
 
 }

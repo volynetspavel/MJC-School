@@ -15,14 +15,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Class for testing methods from service layer for tag.
@@ -44,11 +50,11 @@ class TagServiceTest {
     void findByIdSuccessTest() throws ResourceNotFoundException {
         int id = 3;
         String name = "rest";
-        Tag expected = createTag(id, name);
+        Optional<Tag> expected = createTag(id, name);
         TagDto expectedDto = createTagDto(id, name);
 
         when(tagDao.findById(id)).thenReturn(expected);
-        when(tagMapper.toDto(expected)).thenReturn(expectedDto);
+        when(tagMapper.toDto(expected.get())).thenReturn(expectedDto);
         TagDto actualDto = tagService.findById(id);
 
         assertEquals(expectedDto, actualDto);
@@ -69,11 +75,11 @@ class TagServiceTest {
     void deleteByIdSuccessTest() throws ResourceNotFoundException {
         int id = 3;
         String name = "rest";
-        Tag tag = createTag(id, name);
+        Optional<Tag> tag = createTag(id, name);
 
         when(tagDao.findById(id)).thenReturn(tag);
         tagService.delete(id);
-        verify(tagDao, times(1)).delete(tag);
+        verify(tagDao, times(1)).delete(tag.get());
     }
 
     @DisplayName("Testing method delete() by id of tag on negative result")
@@ -93,11 +99,11 @@ class TagServiceTest {
         String name = "rest";
         TagDto newTagDto = createTagDto(id, name);
         when(tagDao.findByName(name)).thenReturn(null);
-        Tag newTag = createTag(id, name);
+        Optional<Tag> newTag = createTag(id, name);
 
-        when(tagMapper.toEntity(newTagDto)).thenReturn(newTag);
-        when(tagDao.insert(newTag)).thenReturn(newTag);
-        when(tagMapper.toDto(newTag)).thenReturn(newTagDto);
+        when(tagMapper.toEntity(newTagDto)).thenReturn(newTag.get());
+        when(tagDao.save(newTag.get())).thenReturn(newTag.get());
+        when(tagMapper.toDto(newTag.get())).thenReturn(newTagDto);
 
         TagDto tagDtoAfterInsert = tagService.insert(newTagDto);
         assertEquals(newTagDto, tagDtoAfterInsert);
@@ -108,7 +114,7 @@ class TagServiceTest {
     void insertThrowsExceptionTest() {
         int id = 3;
         String name = "rest";
-        Tag newTag = createTag(id, name);
+        Optional<Tag> newTag = createTag(id, name);
         TagDto newTagDto = createTagDto(id, name);
 
         when(tagDao.findByName(name)).thenReturn(newTag);
@@ -125,17 +131,17 @@ class TagServiceTest {
         TagDto newTagDto = createTagDto(id, newName);
 
         String oldName = "rest for child";
-        Tag tagFromDataBase = createTag(id, oldName);
+        Optional<Tag> tagFromDataBase = createTag(id, oldName);
 
         when(tagDao.findById(id)).thenReturn(tagFromDataBase);
         when(tagDao.findByName(newName)).thenReturn(null);
 
-        Tag newTagFromDataBase = createTag(id, newName);
-        when(tagMapper.toEntity(newTagDto)).thenReturn(newTagFromDataBase);
+        Optional<Tag> newTagFromDataBase = createTag(id, newName);
+        when(tagMapper.toEntity(newTagDto)).thenReturn(newTagFromDataBase.get());
 
-        Tag updatesTagFromDataBase = createTag(id, newName);
+        Optional<Tag> updatesTagFromDataBase = createTag(id, newName);
         when(tagDao.findById(id)).thenReturn(updatesTagFromDataBase);
-        when(tagMapper.toDto(updatesTagFromDataBase)).thenReturn(newTagDto);
+        when(tagMapper.toDto(updatesTagFromDataBase.get())).thenReturn(newTagDto);
 
         TagDto tagDtoAfterUpdate = tagService.update(newTagDto);
         assertEquals(tagDtoAfterUpdate, newTagDto);
@@ -162,10 +168,10 @@ class TagServiceTest {
         TagDto newTagDto = createTagDto(id, newName);
 
         String oldName = "rest for child";
-        Tag tagFromDb = createTag(id, oldName);
+        Optional<Tag> tagFromDb = createTag(id, oldName);
         when(tagDao.findById(id)).thenReturn(tagFromDb);
 
-        Tag tagWithSameName = createTag(id, newName);
+        Optional<Tag> tagWithSameName = createTag(id, newName);
         when(tagDao.findByName(newName)).thenReturn(tagWithSameName);
 
         assertThrows(ResourceAlreadyExistException.class,
@@ -178,17 +184,18 @@ class TagServiceTest {
 
         int id1 = 1;
         String name1 = "extreme";
-        Tag tag1 = createTag(id1, name1);
+        Optional<Tag> tag1 = createTag(id1, name1);
 
         int id2 = 2;
         String name2 = "beauty";
-        Tag tag2 = createTag(id2, name2);
+        Optional<Tag> tag2 = createTag(id2, name2);
 
         int id3 = 3;
         String name3 = "rest";
-        Tag tag3 = createTag(id3, name3);
+        Optional<Tag> tag3 = createTag(id3, name3);
 
-        List<Tag> expectedTagList = Arrays.asList(tag1, tag2, tag3);
+        List<Tag> expectedTagList = Arrays.asList(tag1.get(), tag2.get(), tag3.get());
+        Page<Tag> expectedUserPage = new PageImpl<>(expectedTagList);
 
         TagDto tagDto1 = createTagDto(id1, name1);
         TagDto tagDto2 = createTagDto(id2, name2);
@@ -198,25 +205,25 @@ class TagServiceTest {
 
         int offset = 0;
         int limit = 3;
-        when(tagDao.getCount()).thenReturn(3);
+        when(tagDao.count()).thenReturn((long) 3);
         when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
 
-        when(tagDao.findAll(offset, limit)).thenReturn(expectedTagList);
-        when(tagMapper.toDto(tag1)).thenReturn(tagDto1);
-        when(tagMapper.toDto(tag2)).thenReturn(tagDto2);
-        when(tagMapper.toDto(tag3)).thenReturn(tagDto3);
+        when(tagDao.findAll(PageRequest.of(offset, limit))).thenReturn(expectedUserPage);
+        when(tagMapper.toDto(tag1.get())).thenReturn(tagDto1);
+        when(tagMapper.toDto(tag2.get())).thenReturn(tagDto2);
+        when(tagMapper.toDto(tag3.get())).thenReturn(tagDto3);
 
         List<TagDto> actualTagDtoList = tagService.findAll(new HashMap<>());
 
         assertEquals(expectedTagDtoList, actualTagDtoList);
     }
 
-    private Tag createTag(int id, String name) {
+    private Optional<Tag> createTag(int id, String name) {
         Tag tag = new Tag();
         tag.setId(id);
         tag.setName(name);
 
-        return tag;
+        return Optional.of(tag);
     }
 
     private TagDto createTagDto(int id, String name) {

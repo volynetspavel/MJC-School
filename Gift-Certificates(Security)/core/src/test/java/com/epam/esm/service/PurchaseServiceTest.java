@@ -26,8 +26,8 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,11 +69,11 @@ class PurchaseServiceTest {
         List<Certificate> certificates = Arrays.asList(certificate);
         List<String> certificateNames = Arrays.asList(certificateName);
 
-        Purchase expected = createPurchase(id, user, cost, purchaseDate, certificates);
+        Optional<Purchase> expected = createPurchase(id, user, cost, purchaseDate, certificates);
         PurchaseDto expectedDto = createPurchaseDto(id, userEmail, cost, purchaseDate, certificateNames);
 
         when(purchaseDao.findById(id)).thenReturn(expected);
-        when(purchaseMapper.toDto(expected)).thenReturn(expectedDto);
+        when(purchaseMapper.toDto(expected.get())).thenReturn(expectedDto);
         PurchaseDto actualDto = purchaseService.findById(id);
 
         assertEquals(expectedDto, actualDto);
@@ -103,22 +103,23 @@ class PurchaseServiceTest {
 
         PurchaseDto newPurchaseDto = createPurchaseDto(id, userEmail, cost, purchaseDate, certificateNames);
 
-        User user = new User();
-        user.setEmail(userEmail);
+        Optional<User> user = Optional.of(new User());
+        user.get().setEmail(userEmail);
         when(userDao.findByEmail(userEmail)).thenReturn(user);
 
-        Certificate certificate = new Certificate();
-        certificate.setName(certificateName);
-        certificate.setPrice(cost);
-        when(certificateDao.findByName(certificateName)).thenReturn(certificate);
+        Certificate certificateEntity = new Certificate();
+        certificateEntity.setName(certificateName);
+        certificateEntity.setPrice(cost);
+        Optional<Certificate> certificate = Optional.of(certificateEntity);
+        when(certificateDao.findFirstByName(certificateName)).thenReturn(certificate);
 
-        List<Certificate> certificates = Arrays.asList(certificate);
+        List<Certificate> certificates = Arrays.asList(certificate.get());
 
-        Purchase newPurchase = createPurchase(id, user, cost, purchaseDate, certificates);
-        when(purchaseMapper.toEntity(newPurchaseDto)).thenReturn(newPurchase);
+        Optional<Purchase> newPurchase = createPurchase(id, user.get(), cost, purchaseDate, certificates);
+        when(purchaseMapper.toEntity(newPurchaseDto)).thenReturn(newPurchase.get());
 
-        newPurchase.setPurchaseDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
-        when(purchaseDao.insert(newPurchase)).thenReturn(newPurchase);
+        newPurchase.get().setPurchaseDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+        when(purchaseDao.save(newPurchase.get())).thenReturn(newPurchase.get());
 
         PurchaseDtoAfterOrder purchaseAfterMakePurchase = purchaseService.makePurchase(newPurchaseDto);
         assertEquals(newPurchase, purchaseAfterMakePurchase);
@@ -148,10 +149,12 @@ class PurchaseServiceTest {
 
         PurchaseDto newPurchaseDto = createPurchaseDto(id, userEmail, cost, purchaseDate, certificateNames);
 
-        User user = new User();
-        user.setEmail(userEmail);
+        User userEntity = new User();
+        userEntity.setEmail(userEmail);
+        Optional<User> user = Optional.of(userEntity);
+
         when(userDao.findByEmail(userEmail)).thenReturn(user);
-        when(certificateDao.findByName(certificateName)).thenReturn(null);
+        when(certificateDao.findFirstByName(certificateName)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class,
                 () -> purchaseService.makePurchase(newPurchaseDto));
@@ -163,13 +166,10 @@ class PurchaseServiceTest {
         int userId = 1;
         String userEmail = "jonhy@mail.com";
 
-        int offset = 0;
-        int limit = 3;
-        when(purchaseDao.getCount()).thenReturn(new BigInteger("3"));
-        when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
+        User userEntity = new User();
+        userEntity.setId(userId);
+        Optional<User> user = Optional.of(userEntity);
 
-        User user = new User();
-        user.setId(userId);
         when(userDao.findById(userId)).thenReturn(user);
 
         BigInteger id1 = new BigInteger("1");
@@ -182,7 +182,7 @@ class PurchaseServiceTest {
         List<Certificate> certificateList1 = Arrays.asList(certificate1);
 
         PurchaseDto purchaseDto1 = createPurchaseDto(id1, userEmail, cost1, purchaseDate1, certificateNames1);
-        Purchase purchase1 = createPurchase(id1, user, cost1, purchaseDate1, certificateList1);
+        Optional<Purchase> purchase1 = createPurchase(id1, user.get(), cost1, purchaseDate1, certificateList1);
 
         BigInteger id2 = new BigInteger("2");
         BigDecimal cost2 = new BigDecimal("200");
@@ -194,16 +194,16 @@ class PurchaseServiceTest {
         List<Certificate> certificateList2 = Arrays.asList(certificate2);
 
         PurchaseDto purchaseDto2 = createPurchaseDto(id2, userEmail, cost2, purchaseDate2, certificateNames2);
-        Purchase purchase2 = createPurchase(id2, user, cost2, purchaseDate2, certificateList2);
+        Optional<Purchase> purchase2 = createPurchase(id2, user.get(), cost2, purchaseDate2, certificateList2);
 
         List<PurchaseDto> purchaseDtoList = Arrays.asList(purchaseDto1, purchaseDto2);
-        List<Purchase> purchaseList = Arrays.asList(purchase1, purchase2);
+        List<Purchase> purchaseList = Arrays.asList(purchase1.get(), purchase2.get());
 
-        when(purchaseDao.findPurchasesByUser(user, offset, limit)).thenReturn(purchaseList);
-        when(purchaseMapper.toDto(purchase1)).thenReturn(purchaseDto1);
-        when(purchaseMapper.toDto(purchase2)).thenReturn(purchaseDto2);
+        when(purchaseDao.findAllByUserId(userId)).thenReturn(purchaseList);
+        when(purchaseMapper.toDto(purchase1.get())).thenReturn(purchaseDto1);
+        when(purchaseMapper.toDto(purchase2.get())).thenReturn(purchaseDto2);
 
-        List<PurchaseDto> purchaseDtoListByUserId = purchaseService.findPurchasesByUserId(userId, new HashMap<>());
+        List<PurchaseDto> purchaseDtoListByUserId = purchaseService.findPurchasesByUserId(userId);
 
         assertEquals(purchaseDtoListByUserId, purchaseDtoList);
     }
@@ -213,17 +213,14 @@ class PurchaseServiceTest {
     void findPurchasesByUserThrowsExceptionTest() throws ValidationParametersException {
         int userId = 1;
 
-        when(purchaseDao.getCount()).thenReturn(new BigInteger("3"));
-        when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
-
         when(userDao.findById(userId)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class,
-                () -> purchaseService.findPurchasesByUserId(userId, new HashMap<>()));
+                () -> purchaseService.findPurchasesByUserId(userId));
     }
 
-    private Purchase createPurchase(BigInteger id, User user, BigDecimal cost,
-                                    String purchaseDate, List<Certificate> certificates) {
+    private Optional<Purchase> createPurchase(BigInteger id, User user, BigDecimal cost,
+                                              String purchaseDate, List<Certificate> certificates) {
         Purchase purchase = new Purchase();
         purchase.setId(id);
         purchase.setUser(user);
@@ -231,7 +228,7 @@ class PurchaseServiceTest {
         purchase.setPurchaseDate(purchaseDate);
         purchase.setCertificates(certificates);
 
-        return purchase;
+        return Optional.of(purchase);
     }
 
     private PurchaseDto createPurchaseDto(BigInteger id, String userEmail, BigDecimal cost,

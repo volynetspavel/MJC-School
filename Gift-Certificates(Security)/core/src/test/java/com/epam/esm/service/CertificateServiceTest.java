@@ -2,6 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
+import com.epam.esm.dao.specification.CertificateSpecification;
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.dto.TagDto;
 import com.epam.esm.exception.ResourceAlreadyExistException;
@@ -20,6 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -29,6 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,22 +69,22 @@ class CertificateServiceTest {
         String tagName = "tag";
 
         TagDto tagDto = createTagDto(tagId, tagName);
-        Tag tag = createTag(tagId, tagName);
+        Optional<Tag> tag = createTag(tagId, tagName);
 
         CertificateDto newCertificateDto = getCertificateDto(0);
-        Certificate newCertificate = getCertificate(0);
+        Optional<Certificate> newCertificate = getCertificate(0);
 
         when(tagDao.findByName(tagName)).thenReturn(tag);
-        when(tagMapper.toDto(tag)).thenReturn(tagDto);
+        when(tagMapper.toDto(tag.get())).thenReturn(tagDto);
 
-        when(tagMapper.toEntity(tagDto)).thenReturn(tag);
+        when(tagMapper.toEntity(tagDto)).thenReturn(tag.get());
 
-        when(certificateMapper.toEntity(newCertificateDto)).thenReturn(newCertificate);
-        newCertificate.setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
-        newCertificate.setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+        when(certificateMapper.toEntity(newCertificateDto)).thenReturn(newCertificate.get());
+        newCertificate.get().setCreateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
+        newCertificate.get().setLastUpdateDate(LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.MILLIS).toString());
 
-        when(certificateDao.insert(newCertificate)).thenReturn(newCertificate);
-        when(certificateMapper.toDto(newCertificate)).thenReturn(newCertificateDto);
+        when(certificateDao.save(newCertificate.get())).thenReturn(newCertificate.get());
+        when(certificateMapper.toDto(newCertificate.get())).thenReturn(newCertificateDto);
 
         CertificateDto certificateDtoAfterInsert = certificateService.insert(newCertificateDto);
         assertEquals(newCertificateDto, certificateDtoAfterInsert);
@@ -88,12 +94,12 @@ class CertificateServiceTest {
     @Test
     void insertThrowsExceptionTest() {
         String name = "New Off road jeep tour";
-        Certificate newCertificate = new Certificate();
-        newCertificate.setName(name);
+        Optional<Certificate> newCertificate = Optional.of(new Certificate());
+        newCertificate.get().setName(name);
         CertificateDto newCertificateDto = new CertificateDto();
         newCertificateDto.setName(name);
 
-        when(certificateDao.findByName(name)).thenReturn(newCertificate);
+        when(certificateDao.findFirstByName(name)).thenReturn(newCertificate);
 
         assertThrows(ResourceAlreadyExistException.class,
                 () -> certificateService.insert(newCertificateDto));
@@ -115,13 +121,13 @@ class CertificateServiceTest {
 
         int tagId = 1;
         String tagName = "tag1";
-        Tag tag = getTag(tagId);
+        Optional<Tag> tag = getTag(tagId);
 
         TagDto tagDto = getTagDto(tagId);
         Set<TagDto> tagDtoList = new HashSet<>();
         tagDtoList.add(tagDto);
 
-        Certificate certificateFromDataBase = getCertificate(id);
+        Optional<Certificate> certificateFromDataBase = getCertificate(id);
 
 
         when(certificateDao.findById(id)).thenReturn(certificateFromDataBase);
@@ -130,9 +136,9 @@ class CertificateServiceTest {
         updatedCertificateDto.setTags(tagDtoList);
 
         when(tagDao.findByName(tagName)).thenReturn(tag);
-        when(tagMapper.toDto(tag)).thenReturn(tagDto);
-        when(certificateMapper.toEntity(updatedCertificateDto)).thenReturn(certificateFromDataBase);
-        when(certificateMapper.toDto(certificateFromDataBase)).thenReturn(updatedCertificateDto);
+        when(tagMapper.toDto(tag.get())).thenReturn(tagDto);
+        when(certificateMapper.toEntity(updatedCertificateDto)).thenReturn(certificateFromDataBase.get());
+        when(certificateMapper.toDto(certificateFromDataBase.get())).thenReturn(updatedCertificateDto);
 
         CertificateDto certificateDtoAfterUpdate = certificateService.update(updatedCertificateDto);
         assertEquals(certificateDtoAfterUpdate, updatedCertificateDto);
@@ -173,11 +179,11 @@ class CertificateServiceTest {
     @Test
     void deleteByIdSuccessTest() throws ResourceNotFoundException {
         int id = 3;
-        Certificate certificate = getCertificate(id);
+        Optional<Certificate> certificate = getCertificate(id);
 
         when(certificateDao.findById(id)).thenReturn(certificate);
         certificateService.delete(id);
-        verify(certificateDao, times(1)).delete(certificate);
+        verify(certificateDao, times(1)).delete(certificate.get());
     }
 
     @DisplayName("Testing method delete() by id of certificate on negative result")
@@ -195,11 +201,11 @@ class CertificateServiceTest {
     void findByIdSuccessTest() throws ResourceNotFoundException {
         int id = 1;
 
-        Certificate actual = getCertificate(1);
+        Optional<Certificate> actual = getCertificate(1);
         CertificateDto actualDto = getCertificateDto(1);
 
         when(certificateDao.findById(id)).thenReturn(actual);
-        when(certificateMapper.toDto(actual)).thenReturn(actualDto);
+        when(certificateMapper.toDto(actual.get())).thenReturn(actualDto);
         CertificateDto expectedDto = certificateService.findById(id);
 
         assertEquals(expectedDto, actualDto);
@@ -221,15 +227,16 @@ class CertificateServiceTest {
 
         int offset = 0;
         int limit = 3;
-        when(certificateDao.getCount()).thenReturn(3);
+        when(certificateDao.count()).thenReturn((long) 3);
         when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
 
-        Certificate certificate1 = getCertificate(1);
-        Certificate certificate2 = getCertificate(2);
-        Certificate certificate3 = getCertificate(3);
+        Optional<Certificate> certificate1 = getCertificate(1);
+        Optional<Certificate> certificate2 = getCertificate(2);
+        Optional<Certificate> certificate3 = getCertificate(3);
 
-        List<Certificate> expectedCertificateList = Arrays.asList(certificate1,
-                certificate2, certificate3);
+        List<Certificate> expectedCertificateList = Arrays.asList(certificate1.get(),
+                certificate2.get(), certificate3.get());
+        Page<Certificate> expectedCertificatePage = new PageImpl<>(expectedCertificateList);
 
         CertificateDto certificateDto1 = getCertificateDto(1);
         CertificateDto certificateDto2 = getCertificateDto(2);
@@ -238,10 +245,10 @@ class CertificateServiceTest {
         List<CertificateDto> expectedCertificateDtoList = Arrays.asList(certificateDto1,
                 certificateDto2, certificateDto3);
 
-        when(certificateDao.findAll(offset, limit)).thenReturn(expectedCertificateList);
-        when(certificateMapper.toDto(certificate1)).thenReturn(certificateDto1);
-        when(certificateMapper.toDto(certificate2)).thenReturn(certificateDto2);
-        when(certificateMapper.toDto(certificate3)).thenReturn(certificateDto3);
+        when(certificateDao.findAll(PageRequest.of(offset, limit))).thenReturn(expectedCertificatePage);
+        when(certificateMapper.toDto(certificate1.get())).thenReturn(certificateDto1);
+        when(certificateMapper.toDto(certificate2.get())).thenReturn(certificateDto2);
+        when(certificateMapper.toDto(certificate3.get())).thenReturn(certificateDto3);
 
         List<CertificateDto> actualCertificateDtoList = certificateService.findAll(new HashMap<>());
 
@@ -252,9 +259,9 @@ class CertificateServiceTest {
     @Test
     void findCertificatesBySeveralTagsSuccessTest() throws ValidationParametersException {
         List<String> tagNames = Arrays.asList("tag1", "tag2");
-        Tag tag1 = getTag(1);
-        Tag tag2 = getTag(2);
-        Set<Tag> tagList = new HashSet<>(Arrays.asList(tag1, tag2));
+        Optional<Tag> tag1 = getTag(1);
+        Optional<Tag> tag2 = getTag(2);
+        Set<Tag> tagList = new HashSet<>(Arrays.asList(tag1.get(), tag2.get()));
 
         TagDto tagDto1 = getTagDto(1);
         TagDto tagDto2 = getTagDto(2);
@@ -262,18 +269,19 @@ class CertificateServiceTest {
 
         int offset = 0;
         int limit = 3;
-        when(certificateDao.getCount()).thenReturn(3);
+        when(certificateDao.count()).thenReturn((long) 3);
         when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
 
-        Certificate certificate1 = getCertificate(1);
-        certificate1.setTags(tagList);
-        Certificate certificate2 = getCertificate(2);
-        certificate1.setTags(tagList);
-        Certificate certificate3 = getCertificate(3);
-        certificate1.setTags(tagList);
+        Optional<Certificate> certificate1 = getCertificate(1);
+        certificate1.get().setTags(tagList);
+        Optional<Certificate> certificate2 = getCertificate(2);
+        certificate1.get().setTags(tagList);
+        Optional<Certificate> certificate3 = getCertificate(3);
+        certificate1.get().setTags(tagList);
 
-        List<Certificate> expectedCertificateList = Arrays.asList(certificate1,
-                certificate2, certificate3);
+        List<Certificate> expectedCertificateList = Arrays.asList(certificate1.get(),
+                certificate2.get(), certificate3.get());
+        Page<Certificate> expectedCertificatePage = new PageImpl<>(expectedCertificateList);
 
         CertificateDto certificateDto1 = getCertificateDto(1);
         certificateDto1.setTags(tagDtoList);
@@ -285,17 +293,19 @@ class CertificateServiceTest {
         List<CertificateDto> expectedCertificateDtoList = Arrays.asList(certificateDto1,
                 certificateDto2, certificateDto3);
 
-        when(certificateDao.findCertificatesBySeveralTags(tagNames, offset, limit)).thenReturn(expectedCertificateList);
-        when(certificateMapper.toDto(certificate1)).thenReturn(certificateDto1);
-        when(certificateMapper.toDto(certificate2)).thenReturn(certificateDto2);
-        when(certificateMapper.toDto(certificate3)).thenReturn(certificateDto3);
+        Specification<Certificate> specification = null;
+        when(CertificateSpecification.hasSeveralTags(tagNames)).thenReturn(specification);
+        when(certificateDao.findAll(specification, PageRequest.of(offset, limit))).thenReturn(expectedCertificatePage);
+        when(certificateMapper.toDto(certificate1.get())).thenReturn(certificateDto1);
+        when(certificateMapper.toDto(certificate2.get())).thenReturn(certificateDto2);
+        when(certificateMapper.toDto(certificate3.get())).thenReturn(certificateDto3);
 
         List<CertificateDto> actualCertificateDtoList = certificateService.findCertificatesBySeveralTags(tagNames, new HashMap<>());
 
         assertEquals(expectedCertificateDtoList, actualCertificateDtoList);
     }
 
-    private Tag getTag(int num) {
+    private Optional<Tag> getTag(int num) {
         int tagId = 1 + num;
         String tagName = "tag" + num;
         return createTag(tagId, tagName);
@@ -307,7 +317,7 @@ class CertificateServiceTest {
         return createTagDto(tagId, tagName);
     }
 
-    private Certificate getCertificate(int num) {
+    private Optional<Certificate> getCertificate(int num) {
         int id = 1 + num;
         String name = "New Off road jeep tour" + num;
         String description = "We offer the active and courageous an extreme off-road trip." + num;
@@ -318,8 +328,8 @@ class CertificateServiceTest {
 
         int tagId = 1 + num;
         String tagName = "tag1" + num;
-        Tag tag = createTag(tagId, tagName);
-        Set<Tag> tagList = new HashSet<>(Arrays.asList(tag));
+        Optional<Tag> tag = createTag(tagId, tagName);
+        Set<Tag> tagList = new HashSet<>(Arrays.asList(tag.get()));
 
         return createCertificate(id, name, description, price, duration, createDate, lastUpdateDate, tagList);
     }
@@ -341,7 +351,7 @@ class CertificateServiceTest {
         return createCertificateDto(id, name, description, price, duration, createDate, lastUpdateDate, tagDtoList);
     }
 
-    private Certificate createCertificate(int id, String name, String description, BigDecimal price,
+    private Optional<Certificate> createCertificate(int id, String name, String description, BigDecimal price,
                                           Integer duration, String createDate, String lastUpdateDate,
                                           Set<Tag> tagList) {
 
@@ -355,7 +365,7 @@ class CertificateServiceTest {
         certificate.setLastUpdateDate(lastUpdateDate);
         certificate.setTags(tagList);
 
-        return certificate;
+        return Optional.of(certificate);
     }
 
     private CertificateDto createCertificateDto(int id, String name, String description, BigDecimal price,
@@ -375,12 +385,12 @@ class CertificateServiceTest {
         return certificateDto;
     }
 
-    private Tag createTag(int id, String name) {
+    private Optional<Tag> createTag(int id, String name) {
         Tag tag = new Tag();
         tag.setId(id);
         tag.setName(name);
 
-        return tag;
+        return Optional.of(tag);
     }
 
     private TagDto createTagDto(int id, String name) {

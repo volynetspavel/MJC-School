@@ -19,12 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,11 +61,11 @@ class UserServiceTest {
         String surname = "Smith";
         String email = "jonhy@mail.com";
 
-        User expected = createUser(id, name, surname, email);
+        Optional<User> expected = createUser(id, name, surname, email);
         UserDto expectedDto = createUserDto(id, name, surname, email);
 
         when(userDao.findById(id)).thenReturn(expected);
-        when(userMapper.toDto(expected)).thenReturn(expectedDto);
+        when(userMapper.toDto(expected.get())).thenReturn(expectedDto);
         UserDto actualDto = userService.findById(id);
 
         assertEquals(expectedDto, actualDto);
@@ -85,21 +89,22 @@ class UserServiceTest {
         String name1 = "Jonh";
         String surname1 = "Smith";
         String email1 = "jonhy@mail.com";
-        User user1 = createUser(id1, name1, surname1, email1);
+        Optional<User> user1 = createUser(id1, name1, surname1, email1);
 
         int id2 = 2;
         String name2 = "Max";
         String surname2 = "Smith";
         String email2 = "max@mail.com";
-        User user2 = createUser(id2, name2, surname2, email2);
+        Optional<User> user2 = createUser(id2, name2, surname2, email2);
 
         int id3 = 3;
         String name3 = "Julia";
         String surname3 = "Smith";
         String email3 = "julia@mail.com";
-        User user3 = createUser(id3, name3, surname3, email3);
+        Optional<User> user3 = createUser(id3, name3, surname3, email3);
 
-        List<User> expectedUserList = Arrays.asList(user1, user2, user3);
+        List<User> expectedUserList = Arrays.asList(user1.get(), user2.get(), user3.get());
+        Page<User> expectedUserPage = new PageImpl<User>(expectedUserList);
 
         UserDto userDto1 = createUserDto(id1, name1, surname1, email1);
         UserDto userDto2 = createUserDto(id2, name2, surname2, email2);
@@ -109,13 +114,13 @@ class UserServiceTest {
 
         int offset = 0;
         int limit = 3;
-        when(userDao.getCount()).thenReturn(3);
+        when(userDao.count()).thenReturn((long) 3);
         when(paginationValidator.validatePaginationParameters(new HashMap<>())).thenReturn(false);
 
-        when(userDao.findAll(offset, limit)).thenReturn(expectedUserList);
-        when(userMapper.toDto(user1)).thenReturn(userDto1);
-        when(userMapper.toDto(user2)).thenReturn(userDto2);
-        when(userMapper.toDto(user3)).thenReturn(userDto3);
+        when(userDao.findAll(PageRequest.of(offset, limit))).thenReturn(expectedUserPage);
+        when(userMapper.toDto(user1.get())).thenReturn(userDto1);
+        when(userMapper.toDto(user2.get())).thenReturn(userDto2);
+        when(userMapper.toDto(user3.get())).thenReturn(userDto3);
 
         List<UserDto> actualUserDtoList = userService.findAll(new HashMap<>());
 
@@ -131,20 +136,23 @@ class UserServiceTest {
         String email = "jonhy@mail.com";
         String password = "jonhy";
         String encodePassword = "$2y$12$y7VYtQv9l2eMgasIDeGoRerE/sIS09CfzSLIgQL1D1n3P2AcbD2Hu";
-        Role role = new Role();
-        role.setName(RoleValue.ROLE_USER);
-        List<Role> roles = Collections.singletonList(role);
+
+        Role roleEntity = new Role();
+        roleEntity.setName(RoleValue.ROLE_USER);
+        Optional<Role> role = Optional.of(roleEntity);
+
+        List<Role> roles = Collections.singletonList(role.get());
 
         RegistrationUserDto newUser = createRegistrationUserDto(id, name, surname, email, password);
-        User user = getUser(id, name, surname, email, encodePassword, roles);
+        Optional<User> user = getUser(id, name, surname, email, encodePassword, roles);
         UserDto expectedDto = createUserDto(id, name, surname, email);
 
         when(userDao.findByEmail(email)).thenReturn(null);
         when(roleDao.findByName(RoleValue.ROLE_USER)).thenReturn(role);
         when(passwordEncoder.encode(password)).thenReturn(encodePassword);
-        when(userDao.insert(user)).thenReturn(user);
+        when(userDao.save(user.get())).thenReturn(user.get());
 
-        when(userMapper.toDto(user)).thenReturn(expectedDto);
+        when(userMapper.toDto(user.get())).thenReturn(expectedDto);
         UserDto actualDto = userService.registration(newUser);
 
         assertEquals(expectedDto, actualDto);
@@ -157,14 +165,14 @@ class UserServiceTest {
 
         RegistrationUserDto newUser = new RegistrationUserDto();
         newUser.setEmail(email);
-        User user = new User();
+        Optional<User> user = Optional.empty();
         when(userDao.findByEmail(email)).thenReturn(user);
 
         assertThrows(ResourceAlreadyExistException.class,
                 () -> userService.registration(newUser));
     }
 
-    private User getUser(int id, String name, String surname, String email, String password, List<Role> roles) {
+    private Optional<User> getUser(int id, String name, String surname, String email, String password, List<Role> roles) {
         User user = new User();
         user.setId(id);
         user.setName(name);
@@ -173,7 +181,7 @@ class UserServiceTest {
         user.setPassword(password);
         user.setRoles(roles);
 
-        return user;
+        return Optional.of(user);
     }
 
     private RegistrationUserDto createRegistrationUserDto(int id, String name, String surname, String email, String password) {
@@ -187,14 +195,14 @@ class UserServiceTest {
         return user;
     }
 
-    private User createUser(int id, String name, String surname, String email) {
+    private Optional<User> createUser(int id, String name, String surname, String email) {
         User user = new User();
         user.setId(id);
         user.setName(name);
         user.setSurname(surname);
         user.setEmail(email);
 
-        return user;
+        return Optional.of(user);
     }
 
     private UserDto createUserDto(int id, String name, String surname, String email) {
