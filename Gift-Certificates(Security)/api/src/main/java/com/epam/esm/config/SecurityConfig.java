@@ -1,7 +1,7 @@
 package com.epam.esm.config;
 
-import com.epam.esm.constant.RoleValue;
 import com.epam.esm.exception.security.CustomAccessDeniedHandler;
+import com.epam.esm.exception.security.CustomAuthenticationEntryPoint;
 import com.epam.esm.filter.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,11 +28,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenFilter jwtTokenFilter;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Autowired
-    public SecurityConfig(JwtTokenFilter jwtTokenFilter, CustomAccessDeniedHandler accessDeniedHandler) {
+    public SecurityConfig(JwtTokenFilter jwtTokenFilter,
+                          CustomAccessDeniedHandler accessDeniedHandler,
+                          CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtTokenFilter = jwtTokenFilter;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.authenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Override
@@ -56,7 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/users/**", "/tags/user/**", "/purchases/user/**")
                 .hasAnyAuthority(ROLE_ADMIN, ROLE_USER)
                 .and()
-                .exceptionHandling().authenticationEntryPoint(accessDeniedHandler)
+                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .addFilterBefore(jwtTokenFilter, BasicAuthenticationFilter.class);

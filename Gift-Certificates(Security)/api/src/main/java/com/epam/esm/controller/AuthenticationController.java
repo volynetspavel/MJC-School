@@ -50,8 +50,7 @@ public class AuthenticationController {
     public AuthenticationResponseDto authenticate(@RequestBody @Valid AuthenticationRequestDto request) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        Object principal = authentication.getPrincipal();
-        JwtUser jwtUser = (JwtUser) principal;
+        JwtUser jwtUser = (JwtUser) authentication.getPrincipal();
 
         String token = jwtTokenProvider.createToken(request.getEmail());
         AuthenticationResponseDto authenticationResponseDto = new AuthenticationResponseDto(request.getEmail(), token);
