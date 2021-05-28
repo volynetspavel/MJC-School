@@ -15,7 +15,7 @@ import com.epam.esm.mapper.impl.TagMapper;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import com.epam.esm.service.CertificateService;
-import com.epam.esm.validation.FieldValidator;
+import com.epam.esm.validation.CertificateFieldValidator;
 import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class CertificateServiceImpl extends CertificateService {
     private CertificateMapper certificateMapper;
     private TagMapper tagMapper;
     private PaginationValidator paginationValidator;
-    private FieldValidator<CertificateDto> fieldValidator;
+    private CertificateFieldValidator certificateFieldValidator;
 
     private int limit;
     private int offset = 0;
@@ -68,21 +68,21 @@ public class CertificateServiceImpl extends CertificateService {
     public CertificateServiceImpl(CertificateDao certificateDao, TagDao tagDao,
                                   CertificateMapper certificateMapper, TagMapper tagMapper,
                                   PaginationValidator paginationValidator,
-                                  FieldValidator<CertificateDto> fieldValidator) {
+                                  CertificateFieldValidator certificateFieldValidator) {
         this.certificateDao = certificateDao;
         this.tagDao = tagDao;
         this.certificateMapper = certificateMapper;
         this.tagMapper = tagMapper;
         this.paginationValidator = paginationValidator;
-        this.fieldValidator = fieldValidator;
+        this.certificateFieldValidator = certificateFieldValidator;
     }
 
     @Transactional
     @Override
     public CertificateDto insert(CertificateDto certificateDto)
             throws ResourceAlreadyExistException, ServiceException {
-        int countNullFields = 0;
-        fieldValidator.isCountFieldsEqualNullMoreOne(certificateDto, countNullFields);
+
+        certificateFieldValidator.checkIsCountFieldsEqualNullMoreOne(certificateDto);
 
         Optional<Certificate> existedCertificate = certificateDao.findFirstByName(certificateDto.getName());
         if (existedCertificate.isPresent()) {
@@ -174,8 +174,7 @@ public class CertificateServiceImpl extends CertificateService {
     public CertificateDto updateSingleField(CertificateDto updatedCertificateDto)
             throws ResourceNotFoundException, ServiceException {
 
-        int startCount = 0;
-        fieldValidator.isCountFieldsEqualNullLessOne(updatedCertificateDto, startCount);
+        certificateFieldValidator.checkIsCountFieldsEqualNullLessOne(updatedCertificateDto);
         return update(updatedCertificateDto);
     }
 

@@ -2,30 +2,29 @@ package com.epam.esm.validation.impl;
 
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.exception.ServiceException;
+import com.epam.esm.validation.CertificateFieldValidator;
 import com.epam.esm.validation.FieldValidator;
-
-import static com.epam.esm.constant.CodeException.NULL_FIELDS_LESS_THEN_ONE;
-import static com.epam.esm.constant.CodeException.NULL_FIELDS_MORE_THEN_ONE;
+import org.springframework.stereotype.Component;
 
 /**
  * Class checks 'tags' field on null.
  */
-public class CertificateTagsValidator extends FieldValidator<CertificateDto> {
+@Component
+public class CertificateTagsValidator implements FieldValidator<CertificateDto> {
 
     @Override
-    public void isCountFieldsEqualNullLessOne(CertificateDto certificateDto,
-                                              int countFieldsNotNull) throws ServiceException {
-        if (certificateDto.getTags() != null && !certificateDto.getTags().isEmpty()) {
-            countFieldsNotNull++;
+    public void isCountFieldsEqualNullLessOne(CertificateDto dto) {
+        if (dto.getTags() != null && !dto.getTags().isEmpty()) {
+            CertificateFieldValidator.setCounter(CertificateFieldValidator.getCounter() + 1);
         }
-        checkCountOfFieldsOnNull(countFieldsNotNull, NULL_FIELDS_LESS_THEN_ONE);
+        checkCountOfFieldsNotEqualsNull(CertificateFieldValidator.getCounter());
     }
 
     @Override
-    public void isCountFieldsEqualNullMoreOne(CertificateDto certificateDto, int countNullFields) throws ServiceException {
-        if (certificateDto.getTags().isEmpty()) {
-            countNullFields++;
+    public void isCountFieldsEqualNullMoreOne(CertificateDto dto) throws ServiceException {
+        if (dto.getTags().isEmpty()) {
+            CertificateFieldValidator.setCounter(CertificateFieldValidator.getCounter() + 1);
         }
-        checkCountOfFieldsOnNull(countNullFields, NULL_FIELDS_MORE_THEN_ONE);
+        checkCountOfFieldsEqualsNull(CertificateFieldValidator.getCounter());
     }
 }
