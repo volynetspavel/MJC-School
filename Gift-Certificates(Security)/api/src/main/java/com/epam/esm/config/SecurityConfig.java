@@ -60,7 +60,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/users/**", "/tags/user/**", "/purchases/user/**")
                 .hasAnyAuthority(ROLE_ADMIN, ROLE_USER)
                 .and()
-                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
+                .exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .addFilterBefore(jwtTokenFilter, BasicAuthenticationFilter.class);
