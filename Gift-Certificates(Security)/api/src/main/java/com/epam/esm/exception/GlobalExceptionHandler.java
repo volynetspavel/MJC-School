@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -197,6 +198,22 @@ public class GlobalExceptionHandler {
         String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
         ExceptionMessage response = new ExceptionMessage(Integer.parseInt(code), exMessage);
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Catch exception when LocalDate is not valid.
+     *
+     * @param e - HttpMessageNotReadableException
+     * @return - exception message with code.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionMessage> handle(HttpMessageNotReadableException e, HttpServletRequest request) {
+        e.printStackTrace();
+        String code = CodeException.INVALID_DATA;
+        String exMessage = messageSource.getMessage(code, new Object[]{}, request.getLocale());
+
+        ExceptionMessage response = new ExceptionMessage(Integer.parseInt(code), exMessage);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Throwable.class)

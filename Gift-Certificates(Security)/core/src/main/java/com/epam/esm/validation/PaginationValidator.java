@@ -34,7 +34,7 @@ public class PaginationValidator {
 
             if (isPositiveNumber(sizeValue) && isPositiveNumber(pageValue)) {
                 limit = Integer.parseInt(sizeValue);
-                offset = (Integer.parseInt(pageValue) - 1) * limit;
+                offset = Integer.parseInt(pageValue) - 1;
             } else {
                 throw new ValidationParametersException(CodeException.NOT_VALID_PAGINATION);
             }

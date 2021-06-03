@@ -3,7 +3,7 @@ package com.epam.esm.constant;
 /**
  * Contains a list of the column names in the table.
  */
-public class CertificateTableColumn {
+public class TableColumn {
 
     public static final String ID = "id";
     public static final String NAME = "name";

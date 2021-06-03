@@ -4,8 +4,6 @@ import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationParametersException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
@@ -24,8 +22,7 @@ public class CertificateHateoas {
 
     private static final String TAG = "tag";
 
-    public void addLinksForCertificateDto(CertificateDto certificateDto)
-            throws ResourceNotFoundException, ValidationParametersException {
+    public void addLinksForCertificateDto(CertificateDto certificateDto) {
 
         Link selfLink = linkTo(CertificateController.class)
                 .slash(certificateDto.getId())
@@ -42,8 +39,7 @@ public class CertificateHateoas {
         certificateDto.add(selfLink);
     }
 
-    public CollectionModel<CertificateDto> addLinksForListOfCertificateDto(List<CertificateDto> certificates)
-            throws ResourceNotFoundException, ValidationParametersException {
+    public CollectionModel<CertificateDto> addLinksForListOfCertificateDto(List<CertificateDto> certificates) {
 
         for (CertificateDto certificate : certificates) {
             addLinksForCertificateDto(certificate);

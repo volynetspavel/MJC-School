@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.constant.CodeException;
+import com.epam.esm.constant.TableColumn;
 import com.epam.esm.dao.CertificateDao;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.specification.CertificateSpecification;
@@ -20,6 +21,8 @@ import com.epam.esm.validation.PaginationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,9 +63,6 @@ public class CertificateServiceImpl extends CertificateService {
     private TagMapper tagMapper;
     private PaginationValidator paginationValidator;
     private CertificateFieldValidator certificateFieldValidator;
-
-    private int limit;
-    private int offset = 0;
 
     @Autowired
     public CertificateServiceImpl(CertificateDao certificateDao, TagDao tagDao,
@@ -195,7 +195,9 @@ public class CertificateServiceImpl extends CertificateService {
 
     @Override
     public List<CertificateDto> findCertificatesByParams(Map<String, String> params) throws ValidationParametersException {
-        limit = (int) certificateDao.count();
+        int limit = (int) certificateDao.count();
+        int offset = 0;
+
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();
@@ -208,7 +210,8 @@ public class CertificateServiceImpl extends CertificateService {
         Specification<Certificate> specification = CertificateSpecification.hasSeveralParams(tagName,
                 partOfCertificateName, partOfCertificateDescription);
 
-        List<Certificate> certificates = certificateDao.findAll(specification, PageRequest.of(offset, limit)).toList();
+        Pageable page = PageRequest.of(offset, limit);
+        List<Certificate> certificates = certificateDao.findAll(specification, page).getContent();
         List<CertificateDto> certificateList = migrateListCertificatesFromEntityToDto(certificates);
 
         String typeOfSort = params.getOrDefault(TYPE_SORT, NAME);
@@ -218,13 +221,17 @@ public class CertificateServiceImpl extends CertificateService {
 
     @Override
     public List<CertificateDto> findAll(Map<String, String> params) throws ValidationParametersException {
-        limit = (int) certificateDao.count();
+        int limit = (int) certificateDao.count();
+        int offset = 0;
+
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();
         }
+        Sort sort = Sort.by(TableColumn.ID);
+        Pageable page = PageRequest.of(offset, limit, sort);
 
-        List<Certificate> certificates = certificateDao.findAll(PageRequest.of(offset, limit)).toList();
+        List<Certificate> certificates = certificateDao.findAll(page).getContent();
         return migrateListCertificatesFromEntityToDto(certificates);
     }
 
@@ -232,7 +239,9 @@ public class CertificateServiceImpl extends CertificateService {
     public List<CertificateDto> findCertificatesBySeveralTags(List<String> tagNames,
                                                               Map<String, String> params)
             throws ValidationParametersException {
-        limit = (int) certificateDao.count();
+        int limit = (int) certificateDao.count();
+        int offset = 0;
+
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();

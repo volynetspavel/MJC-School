@@ -57,6 +57,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAuthority(ROLE_ADMIN)
                 .antMatchers(HttpMethod.PUT, "/tags/**", "/certificates/**")
                 .hasAuthority(ROLE_ADMIN)
+                .antMatchers(HttpMethod.GET, "/users")
+                .hasAuthority(ROLE_ADMIN)
                 .antMatchers(HttpMethod.GET, "/users/**", "/tags/user/**", "/purchases/user/**")
                 .hasAnyAuthority(ROLE_ADMIN, ROLE_USER)
                 .and()

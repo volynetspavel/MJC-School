@@ -8,8 +8,6 @@ import com.epam.esm.dto.CertificateDto;
 import com.epam.esm.dto.PurchaseDto;
 import com.epam.esm.dto.PurchaseDtoAfterOrder;
 import com.epam.esm.dto.TagDto;
-import com.epam.esm.exception.ResourceNotFoundException;
-import com.epam.esm.exception.ValidationParametersException;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.stereotype.Component;
@@ -49,8 +47,7 @@ public class PurchaseHateoas {
         return CollectionModel.of(purchases, selfLink);
     }
 
-    public void addLinksForPurchaseDtoWithUser(PurchaseDtoAfterOrder newPurchase) throws ResourceNotFoundException,
-            ValidationParametersException {
+    public void addLinksForPurchaseDtoWithUser(PurchaseDtoAfterOrder newPurchase) {
         Link selfLink = linkTo(PurchaseController.class)
                 .slash(newPurchase.getId())
                 .withSelfRel();

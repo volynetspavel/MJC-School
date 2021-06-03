@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.constant.CodeException;
+import com.epam.esm.constant.TableColumn;
 import com.epam.esm.dao.TagDao;
 import com.epam.esm.dao.UserDao;
 import com.epam.esm.dto.TagDto;
@@ -17,6 +18,7 @@ import com.epam.esm.validation.SecurityValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +39,6 @@ public class TagServiceImpl extends TagService {
     private UserDao userDao;
     private TagMapper tagMapper;
     private PaginationValidator paginationValidator;
-
-    private int offset;
 
     @Autowired
     public TagServiceImpl(TagDao tagDao, UserDao userDao, TagMapper tagMapper, PaginationValidator paginationValidator) {
@@ -88,12 +88,15 @@ public class TagServiceImpl extends TagService {
     @Override
     public List<TagDto> findAll(Map<String, String> params) throws ValidationParametersException {
         int limit = (int) tagDao.count();
+        int offset = 0;
+
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();
         }
 
-        List<Tag> tags = tagDao.findAll(PageRequest.of(offset, limit)).toList();
+        Sort sort = Sort.by(TableColumn.ID);
+        List<Tag> tags = tagDao.findAll(PageRequest.of(offset, limit, sort)).toList();
         return migrateListFromEntityToDto(tags);
     }
 

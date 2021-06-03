@@ -1,6 +1,6 @@
 package com.epam.esm.dao.specification;
 
-import com.epam.esm.constant.CertificateTableColumn;
+import com.epam.esm.constant.TableColumn;
 import com.epam.esm.model.Certificate;
 import com.epam.esm.model.Tag;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,12 +33,12 @@ public class CertificateSpecification {
                 predicateList.add(predicate);
             }
             if (!partOfCertificateName.isEmpty()) {
-                predicate = criteriaBuilder.like(root.get(CertificateTableColumn.NAME),
+                predicate = criteriaBuilder.like(root.get(TableColumn.NAME),
                         PERCENT + partOfCertificateName + PERCENT);
                 predicateList.add(predicate);
             }
             if (!partOfCertificateDescription.isEmpty()) {
-                predicate = criteriaBuilder.like(root.get(CertificateTableColumn.DESCRIPTION),
+                predicate = criteriaBuilder.like(root.get(TableColumn.DESCRIPTION),
                         PERCENT + partOfCertificateDescription + PERCENT);
                 predicateList.add(predicate);
             }

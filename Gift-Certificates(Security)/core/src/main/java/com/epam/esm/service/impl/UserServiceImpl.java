@@ -43,8 +43,6 @@ public class UserServiceImpl extends UserService {
     private PaginationValidator paginationValidator;
     private PasswordEncoder passwordEncoder;
 
-    private int offset;
-
     @Autowired
     public UserServiceImpl(UserDao userDao, RoleDao roleDao, UserMapper userMapper,
                            PaginationValidator paginationValidator,
@@ -59,6 +57,8 @@ public class UserServiceImpl extends UserService {
     @Override
     public List<UserDto> findAll(Map<String, String> params) throws ValidationParametersException {
         int limit = (int) userDao.count();
+        int offset = 0;
+
         if (paginationValidator.validatePaginationParameters(params)) {
             limit = paginationValidator.getLimit();
             offset = paginationValidator.getOffset();
